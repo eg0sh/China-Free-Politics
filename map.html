@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта системы — China Space Live</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #000; height: 100vh; overflow: hidden; }
+        #viewport { width: 100%; height: 100%; }
+        .topbar {
+            position: absolute; top: 0; left: 0; right: 0;
+            background: rgba(8,8,22,0.9); border-bottom: 1px solid #1a1a3a;
+            padding: 10px 20px; display: flex; justify-content: space-between;
+            align-items: center; color: #ccc; z-index: 10;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .topbar a { color: #cc0000; text-decoration: none; font-weight: bold; }
+        .speed-control {
+            position: absolute; bottom: 20px; left: 20px;
+            background: rgba(17,17,34,0.9); border: 1px solid #333;
+            padding: 10px 15px; border-radius: 8px; color: #ccc;
+            font-family: 'Segoe UI', sans-serif; z-index: 10;
+        }
+        .speed-control input { width: 100px; }
+        .info-popup {
+            position: absolute; bottom: 20px; right: 20px;
+            background: rgba(17,17,34,0.95); border: 1px solid #cc0000;
+            padding: 20px; border-radius: 10px; color: #e0e0e0;
+            font-family: 'Segoe UI', sans-serif; max-width: 350px; display: none; z-index: 10;
+        }
+        .info-popup h3 { color: #fff; margin-bottom: 10px; }
+        .info-popup p { margin: 5px 0; font-size: 14px; }
+        .info-popup .close { position: absolute; top: 8px; right: 12px; cursor: pointer; color: #888; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <span>🌌 Карта системы — China Space Live</span>
+    <a href="index.html">← На главную</a>
+</div>
+
+<div id="viewport"></div>
+
+<div class="speed-control">
+    Скорость камеры: <input type="range" min="1" max="50" value="5" id="speed-slider">
+    <span id="speed-val">5x</span>
+</div>
+
+<div class="info-popup" id="info-popup">
+    <span class="close" onclick="document.getElementById('info-popup').style.display='none'">✕</span>
+    <div id="info-content"></div>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+<script type="module" src="js/map.js"></script>
+</body>
+</html>
