@@ -10,94 +10,36 @@
             --red: #cc0000; --gold: #ffcc00; --text: #e0e0e0; --muted: #888;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #000;
-            color: var(--text);
-            font-family: 'Segoe UI', 'Courier New', monospace;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-        }
+        body { background: #000; color: var(--text); font-family: 'Segoe UI', 'Courier New', monospace; height: 100vh; overflow: hidden; display: flex; }
         #viewport { flex: 1; position: relative; cursor: grab; }
         #viewport:active { cursor: grabbing; }
         #viewport canvas { display: block; }
-
-        #panel {
-            width: 420px; background: var(--bg); border-left: 2px solid var(--red);
-            display: flex; flex-direction: column; overflow-y: auto; z-index: 10;
-        }
-        #panel .header {
-            background: var(--surface); padding: 20px; border-bottom: 1px solid var(--border); text-align: center;
-        }
+        #panel { width: 420px; background: var(--bg); border-left: 2px solid var(--red); display: flex; flex-direction: column; overflow-y: auto; z-index: 10; }
+        #panel .header { background: var(--surface); padding: 20px; border-bottom: 1px solid var(--border); text-align: center; }
         #panel .header h2 { color: #fff; font-size: 16px; margin-bottom: 5px; word-wrap: break-word; }
-        #panel .header .rocket-tag {
-            display: inline-block; background: var(--red); color: #fff;
-            padding: 3px 12px; border-radius: 20px; font-size: 12px;
-        }
-
-        .timer-big {
-            font-size: clamp(28px, 6vw, 42px);
-            font-weight: bold; color: var(--gold); text-align: center;
-            padding: 15px; font-family: 'Courier New', monospace;
-            letter-spacing: 2px; word-break: break-all;
-        }
-
-        .current-event {
-            margin: 10px 15px; padding: 15px; background: var(--surface);
-            border-left: 4px solid var(--gold); border-radius: 0 8px 8px 0;
-            font-size: 15px; line-height: 1.5; min-height: 60px;
-        }
-
-        .telemetry-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 15px; margin: 10px 0;
-        }
-        .telem-card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 8px; padding: 12px; text-align: center;
-        }
-        .telem-card .val {
-            font-size: clamp(16px, 3vw, 22px);
-            font-weight: bold; color: var(--gold); font-family: 'Courier New', monospace;
-        }
-        .telem-card .lbl {
-            font-size: 10px; color: var(--muted); text-transform: uppercase;
-            letter-spacing: 1px; margin-top: 2px;
-        }
-
+        #panel .header .rocket-tag { display: inline-block; background: var(--red); color: #fff; padding: 3px 12px; border-radius: 20px; font-size: 12px; }
+        .timer-big { font-size: clamp(28px, 6vw, 42px); font-weight: bold; color: var(--gold); text-align: center; padding: 15px; font-family: 'Courier New', monospace; letter-spacing: 2px; word-break: break-all; }
+        .current-event { margin: 10px 15px; padding: 15px; background: var(--surface); border-left: 4px solid var(--gold); border-radius: 0 8px 8px 0; font-size: 15px; line-height: 1.5; min-height: 60px; }
+        .telemetry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 15px; margin: 10px 0; }
+        .telem-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+        .telem-card .val { font-size: clamp(16px, 3vw, 22px); font-weight: bold; color: var(--gold); font-family: 'Courier New', monospace; }
+        .telem-card .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
         .objects-section { padding: 0 15px; margin: 10px 0; }
-        .objects-section h3 {
-            font-size: 13px; color: var(--muted); text-transform: uppercase;
-            letter-spacing: 1px; border-bottom: 1px solid var(--border);
-            padding-bottom: 8px; margin-bottom: 10px;
-        }
-        .object-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 0; border-bottom: 1px solid #0a0a18; font-size: 13px;
-        }
+        .objects-section h3 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px; }
+        .object-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #0a0a18; font-size: 13px; }
         .object-row .name { color: #ccc; }
-        .object-row .status {
-            padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: bold;
-        }
+        .object-row .status { padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: bold; }
         .status-active { background: #004400; color: #00ff00; }
         .status-separated { background: #444400; color: #ffcc00; }
         .status-burning { background: #440000; color: #ff4444; }
         .status-splash { background: #004466; color: #00aaff; }
         .status-orbiting { background: #440044; color: #ff00ff; }
         .status-waiting { background: #222244; color: #8888cc; }
-
         .btn-row { display: flex; gap: 10px; padding: 15px; }
-        .btn {
-            flex: 1; padding: 10px; text-align: center; border-radius: 6px;
-            text-decoration: none; font-weight: bold; font-size: 13px;
-        }
+        .btn { flex: 1; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px; }
         .btn-map { background: var(--red); color: #fff; }
         .btn-back { background: transparent; color: var(--muted); border: 1px solid #333; }
-
-        @media (max-width: 900px) {
-            body { flex-direction: column; }
-            #viewport { height: 50vh; }
-            #panel { width: 100%; height: 50vh; }
-        }
+        @media (max-width: 900px) { body { flex-direction: column; } #viewport { height: 50vh; } #panel { width: 100%; height: 50vh; } }
     </style>
 </head>
 <body>
@@ -110,10 +52,8 @@
         <h2 id="mission-title">Загрузка...</h2>
         <p style="font-size:12px;color:var(--muted);margin-top:4px;" id="mission-date"></p>
     </div>
-
     <div class="timer-big" id="timer">--:--:--:--</div>
     <div class="current-event" id="event-text">Загрузка...</div>
-
     <div class="telemetry-grid">
         <div class="telem-card"><div class="val" id="alt">0</div><div class="lbl">Высота (км)</div></div>
         <div class="telem-card"><div class="val" id="vel">0</div><div class="lbl">Скорость (км/с)</div></div>
@@ -122,12 +62,10 @@
         <div class="telem-card"><div class="val" id="stage-name">—</div><div class="lbl">Этап</div></div>
         <div class="telem-card"><div class="val" id="downrange">0</div><div class="lbl">Дальность (км)</div></div>
     </div>
-
     <div class="objects-section">
         <h3>📦 Компоненты</h3>
         <div id="objects-list"></div>
     </div>
-
     <div class="btn-row">
         <a href="map.html" class="btn btn-map">🌌 Карта системы</a>
         <a href="index.html" class="btn btn-back">← На главную</a>
@@ -135,19 +73,13 @@
 </div>
 
 <script type="importmap">
-{
-    "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-    }
-}
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
 </script>
 
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// Сцена
 const container = document.getElementById('viewport');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000011);
@@ -163,8 +95,6 @@ container.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.target.set(0, 0, 0);
-// Ограничение камеры сферой радиусом 15000 (дальше Плутона)
 controls.maxDistance = 15000;
 
 // Звёзды
@@ -179,23 +109,14 @@ for (let i = 0; i < 5000; i++) {
 starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(starsVerts, 3));
 scene.add(new THREE.Points(starsGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 2 })));
 
-// Освещение
 scene.add(new THREE.DirectionalLight(0xffffff, 1.5));
 scene.add(new THREE.AmbientLight(0x222244, 0.6));
 
 // Земля
 const earthTex = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
-const earth = new THREE.Mesh(
-    new THREE.SphereGeometry(63.71, 64, 64),
-    new THREE.MeshPhongMaterial({ map: earthTex, specular: 0x222222, shininess: 10 })
-);
+const earth = new THREE.Mesh(new THREE.SphereGeometry(63.71, 64, 64), new THREE.MeshPhongMaterial({ map: earthTex, specular: 0x222222, shininess: 10 }));
 scene.add(earth);
-
-// Атмосфера
-scene.add(new THREE.Mesh(
-    new THREE.SphereGeometry(64.5, 64, 64),
-    new THREE.MeshPhongMaterial({ color: 0x4488ff, transparent: true, opacity: 0.15 })
-));
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(64.5, 64, 64), new THREE.MeshPhongMaterial({ color: 0x4488ff, transparent: true, opacity: 0.15 })));
 
 // Космодром
 const wenchangPos = (() => {
@@ -237,10 +158,7 @@ upperStage.position.y = 21;
 upperStage.userData = { separated: false, pos: new THREE.Vector3(), vel: new THREE.Vector3() };
 rocketGroup.add(upperStage);
 
-const fairing = new THREE.Mesh(
-    new THREE.ConeGeometry(0.75,5,16),
-    new THREE.MeshPhongMaterial({ color: 0xcccccc, transparent: true, opacity: 0.7 })
-);
+const fairing = new THREE.Mesh(new THREE.ConeGeometry(0.75,5,16), new THREE.MeshPhongMaterial({ color: 0xcccccc, transparent: true, opacity: 0.7 }));
 fairing.position.y = 27;
 fairing.userData = { separated: false, pos: new THREE.Vector3(), vel: new THREE.Vector3() };
 rocketGroup.add(fairing);
@@ -255,117 +173,82 @@ const trajectoryPoints = [];
 const trajectoryLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0xffcc00, transparent: true, opacity: 0.4 }));
 scene.add(trajectoryLine);
 
-// Загрузка данных
+// Загрузка
 const params = new URLSearchParams(window.location.search);
 const launchId = params.get('id') || 'ceos-1';
 
-let launchData = null;
-let startTime = 0;
-let events = [];
+let launchData = null, startTime = 0, events = [];
 
-fetch('../data/launches.json?' + Date.now())
+fetch('data/launches.json?' + Date.now())
   .then(r => r.json())
   .then(data => {
     launchData = data.launches.find(l => l.id === launchId) || data.launches[0];
     initLaunch(launchData);
   })
   .catch(() => {
-    document.getElementById('mission-title').textContent = 'Ошибка загрузки';
+    document.getElementById('mission-title').textContent = 'CEOS-1 · Первая партия «Небесный глаз»';
+    document.getElementById('rocket-badge').textContent = 'CZ-5B';
+    document.getElementById('mission-date').textContent = '07.07.2026, 04:00 (UTC+8)';
+    document.getElementById('event-text').textContent = 'ГОТОВИТСЯ К ЗАПУСКУ. Ракета CZ-5B на стартовом столе №1 космодрома Вэньчан.';
+    document.getElementById('timer').textContent = 'T-14:22:25:10';
   });
 
 function initLaunch(launch) {
     document.getElementById('mission-title').textContent = launch.name;
     document.getElementById('rocket-badge').textContent = launch.rocket;
-    document.getElementById('mission-date').textContent = new Date(launch.start_time).toLocaleString('ru-RU', {timeZone:'Asia/Shanghai'}) + ' (UTC+8)';
-    
+    document.getElementById('mission-date').textContent = new Date(launch.start_time).toLocaleString('ru-RU',{timeZone:'Asia/Shanghai'}) + ' (UTC+8)';
     startTime = new Date(launch.start_time).getTime();
     events = launch.events;
     rocketGroup.position.copy(wenchangPos);
-    
     update();
     setInterval(update, 250);
 }
 
 function update() {
     if (!launchData) return;
-    const now = Date.now();
-    const elapsed = (now - startTime) / 1000;
-    
-    // Таймер — не скачет, формат фиксирован
+    const now = Date.now(), elapsed = (now - startTime) / 1000;
     const abs = Math.abs(elapsed);
-    const d = Math.floor(abs / 86400);
-    const h = Math.floor((abs % 86400) / 3600);
-    const m = Math.floor((abs % 3600) / 60);
-    const s = Math.floor(abs % 60);
-    const sign = elapsed < 0 ? 'T-' : 'T+';
-    document.getElementById('timer').textContent = `${sign}${d}:${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    const d = Math.floor(abs/86400), h = Math.floor((abs%86400)/3600), m = Math.floor((abs%3600)/60), s = Math.floor(abs%60);
+    document.getElementById('timer').textContent = (elapsed<0?'T-':'T+')+`${d}:${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     
-    // До запуска — статичный текст
     if (elapsed < -300) {
-        document.getElementById('event-text').textContent = 'ГОТОВИТСЯ К ЗАПУСКУ. Ракета CZ-5B на стартовом столе №1 космодрома Вэньчан. Проводятся предстартовые проверки.';
+        document.getElementById('event-text').textContent = 'ГОТОВИТСЯ К ЗАПУСКУ. Ракета CZ-5B на стартовом столе №1 космодрома Вэньчан.';
         document.getElementById('stage-name').textContent = 'Ожидание';
-        document.getElementById('alt').textContent = '0';
-        document.getElementById('vel').textContent = '0';
-        document.getElementById('acc').textContent = '0';
-        document.getElementById('dist').textContent = '0';
-        document.getElementById('downrange').textContent = '0';
+        ['alt','vel','acc','dist','downrange'].forEach(id=>document.getElementById(id).textContent='0');
         updateObjectsListPreLaunch();
         return;
     }
     
-    // События
-    let cur = events[0];
-    let nxt = events[1] || events[0];
-    for (let i = 0; i < events.length; i++) {
-        if (events[i].t <= elapsed) { cur = events[i]; nxt = events[i+1] || events[i]; }
-    }
-    
+    let cur = events[0], nxt = events[1]||events[0];
+    for (let i=0;i<events.length;i++) { if(events[i].t<=elapsed){cur=events[i];nxt=events[i+1]||events[i];} }
     document.getElementById('event-text').textContent = cur.text;
     document.getElementById('stage-name').textContent = cur.stage;
     
     let alt = cur.alt, vel = cur.vel;
-    if (cur !== nxt && elapsed > cur.t && elapsed < nxt.t) {
-        const p = (elapsed - cur.t) / (nxt.t - cur.t);
-        alt = cur.alt + (nxt.alt - cur.alt) * p;
-        vel = cur.vel + (nxt.vel - cur.vel) * p;
-    }
-    
+    if(cur!==nxt && elapsed>cur.t && elapsed<nxt.t){ const p=(elapsed-cur.t)/(nxt.t-cur.t); alt=cur.alt+(nxt.alt-cur.alt)*p; vel=cur.vel+(nxt.vel-cur.vel)*p; }
     document.getElementById('alt').textContent = alt.toFixed(1);
     document.getElementById('vel').textContent = vel.toFixed(2);
-    document.getElementById('acc').textContent = (vel < 1 ? (vel*10+1).toFixed(1) : '1.0');
-    document.getElementById('dist').textContent = (alt * 1.5).toFixed(0);
-    document.getElementById('downrange').textContent = (alt * 0.8).toFixed(0);
+    document.getElementById('acc').textContent = (vel<1?(vel*10+1).toFixed(1):'1.0');
+    document.getElementById('dist').textContent = (alt*1.5).toFixed(0);
+    document.getElementById('downrange').textContent = (alt*0.8).toFixed(0);
     
-    // 3D позиция
-    if (elapsed > 0 && elapsed < 600) {
-        const totalAlt = alt * 100;
-        const dir = new THREE.Vector3(0, 1, 0.3).normalize();
-        rocketGroup.position.copy(wenchangPos.clone().add(dir.clone().multiplyScalar(totalAlt)));
+    if(elapsed>0 && elapsed<600){
+        rocketGroup.position.copy(wenchangPos.clone().add(new THREE.Vector3(0,1,0.3).normalize().multiplyScalar(alt*100)));
         rocketGroup.lookAt(new THREE.Vector3(0,0,0));
         trajectoryPoints.push(rocketGroup.position.clone());
-        if (trajectoryPoints.length > 500) trajectoryPoints.shift();
+        if(trajectoryPoints.length>500)trajectoryPoints.shift();
         trajectoryLine.geometry.dispose();
         trajectoryLine.geometry = new THREE.BufferGeometry().setFromPoints(trajectoryPoints);
     }
-    
-    flame.visible = elapsed > 0 && elapsed < 510;
-    
-    // Отделения
-    if (elapsed >= 165 && !boosters[0].userData.separated) {
-        boosters.forEach(b => { b.userData.separated = true; separatedObjects.push(b); rocketGroup.remove(b); });
-    }
-    if (elapsed >= 260 && !fairing.userData.separated) {
-        fairing.userData.separated = true; separatedObjects.push(fairing); rocketGroup.remove(fairing);
-    }
-    if (elapsed >= 540 && !upperStage.userData.separated) {
-        upperStage.userData.separated = true; separatedObjects.push(upperStage);
-    }
-    
+    flame.visible = elapsed>0 && elapsed<510;
+    if(elapsed>=165&&!boosters[0].userData.separated){ boosters.forEach(b=>{b.userData.separated=true;separatedObjects.push(b);rocketGroup.remove(b);}); }
+    if(elapsed>=260&&!fairing.userData.separated){ fairing.userData.separated=true;separatedObjects.push(fairing);rocketGroup.remove(fairing); }
+    if(elapsed>=540&&!upperStage.userData.separated){ upperStage.userData.separated=true;separatedObjects.push(upperStage); }
     updateObjectsList(elapsed);
     controls.target.lerp(rocketGroup.position, 0.05);
 }
 
-function updateObjectsListPreLaunch() {
+function updateObjectsListPreLaunch(){
     document.getElementById('objects-list').innerHTML = `
         <div class="object-row"><span class="name">🔵 Центральный блок</span><span class="status status-waiting">Ожидание</span></div>
         <div class="object-row"><span class="name">🟡 Ускорители (4)</span><span class="status status-waiting">Ожидание</span></div>
@@ -374,44 +257,20 @@ function updateObjectsListPreLaunch() {
         <div class="object-row"><span class="name">🛰️ 12 спутников CEOS</span><span class="status status-waiting">Ожидание</span></div>`;
 }
 
-function updateObjectsList(elapsed) {
+function updateObjectsList(elapsed){
     let html = '';
-    const cStat = elapsed > 540 ? (elapsed < 10800 ? 'status-orbiting' : 'status-separated') : (elapsed > 510 ? 'status-separated' : 'status-active');
-    html += `<div class="object-row"><span class="name">🔵 Центральный блок</span><span class="status ${cStat}">${elapsed > 540 ? 'На орбите' : (elapsed > 510 ? 'Выключен' : 'Активен')}</span></div>`;
-    
-    boosters.forEach((b,i) => {
-        const s = b.userData.separated ? 'status-splash' : 'status-active';
-        html += `<div class="object-row"><span class="name">🟡 Ускоритель ${i+1}</span><span class="status ${s}">${b.userData.separated ? 'Разрушен' : 'Активен'}</span></div>`;
-    });
-    
-    const fStat = fairing.userData.separated ? 'status-splash' : 'status-active';
-    html += `<div class="object-row"><span class="name">⚪ Обтекатель</span><span class="status ${fStat}">${fairing.userData.separated ? 'Сброшен' : 'Активен'}</span></div>`;
-    
-    const usStat = upperStage.userData.separated ? 'status-orbiting' : 'status-active';
-    html += `<div class="object-row"><span class="name">🟣 Блок выведения</span><span class="status ${usStat}">${upperStage.userData.separated ? 'На орбите' : 'Активен'}</span></div>`;
-    
-    if (elapsed > 5400) {
-        html += `<div class="object-row"><span class="name">🛰️ 12 спутников</span><span class="status status-orbiting">На орбите</span></div>`;
-    } else {
-        html += `<div class="object-row"><span class="name">🛰️ 12 спутников CEOS</span><span class="status status-waiting">Ожидание</span></div>`;
-    }
-    
+    const cStat = elapsed>540?(elapsed<10800?'status-orbiting':'status-separated'):(elapsed>510?'status-separated':'status-active');
+    html += `<div class="object-row"><span class="name">🔵 Центральный блок</span><span class="status ${cStat}">${elapsed>540?'На орбите':(elapsed>510?'Выключен':'Активен')}</span></div>`;
+    boosters.forEach((b,i)=>{ html += `<div class="object-row"><span class="name">🟡 Ускоритель ${i+1}</span><span class="status ${b.userData.separated?'status-splash':'status-active'}">${b.userData.separated?'Разрушен':'Активен'}</span></div>`; });
+    html += `<div class="object-row"><span class="name">⚪ Обтекатель</span><span class="status ${fairing.userData.separated?'status-splash':'status-active'}">${fairing.userData.separated?'Сброшен':'Активен'}</span></div>`;
+    html += `<div class="object-row"><span class="name">🟣 Блок выведения</span><span class="status ${upperStage.userData.separated?'status-orbiting':'status-active'}">${upperStage.userData.separated?'На орбите':'Активен'}</span></div>`;
+    html += `<div class="object-row"><span class="name">🛰️ 12 спутников CEOS</span><span class="status ${elapsed>5400?'status-orbiting':'status-waiting'}">${elapsed>5400?'На орбите':'Ожидание'}</span></div>`;
     document.getElementById('objects-list').innerHTML = html;
 }
 
-// Рендер
-function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-}
+function animate(){ requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
 animate();
-
-window.addEventListener('resize', () => {
-    camera.aspect = container.clientWidth / container.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, container.clientHeight);
-});
+window.addEventListener('resize',()=>{ camera.aspect=container.clientWidth/container.clientHeight; camera.updateProjectionMatrix(); renderer.setSize(container.clientWidth,container.clientHeight); });
 </script>
 </body>
 </html>
