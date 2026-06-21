@@ -6,13 +6,8 @@
     <title>China Space Live</title>
     <style>
         :root {
-            --bg: #0a0a12;
-            --surface: #111122;
-            --border: #1a1a3a;
-            --red: #cc0000;
-            --gold: #ffcc00;
-            --text: #e0e0e0;
-            --muted: #888;
+            --bg: #0a0a12; --surface: #111122; --border: #1a1a3a;
+            --red: #cc0000; --gold: #ffcc00; --text: #e0e0e0; --muted: #888;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -22,6 +17,8 @@
             min-height: 100vh;
             line-height: 1.6;
         }
+
+        /* TOP BAR */
         .topbar {
             background: #080816;
             border-bottom: 1px solid var(--border);
@@ -29,11 +26,38 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 13px;
-            color: var(--muted);
         }
         .topbar .brand { color: var(--red); font-weight: bold; font-size: 14px; letter-spacing: 1px; }
-        #google_translate_element { font-size: 12px; }
+
+        /* CUSTOM LANGUAGE SWITCHER */
+        .lang-switch {
+            display: flex;
+            gap: 4px;
+            background: #0a0a18;
+            border-radius: 20px;
+            padding: 3px;
+            border: 1px solid var(--border);
+        }
+        .lang-switch button {
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            padding: 6px 14px;
+            cursor: pointer;
+            border-radius: 18px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .lang-switch button.active {
+            background: var(--red);
+            color: #fff;
+        }
+        .lang-switch button:hover:not(.active) {
+            color: #fff;
+        }
+
+        /* NAV */
         nav {
             background: var(--surface);
             padding: 0 30px;
@@ -53,10 +77,12 @@
         }
         nav a:hover { color: #fff; background: #1a1a30; }
         nav a.active { color: #fff; border-bottom-color: var(--red); }
+
+        /* PAGES */
         .page { display: none; max-width: 1000px; margin: 0 auto; padding: 30px 20px; }
         .page.active { display: block; }
 
-        /* Таймер */
+        /* TIMER BOX */
         .timer-box {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -65,19 +91,29 @@
             text-align: center;
             margin-bottom: 30px;
         }
-        .timer-box .label { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+        .timer-box .label {
+            color: var(--muted);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
         .timer-box .value {
-            font-size: 48px;
             font-weight: bold;
             color: var(--gold);
             font-family: 'Courier New', monospace;
-            margin: 10px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 10px;
         }
         .timer-box .sub {
             color: var(--muted);
             font-size: 14px;
+            margin-top: 8px;
+            min-height: 20px;
         }
-        .timer-box a {
+        .timer-box a.timer-link {
             display: inline-block;
             margin-top: 15px;
             padding: 10px 24px;
@@ -88,7 +124,7 @@
             font-weight: bold;
         }
 
-        /* Новости */
+        /* NEWS */
         .news-item {
             background: var(--surface);
             border-left: 4px solid var(--red);
@@ -105,7 +141,6 @@
         .news-photo { margin-top: 18px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
         .news-photo img { width: 100%; display: block; }
         .news-photo .caption { background: #0a0a18; padding: 8px 14px; font-size: 12px; color: var(--muted); }
-        .loading-text { text-align: center; padding: 40px; color: var(--muted); }
 
         footer { text-align: center; padding: 20px; color: #444; font-size: 12px; border-top: 1px solid #1a1a2a; margin-top: 40px; }
     </style>
@@ -114,153 +149,266 @@
 
 <div class="topbar">
     <span class="brand">CHINA SPACE LIVE</span>
-    <div id="google_translate_element"></div>
+    <div class="lang-switch" id="lang-switch">
+        <button onclick="setLang('ru')" id="btn-ru" class="active">РУС</button>
+        <button onclick="setLang('en')" id="btn-en">ENG</button>
+        <button onclick="setLang('zh')" id="btn-zh">中文</button>
+    </div>
 </div>
 
 <nav>
-    <a href="#" class="active" onclick="showPage('news'); return false;">📰 Новости</a>
-    <a href="#" onclick="showPage('launches'); return false;">🚀 Запуски</a>
+    <a href="#" class="active" onclick="showPage('news');return false;" data-key="nav-news">📰 Новости</a>
+    <a href="#" onclick="showPage('launches');return false;" data-key="nav-launches">🚀 Запуски</a>
+    <a href="map/" data-key="nav-map">🌌 Карта системы</a>
 </nav>
 
 <!-- ===== НОВОСТИ ===== -->
 <div class="page active" id="page-news">
     <div class="timer-box" id="timer-box">
         <div class="label" id="timer-label">Загрузка...</div>
-        <div class="value" id="timer-value">--:--:--:--</div>
+        <div class="value" id="timer-value" style="font-size:clamp(24px,5vw,48px);">--:--:--:--</div>
         <div class="sub" id="timer-sub"></div>
-        <a href="#" onclick="showPage('launches'); return false;" id="timer-link" style="display:none;">📡 Перейти к трансляции</a>
+        <a href="#" class="timer-link" id="timer-link" style="display:none;" onclick="showPage('launches');return false;">📡 Перейти к трансляции</a>
     </div>
-    <div id="news-container"><div class="loading-text">Загрузка новостей...</div></div>
+    <div id="news-container"><p style="text-align:center;color:var(--muted);padding:40px;">Загрузка новостей...</p></div>
 </div>
 
 <!-- ===== ЗАПУСКИ ===== -->
 <div class="page" id="page-launches">
-    <div id="launch-container"><div class="loading-text">Загрузка...</div></div>
+    <div id="launch-container"><p style="text-align:center;color:var(--muted);padding:40px;">Загрузка...</p></div>
 </div>
 
 <footer>China Space Live © 2026</footer>
 
-<!-- Google Translate -->
 <script>
-function googleTranslateInit() {
-    new google.translate.TranslateElement({
-        pageLanguage: 'ru',
-        includedLanguages: 'ru,en,zh-CN',
-        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-        autoDisplay: false
-    }, 'google_translate_element');
-}
-</script>
-<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateInit"></script>
+// ========== LANGUAGE ==========
+let currentLang = 'ru';
+const translations = {
+    ru: {
+        'nav-news': '📰 Новости',
+        'nav-launches': '🚀 Запуски',
+        'nav-map': '🌌 Карта системы',
+        loading: 'Загрузка новостей...',
+        loadingLaunches: 'Загрузка...',
+        timerLoading: 'Загрузка...',
+        inProgress: '🚀 ЗАПУСК В ПРОЦЕССЕ',
+        countdown: '⏳ ДО СЛЕДУЮЩЕГО ЗАПУСКА',
+        noLaunches: '📅 БЛИЖАЙШИХ ЗАПУСКОВ НЕТ',
+        lastLaunch: '📅 С ПОСЛЕДНЕГО ЗАПУСКА',
+        goToLive: '📡 Перейти к трансляции',
+        preparing: 'ГОТОВИТСЯ',
+        countdownTo: 'Обратный отсчёт до старта',
+        details: '📡 Детали запуска',
+        systemMap: '🌌 Карта системы'
+    },
+    en: {
+        'nav-news': '📰 News',
+        'nav-launches': '🚀 Launches',
+        'nav-map': '🌌 System Map',
+        loading: 'Loading news...',
+        loadingLaunches: 'Loading...',
+        timerLoading: 'Loading...',
+        inProgress: '🚀 LAUNCH IN PROGRESS',
+        countdown: '⏳ NEXT LAUNCH IN',
+        noLaunches: '📅 NO UPCOMING LAUNCHES',
+        lastLaunch: '📅 SINCE LAST LAUNCH',
+        goToLive: '📡 Go to Live',
+        preparing: 'PREPARING',
+        countdownTo: 'Countdown to launch',
+        details: '📡 Launch Details',
+        systemMap: '🌌 System Map'
+    },
+    zh: {
+        'nav-news': '📰 新闻',
+        'nav-launches': '🚀 发射',
+        'nav-map': '🌌 系统地图',
+        loading: '加载新闻...',
+        loadingLaunches: '加载中...',
+        timerLoading: '加载中...',
+        inProgress: '🚀 发射进行中',
+        countdown: '⏳ 距离下次发射',
+        noLaunches: '📅 暂无发射计划',
+        lastLaunch: '📅 自上次发射',
+        goToLive: '📡 进入直播',
+        preparing: '准备中',
+        countdownTo: '发射倒计时',
+        details: '📡 发射详情',
+        systemMap: '🌌 系统地图'
+    }
+};
 
-<script>
-// ========== НАВИГАЦИЯ ==========
+function setLang(lang) {
+    currentLang = lang;
+    document.querySelectorAll('.lang-switch button').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-' + lang).classList.add('active');
+    document.querySelectorAll('[data-key]').forEach(el => {
+        const key = el.getAttribute('data-key');
+        if (translations[lang] && translations[lang][key]) {
+            el.childNodes[0] && (el.childNodes[0].textContent = translations[lang][key]);
+            // update text
+            const txt = translations[lang][key];
+            const icon = txt.split(' ')[0];
+            const rest = txt.substring(icon.length);
+            el.innerHTML = icon + rest;
+        }
+    });
+    // Reload displays
+    loadNews();
+    loadLaunches();
+    updateTimer();
+}
+
+function t(key) {
+    return (translations[currentLang] && translations[currentLang][key]) || key;
+}
+
+// ========== NAVIGATION ==========
 function showPage(name) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + name).classList.add('active');
-    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-    document.querySelectorAll('nav a').forEach(a => {
-        if (a.textContent.includes(name === 'news' ? 'Новости' : 'Запуски')) a.classList.add('active');
+    document.querySelectorAll('nav a[data-key]').forEach(a => {
+        a.classList.toggle('active', a.getAttribute('data-key') === 'nav-' + name);
     });
 }
 
-// ========== ЗАГРУЗКА НОВОСТЕЙ ==========
-fetch('data/news.json?' + Date.now())
-  .then(r => r.json())
-  .then(data => {
-    const container = document.getElementById('news-container');
-    container.innerHTML = '';
-    const sorted = data.news.sort((a,b) => new Date(b.time) - new Date(a.time));
-    sorted.forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'news-item';
-      let html = `
-        <div class="news-time">⏰ ${new Date(item.time).toLocaleString('ru-RU', {timeZone:'Asia/Shanghai'})} (UTC+8)</div>
-        <div class="news-title"><span class="news-flag">${item.flag}</span> ${item.title}</div>
-        <div class="news-body">${item.body}</div>`;
-      if (item.photo) {
-        html += `<div class="news-photo"><img src="${item.photo.url}" alt=""><div class="caption">${item.photo.caption || ''}</div></div>`;
-      }
-      div.innerHTML = html;
-      container.appendChild(div);
-    });
-  })
-  .catch(() => {
-    document.getElementById('news-container').innerHTML = '<div class="loading-text">Ошибка загрузки новостей</div>';
-  });
+// ========== NEWS ==========
+function loadNews() {
+    fetch('data/news.json?' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        const container = document.getElementById('news-container');
+        container.innerHTML = '';
+        const sorted = [...data.news].sort((a,b) => new Date(b.time) - new Date(a.time));
+        sorted.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'news-item';
+          let html = `
+            <div class="news-time">⏰ ${new Date(item.time).toLocaleString(currentLang === 'zh' ? 'zh-CN' : 'ru-RU', {timeZone:'Asia/Shanghai'})} (UTC+8)</div>
+            <div class="news-title"><span class="news-flag">${item.flag}</span> ${item.title}</div>
+            <div class="news-body">${item.body}</div>`;
+          if (item.photo) {
+            html += `<div class="news-photo"><img src="${item.photo.url}" alt=""><div class="caption">${item.photo.caption || ''}</div></div>`;
+          }
+          div.innerHTML = html;
+          container.appendChild(div);
+        });
+      })
+      .catch(() => {
+        document.getElementById('news-container').innerHTML = '<p style="text-align:center;color:var(--muted);padding:40px;">Ошибка загрузки новостей</p>';
+      });
+}
 
-// ========== ЗАГРУЗКА ЗАПУСКОВ ==========
-fetch('data/launches.json?' + Date.now())
-  .then(r => r.json())
-  .then(data => {
-    const container = document.getElementById('launch-container');
-    container.innerHTML = '';
-    data.launches.forEach(launch => {
-      const div = document.createElement('div');
-      div.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:25px;margin-bottom:20px;';
-      const start = new Date(launch.start_time);
-      div.innerHTML = `
-        <h3 style="color:#fff;margin-bottom:5px;">${launch.name}</h3>
-        <p style="color:var(--muted);margin-bottom:10px;">🚀 ${launch.rocket} · 📍 ${launch.cosmodrome} · ⏰ ${start.toLocaleString('ru-RU',{timeZone:'Asia/Shanghai'})} (UTC+8)</p>
-        <p style="color:#ccc;">${launch.description || ''}</p>
-        <a href="launch.html?id=${launch.id}" style="display:inline-block;margin-top:15px;padding:10px 24px;background:var(--red);color:#fff;border-radius:6px;text-decoration:none;font-weight:bold;">📡 Детали запуска</a>
-        <a href="map/" style="display:inline-block;margin-top:15px;margin-left:10px;padding:10px 24px;background:transparent;color:var(--gold);border:1px solid var(--gold);border-radius:6px;text-decoration:none;">🌌 Карта системы</a>
-      `;
-      container.appendChild(div);
-    });
-  })
-  .catch(() => {
-    document.getElementById('launch-container').innerHTML = '<div class="loading-text">Ошибка загрузки</div>';
-  });
+// ========== LAUNCHES ==========
+let launchesData = [];
+function loadLaunches() {
+    fetch('data/launches.json?' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        launchesData = data.launches;
+        const container = document.getElementById('launch-container');
+        container.innerHTML = '';
+        launchesData.forEach(launch => {
+          const div = document.createElement('div');
+          div.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:25px;margin-bottom:20px;';
+          const start = new Date(launch.start_time);
+          div.innerHTML = `
+            <h3 style="color:#fff;margin-bottom:5px;">${launch.name}</h3>
+            <p style="color:var(--muted);margin-bottom:10px;">🚀 ${launch.rocket} · 📍 ${launch.cosmodrome} · ⏰ ${start.toLocaleString('ru-RU',{timeZone:'Asia/Shanghai'})} (UTC+8)</p>
+            <p style="color:#ccc;">${launch.description || ''}</p>
+            <a href="launch.html?id=${launch.id}" style="display:inline-block;margin-top:15px;padding:10px 24px;background:var(--red);color:#fff;border-radius:6px;text-decoration:none;font-weight:bold;">${t('details')}</a>
+            <a href="map/" style="display:inline-block;margin-top:15px;margin-left:10px;padding:10px 24px;background:transparent;color:var(--gold);border:1px solid var(--gold);border-radius:6px;text-decoration:none;">${t('systemMap')}</a>
+          `;
+          container.appendChild(div);
+        });
+      })
+      .catch(() => {
+        document.getElementById('launch-container').innerHTML = '<p style="text-align:center;color:var(--muted);padding:40px;">Ошибка загрузки</p>';
+      });
+}
 
-// ========== ТАЙМЕР ==========
-fetch('data/launches.json?' + Date.now())
-  .then(r => r.json())
-  .then(data => {
-    const now = Date.now();
-    const launches = data.launches.sort((a,b) => new Date(a.start_time) - new Date(b.start_time));
+// ========== TIMER ==========
+let timerInterval = null;
+function updateTimer() {
+    if (!launchesData.length) return;
     
-    // Ищем текущий/будущий запуск
+    const now = Date.now();
+    const sorted = [...launchesData].sort((a,b) => new Date(a.start_time) - new Date(b.start_time));
+    
     let current = null;
     let next = null;
-    for (const l of launches) {
-      const t = new Date(l.start_time).getTime();
-      if (t > now && !next) next = l;
-      if (t <= now && t + (l.duration_sec || 7200)*1000 > now) current = l;
+    let last = null;
+    
+    for (const l of sorted) {
+        const t = new Date(l.start_time).getTime();
+        const dur = (l.duration_sec || 10800) * 1000;
+        if (t <= now && t + dur > now) current = l;
+        if (t > now && !next) next = l;
+        if (t + dur <= now) last = l;
     }
     
-    const timerVal = document.getElementById('timer-value');
-    const timerLabel = document.getElementById('timer-label');
-    const timerSub = document.getElementById('timer-sub');
-    const timerLink = document.getElementById('timer-link');
+    const label = document.getElementById('timer-label');
+    const value = document.getElementById('timer-value');
+    const sub = document.getElementById('timer-sub');
+    const link = document.getElementById('timer-link');
+    
+    if (timerInterval) clearInterval(timerInterval);
     
     if (current) {
-      timerLabel.textContent = '🚀 ЗАПУСК В ПРОЦЕССЕ';
-      timerVal.textContent = current.name;
-      timerSub.textContent = 'Старт: ' + new Date(current.start_time).toLocaleString('ru-RU', {timeZone:'Asia/Shanghai'});
-      timerLink.style.display = 'inline-block';
+        label.textContent = t('inProgress');
+        value.textContent = current.name;
+        value.style.fontSize = 'clamp(18px,3vw,32px)';
+        sub.textContent = 'Старт: ' + new Date(current.start_time).toLocaleString('ru-RU', {timeZone:'Asia/Shanghai'});
+        link.style.display = 'inline-block';
+        link.textContent = t('goToLive');
     } else if (next) {
-      timerLabel.textContent = '⏳ ДО СЛЕДУЮЩЕГО ЗАПУСКА';
-      timerLink.style.display = 'none';
-      function updateCountdown() {
-        const diff = new Date(next.start_time).getTime() - Date.now();
-        if (diff <= 0) { location.reload(); return; }
-        const d = Math.floor(diff / 86400000);
-        const h = Math.floor((diff % 86400000) / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
-        timerVal.textContent = `${d}:${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-        timerSub.textContent = next.name + ' · ' + new Date(next.start_time).toLocaleString('ru-RU', {timeZone:'Asia/Shanghai'});
-      }
-      updateCountdown();
-      setInterval(updateCountdown, 500);
+        label.textContent = t('countdown');
+        link.style.display = 'none';
+        function tick() {
+            const diff = new Date(next.start_time).getTime() - Date.now();
+            if (diff <= 0) { loadLaunches(); updateTimer(); return; }
+            const d = Math.floor(diff / 86400000);
+            const h = Math.floor((diff % 86400000) / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            value.textContent = `${d}:${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            value.style.fontSize = 'clamp(24px,5vw,48px)';
+            sub.textContent = next.name + ' · ' + new Date(next.start_time).toLocaleString('ru-RU', {timeZone:'Asia/Shanghai'});
+        }
+        tick();
+        timerInterval = setInterval(tick, 500);
+    } else if (last) {
+        label.textContent = t('lastLaunch');
+        const diff = now - (new Date(last.start_time).getTime() + (last.duration_sec || 10800)*1000);
+        const days = Math.floor(diff / 86400000);
+        value.textContent = `${days} дн.`;
+        value.style.fontSize = 'clamp(24px,5vw,48px)';
+        sub.textContent = last.name;
+        link.style.display = 'none';
     } else {
-      timerLabel.textContent = '📅 БЛИЖАЙШИХ ЗАПУСКОВ НЕТ';
-      timerVal.textContent = '—';
-      timerSub.textContent = 'Расписание уточняется';
-      timerLink.style.display = 'none';
+        label.textContent = t('noLaunches');
+        value.textContent = '—';
+        value.style.fontSize = 'clamp(24px,5vw,48px)';
+        sub.textContent = 'Расписание уточняется';
+        link.style.display = 'none';
     }
-  });
+}
+
+// ========== INIT ==========
+loadNews();
+loadLaunches();
+setTimeout(updateTimer, 500);
+setInterval(() => { if (launchesData.length) updateTimer(); }, 30000);
+
+// Обновляем запуски и таймер при загрузке данных
+const origFetch = fetch;
+window.fetch = function(...args) {
+    return origFetch.apply(this, args).then(r => {
+        if (args[0].includes('launches.json')) {
+            setTimeout(updateTimer, 100);
+        }
+        return r;
+    });
+};
 </script>
 </body>
 </html>
