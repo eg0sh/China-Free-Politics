@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>China Space Live — 中国航天直播</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0f;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        nav {
+            background: #111122;
+            padding: 15px 30px;
+            border-bottom: 2px solid #cc0000;
+            display: flex;
+            gap: 30px;
+        }
+        nav a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 5px 15px;
+            border: 1px solid #333;
+            border-radius: 3px;
+        }
+        nav a:hover { background: #cc0000; border-color: #cc0000; }
+        nav a.active { background: #cc0000; }
+        main {
+            flex: 1;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        h1 {
+            color: #cc0000;
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 40px;
+            font-size: 14px;
+        }
+        .news-item {
+            background: #111122;
+            border-left: 3px solid #cc0000;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 0 5px 5px 0;
+        }
+        .news-time {
+            color: #888;
+            font-size: 12px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .news-flag {
+            font-size: 20px;
+            margin-right: 10px;
+        }
+        .news-text {
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        .loading {
+            text-align: center;
+            color: #888;
+            font-size: 18px;
+            padding: 50px;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #222;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="active">🇨🇳 Новости</a>
+        <a href="live/">📡 Live-трансляция</a>
+        <a href="map/">🌌 Карта аппаратов</a>
+    </nav>
+    
+    <main>
+        <h1>🚀 China Space Live</h1>
+        <p class="subtitle">中国航天直播 — Новости космической программы КНР</p>
+        
+        <div id="news-container">
+            <p class="loading">Загрузка новостей...</p>
+        </div>
+    </main>
+    
+    <footer>
+        China Space Live © 2026 · Данные обновляются в реальном времени · Сделано в КНР
+    </footer>
+
+    <script>
+        // Временный скрипт — показывает тестовые новости
+        const news = [
+            {
+                time: "2026-06-21 16:00",
+                flag: "🇨🇳",
+                text: "Председатель КНР поручил МИД начать переговоры с Казахстаном о новых условиях аренды космодрома Байконур. Аренда продлевается до 2075 года."
+            },
+            {
+                time: "2026-06-21 16:05",
+                flag: "🇨🇳",
+                text: "CNSA открыло приём заявок в 4-е поколение тайконавтов. 78 мест, включая 7 иностранных участников из 6 стран."
+            },
+            {
+                time: "2026-06-20 08:00",
+                flag: "🇨🇳",
+                text: "ГККЭ утвердила график запусков на 2026 год. Первый запуск CEOS — 7 июля."
+            },
+            {
+                time: "2026-06-18 09:00",
+                flag: "🇨🇳",
+                text: "Опубликован указ о создании China University of Space Science and Technology (CUSST) в провинции Хайнань, рядом с космодромом Вэньчан."
+            },
+            {
+                time: "2026-06-16 09:00",
+                flag: "🇨🇳",
+                text: "Опубликован Указ Председателя КНР «О создании Государственной Комиссии по Космической Экспансии» (ГККЭ)."
+            },
+            {
+                time: "2026-06-16 09:05",
+                flag: "🇨🇳",
+                text: "Опубликован Указ «О строительстве Большого Кольцевого Коллайдера» (LCC «Тайцзи»). Кольцо 120 км, энергия до 150 ТэВ."
+            }
+        ];
+
+        const container = document.getElementById('news-container');
+        container.innerHTML = '';
+        news.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'news-item';
+            div.innerHTML = `
+                <span class="news-time">⏰ ${item.time}</span>
+                <p class="news-text"><span class="news-flag">${item.flag}</span> ${item.text}</p>
+            `;
+            container.appendChild(div);
+        });
+    </script>
+</body>
+</html>
