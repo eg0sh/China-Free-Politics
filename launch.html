@@ -28,7 +28,6 @@
         .object-row .status { padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: bold; }
         .status-active { background: #004400; color: #00ff00; }
         .status-separated { background: #444400; color: #ffcc00; }
-        .status-burning { background: #440000; color: #ff4444; }
         .status-splash { background: #004466; color: #00aaff; }
         .status-orbiting { background: #440044; color: #ff00ff; }
         .status-waiting { background: #222244; color: #8888cc; }
@@ -75,62 +74,134 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 const container = document.getElementById('viewport');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000011);
-const camera = new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight, 0.1, 200000);
-camera.position.set(0, 100, 300);
+const camera = new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight, 0.01, 50000);
+camera.position.set(30, 15, 60);
+camera.lookAt(0, 0, 0);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(container.clientWidth, container.clientHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 container.appendChild(renderer.domElement);
+
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; controls.dampingFactor = 0.05; controls.target.set(0,0,0);
-controls.maxDistance = 15000;
+controls.enableDamping = true; controls.dampingFactor = 0.05;
+controls.target.set(0, 3, 0);
+controls.maxDistance = 10000;
+controls.update();
 
+// Звёзды
 const starsGeo = new THREE.BufferGeometry();
-const v = [];
-for (let i=0;i<5000;i++) { const r=12000+Math.random()*3000,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1); v.push(r*Math.sin(ph)*Math.cos(th),r*Math.sin(ph)*Math.sin(th),r*Math.cos(ph)); }
-starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(v,3));
-scene.add(new THREE.Points(starsGeo, new THREE.PointsMaterial({color:0xffffff,size:2})));
+const sv = [];
+for (let i=0;i<3000;i++){const r=3000+Math.random()*5000,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);sv.push(r*Math.sin(ph)*Math.cos(th),r*Math.sin(ph)*Math.sin(th),r*Math.cos(ph));}
+starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(sv,3));
+scene.add(new THREE.Points(starsGeo, new THREE.PointsMaterial({color:0xffffff,size:1.5})));
 
-scene.add(new THREE.DirectionalLight(0xffffff,1.5));
-scene.add(new THREE.AmbientLight(0x222244,0.6));
+scene.add(new THREE.DirectionalLight(0xffffff, 2));
+scene.add(new THREE.AmbientLight(0x333355, 0.8));
 
-const earth = new THREE.Mesh(new THREE.SphereGeometry(63.71,64,64), new THREE.MeshPhongMaterial({map:new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'),specular:0x222222,shininess:10}));
+// Земля (уменьшена для масштаба сцены)
+const earthGeo = new THREE.SphereGeometry(6.371, 64, 64);
+const earthTex = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+const earth = new THREE.Mesh(earthGeo, new THREE.MeshPhongMaterial({map:earthTex,specular:0x111111,shininess:5}));
 scene.add(earth);
-scene.add(new THREE.Mesh(new THREE.SphereGeometry(64.5,64,64), new THREE.MeshPhongMaterial({color:0x4488ff,transparent:true,opacity:0.15})));
 
-const wenchangPos = new THREE.Vector3(63.81*Math.sin((90-19.6)*Math.PI/180)*Math.cos(110.9*Math.PI/180), 63.81*Math.cos((90-19.6)*Math.PI/180), 63.81*Math.sin((90-19.6)*Math.PI/180)*Math.sin(110.9*Math.PI/180));
-const pad = new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,1,8), new THREE.MeshPhongMaterial({color:0xffcc00,emissive:0x332200}));
-pad.position.copy(wenchangPos); pad.lookAt(new THREE.Vector3(0,0,0)); pad.rotateX(Math.PI/2); scene.add(pad);
+// Атмосфера
+const atmoGeo = new THREE.SphereGeometry(6.45, 64, 64);
+const atmo = new THREE.Mesh(atmoGeo, new THREE.MeshPhongMaterial({color:0x4488ff,transparent:true,opacity:0.12}));
+scene.add(atmo);
 
-const rocketGroup = new THREE.Group(); scene.add(rocketGroup);
-rocketGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(0.8,0.8,18,16), new THREE.MeshPhongMaterial({color:0xffffff}))).position.y = 9;
+// Космодром Вэньчан (19.6°N, 110.9°E) — на поверхности Земли
+const padLat = 19.6, padLon = 110.9;
+const padPhi = (90-padLat)*Math.PI/180;
+const padTheta = padLon*Math.PI/180;
+const padR = 6.38;
+const padPos = new THREE.Vector3(
+    padR * Math.sin(padPhi) * Math.cos(padTheta),
+    padR * Math.cos(padPhi),
+    padR * Math.sin(padPhi) * Math.sin(padTheta)
+);
+const padMarker = new THREE.Mesh(
+    new THREE.ConeGeometry(0.15, 0.5, 8),
+    new THREE.MeshPhongMaterial({color:0xffcc00,emissive:0x331100})
+);
+padMarker.position.copy(padPos);
+padMarker.lookAt(new THREE.Vector3(0,0,0));
+padMarker.rotateX(Math.PI/2);
+scene.add(padMarker);
 
+// Ракета (масштаб: 1 ед = 100 м реальных)
+const rocketGroup = new THREE.Group();
+rocketGroup.position.copy(padPos);
+rocketGroup.visible = true;
+scene.add(rocketGroup);
+
+// Ракета CZ-5B: высота 53.7 м → 0.537 ед
+const ROCKET_SCALE = 0.01; // 1 метр = 0.01 ед сцены
+const rocketHeight = 53.7 * ROCKET_SCALE;
+const coreRadius = 2.5 * ROCKET_SCALE;
+const boosterRadius = 1.5 * ROCKET_SCALE;
+
+// Центральный блок
+const core = new THREE.Mesh(
+    new THREE.CylinderGeometry(coreRadius, coreRadius, rocketHeight, 16),
+    new THREE.MeshPhongMaterial({color:0xffffff})
+);
+core.position.y = rocketHeight/2;
+rocketGroup.add(core);
+
+// Боковые ускорители (4)
 const boosters = [];
 for (let i=0;i<4;i++) {
-    const b = new THREE.Group();
-    b.add(new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,10,8), new THREE.MeshPhongMaterial({color:0xdddddd}))).position.y = 5;
-    b.add(new THREE.Mesh(new THREE.ConeGeometry(0.4,1.5,8), new THREE.MeshPhongMaterial({color:0x333333}))).position.y = -0.5;
-    const a = i*Math.PI/2+Math.PI/4; b.position.set(Math.cos(a)*1.4,0.5,Math.sin(a)*1.4);
-    b.userData = {separated:false,pos:new THREE.Vector3(),vel:new THREE.Vector3()};
-    rocketGroup.add(b); boosters.push(b);
+    const bGroup = new THREE.Group();
+    const bHeight = 30 * ROCKET_SCALE;
+    const bGeo = new THREE.CylinderGeometry(boosterRadius, boosterRadius, bHeight, 8);
+    const bMesh = new THREE.Mesh(bGeo, new THREE.MeshPhongMaterial({color:0xdddddd}));
+    bMesh.position.y = bHeight/2;
+    bGroup.add(bMesh);
+    const a = i*Math.PI/2 + Math.PI/4;
+    bGroup.position.set(Math.cos(a)*0.045, -0.01, Math.sin(a)*0.045);
+    bGroup.userData = {separated:false};
+    rocketGroup.add(bGroup);
+    boosters.push(bGroup);
 }
 
+// Блок выведения
 const upperStage = new THREE.Group();
-upperStage.add(new THREE.Mesh(new THREE.CylinderGeometry(0.7,0.7,6,16), new THREE.MeshPhongMaterial({color:0xeeeeff}))).position.y = 3;
-upperStage.position.y = 21; upperStage.userData = {separated:false,pos:new THREE.Vector3(),vel:new THREE.Vector3()};
+const usHeight = 12 * ROCKET_SCALE;
+const usMesh = new THREE.Mesh(
+    new THREE.CylinderGeometry(coreRadius*0.85, coreRadius*0.85, usHeight, 16),
+    new THREE.MeshPhongMaterial({color:0xeeeeff})
+);
+usMesh.position.y = usHeight/2;
+upperStage.add(usMesh);
+upperStage.position.y = rocketHeight + 0.02;
+upperStage.userData = {separated:false};
 rocketGroup.add(upperStage);
 
-const fairing = new THREE.Mesh(new THREE.ConeGeometry(0.75,5,16), new THREE.MeshPhongMaterial({color:0xcccccc,transparent:true,opacity:0.7}));
-fairing.position.y = 27; fairing.userData = {separated:false,pos:new THREE.Vector3(),vel:new THREE.Vector3()};
+// Обтекатель
+const fairingHeight = 20.5 * ROCKET_SCALE;
+const fairing = new THREE.Mesh(
+    new THREE.ConeGeometry(coreRadius, fairingHeight, 16),
+    new THREE.MeshPhongMaterial({color:0xcccccc,transparent:true,opacity:0.6})
+);
+fairing.position.y = rocketHeight + usHeight + fairingHeight/2 - 0.01;
+fairing.userData = {separated:false};
 rocketGroup.add(fairing);
 
-const flame = new THREE.Mesh(new THREE.ConeGeometry(0.6,8,8), new THREE.MeshBasicMaterial({color:0xff6600,transparent:true,opacity:0.9}));
-flame.position.y = -4; flame.rotation.x = Math.PI; rocketGroup.add(flame);
+// Пламя
+const flame = new THREE.Mesh(
+    new THREE.ConeGeometry(0.02, 0.08, 8),
+    new THREE.MeshBasicMaterial({color:0xff6600,transparent:true,opacity:0.9})
+);
+flame.position.y = -0.04;
+flame.rotation.x = Math.PI;
+rocketGroup.add(flame);
 
+// Траектория
 const trajectoryPoints = [];
-const trajectoryLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({color:0xffcc00,transparent:true,opacity:0.4}));
+const trajectoryLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({color:0xffcc00,transparent:true,opacity:0.5}));
 scene.add(trajectoryLine);
 
+// Данные
 const params = new URLSearchParams(window.location.search);
 const launchId = params.get('id') || 'ceos-1';
 let launchData = null, startTime = 0, events = [];
@@ -144,10 +215,9 @@ fetch('data/launches.json?' + Date.now())
     document.getElementById('mission-date').textContent = new Date(launchData.start_time).toLocaleString('ru-RU',{timeZone:'Asia/Shanghai'}) + ' (UTC+8)';
     startTime = new Date(launchData.start_time).getTime();
     events = launchData.events;
-    rocketGroup.position.copy(wenchangPos);
     update(); setInterval(update, 250);
   })
-  .catch(() => document.getElementById('mission-title').textContent = 'Ошибка загрузки данных');
+  .catch(() => document.getElementById('mission-title').textContent = 'Ошибка загрузки');
 
 function update() {
     if (!launchData) return;
@@ -155,39 +225,62 @@ function update() {
     const abs = Math.abs(elapsed);
     const d = Math.floor(abs/86400), h = Math.floor((abs%86400)/3600), m = Math.floor((abs%3600)/60), s = Math.floor(abs%60);
     document.getElementById('timer').textContent = (elapsed<0?'T-':'T+')+`${d}:${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    
+
+    // До T-5 минут — ракета на стартовом столе
     if (elapsed < -300) {
-        document.getElementById('event-text').textContent = 'ГОТОВИТСЯ К ЗАПУСКУ. Ракета CZ-5B на стартовом столе №1 космодрома Вэньчан.';
+        document.getElementById('event-text').textContent = 'ГОТОВИТСЯ К ЗАПУСКУ. Ракета CZ-5B на стартовом столе №1 космодрома Вэньчан. Проводятся предстартовые проверки.';
         document.getElementById('stage-name').textContent = 'Ожидание';
         document.getElementById('alt').textContent = '0'; document.getElementById('vel').textContent = '0'; document.getElementById('dist').textContent = '0';
-        document.getElementById('objects-list').innerHTML = '<div class="object-row"><span class="name">🔵 Центральный блок</span><span class="status status-waiting">Ожидание</span></div><div class="object-row"><span class="name">🟡 Ускорители (4)</span><span class="status status-waiting">Ожидание</span></div><div class="object-row"><span class="name">⚪ Обтекатель</span><span class="status status-waiting">Ожидание</span></div><div class="object-row"><span class="name">🟣 Блок выведения</span><span class="status status-waiting">Ожидание</span></div><div class="object-row"><span class="name">🛰️ 12 спутников CEOS</span><span class="status status-waiting">Ожидание</span></div>';
+        rocketGroup.position.copy(padPos);
+        rocketGroup.visible = true;
+        flame.visible = false;
+        fairing.userData.separated = false;
+        upperStage.userData.separated = false;
+        boosters.forEach(b=>b.userData.separated=false);
+        if (!rocketGroup.children.includes(fairing)) rocketGroup.add(fairing);
+        if (!rocketGroup.children.includes(upperStage)) rocketGroup.add(upperStage);
+        boosters.forEach(b=>{if(!rocketGroup.children.includes(b))rocketGroup.add(b);});
+        document.getElementById('objects-list').innerHTML = `
+            <div class="object-row"><span class="name">🔵 Центральный блок</span><span class="status status-waiting">Ожидание</span></div>
+            <div class="object-row"><span class="name">🟡 Ускорители (4)</span><span class="status status-waiting">Ожидание</span></div>
+            <div class="object-row"><span class="name">⚪ Обтекатель</span><span class="status status-waiting">Ожидание</span></div>
+            <div class="object-row"><span class="name">🟣 Блок выведения</span><span class="status status-waiting">Ожидание</span></div>
+            <div class="object-row"><span class="name">🛰️ 12 спутников</span><span class="status status-waiting">Ожидание</span></div>`;
+        controls.target.set(padPos.x, padPos.y, padPos.z);
         return;
     }
-    
+
     let cur = events[0], nxt = events[1]||events[0];
-    for (let i=0;i<events.length;i++) { if(events[i].t<=elapsed){cur=events[i];nxt=events[i+1]||events[i];} }
+    for (let i=0;i<events.length;i++){if(events[i].t<=elapsed){cur=events[i];nxt=events[i+1]||events[i];}}
     document.getElementById('event-text').textContent = cur.text;
     document.getElementById('stage-name').textContent = cur.stage;
+
     let alt=cur.alt, vel=cur.vel;
-    if(cur!==nxt && elapsed>cur.t && elapsed<nxt.t){const p=(elapsed-cur.t)/(nxt.t-cur.t); alt=cur.alt+(nxt.alt-cur.alt)*p; vel=cur.vel+(nxt.vel-cur.vel)*p;}
+    if(cur!==nxt && elapsed>cur.t && elapsed<nxt.t){const p=(elapsed-cur.t)/(nxt.t-cur.t);alt=cur.alt+(nxt.alt-cur.alt)*p;vel=cur.vel+(nxt.vel-cur.vel)*p;}
     document.getElementById('alt').textContent = alt.toFixed(1);
     document.getElementById('vel').textContent = vel.toFixed(2);
     document.getElementById('dist').textContent = (alt*1.5).toFixed(0);
-    
-    if(elapsed>0 && elapsed<600){
-        rocketGroup.position.copy(wenchangPos.clone().add(new THREE.Vector3(0,1,0.3).normalize().multiplyScalar(alt*100)));
+
+    // Ракета летит
+    if (elapsed > -300 && elapsed < 600) {
+        const scaleAlt = alt * 0.1; // масштаб: 1 км = 0.1 ед сцены
+        const dir = new THREE.Vector3(0, 1, 0.25).normalize();
+        const pos = padPos.clone().add(dir.clone().multiplyScalar(scaleAlt));
+        rocketGroup.position.copy(pos);
+        rocketGroup.visible = true;
         rocketGroup.lookAt(new THREE.Vector3(0,0,0));
-        trajectoryPoints.push(rocketGroup.position.clone());
+        trajectoryPoints.push(pos.clone());
         if(trajectoryPoints.length>500)trajectoryPoints.shift();
         trajectoryLine.geometry.dispose();
         trajectoryLine.geometry = new THREE.BufferGeometry().setFromPoints(trajectoryPoints);
     }
-    flame.visible = elapsed>0 && elapsed<510;
-    
+
+    flame.visible = elapsed > -5 && elapsed < 510;
+
     if(elapsed>=165 && !boosters[0].userData.separated) boosters.forEach(b=>{b.userData.separated=true;rocketGroup.remove(b);});
     if(elapsed>=260 && !fairing.userData.separated){fairing.userData.separated=true;rocketGroup.remove(fairing);}
     if(elapsed>=540 && !upperStage.userData.separated){upperStage.userData.separated=true;rocketGroup.remove(upperStage);}
-    
+
     let html='';
     const cs=elapsed>540?'status-orbiting':(elapsed>510?'status-separated':'status-active');
     html+=`<div class="object-row"><span class="name">🔵 Центральный блок</span><span class="status ${cs}">${elapsed>540?'На орбите':(elapsed>510?'Выключен':'Активен')}</span></div>`;
@@ -196,7 +289,8 @@ function update() {
     html+=`<div class="object-row"><span class="name">🟣 Блок выведения</span><span class="status ${upperStage.userData.separated?'status-orbiting':'status-active'}">${upperStage.userData.separated?'На орбите':'Активен'}</span></div>`;
     html+=`<div class="object-row"><span class="name">🛰️ 12 спутников</span><span class="status ${elapsed>5400?'status-orbiting':'status-waiting'}">${elapsed>5400?'На орбите':'Ожидание'}</span></div>`;
     document.getElementById('objects-list').innerHTML = html;
-    controls.target.lerp(rocketGroup.position, 0.05);
+
+    if (elapsed > -300 && elapsed < 600) controls.target.lerp(rocketGroup.position, 0.05);
 }
 
 function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
