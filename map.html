@@ -146,4 +146,58 @@ moon.add(moonLbl);
 // Кольцо Сатурна
 const saturnMesh = planetMeshes.find(m=>m.userData.name==='Сатурн');
 if (saturnMesh) {
-    const satRing = new THREE.Mesh(new THREE.TorusGeometry(6,0.6,16,100), new THREE.MeshBasicMaterial({color:0xff
+    const satRing = new THREE.Mesh(new THREE.TorusGeometry(6,0.6,16,100), new THREE.MeshBasicMaterial({color:0xffdd88,transparent:true,opacity:0.4,side:THREE.DoubleSide}));
+    saturnMesh.add(satRing);
+    satRing.rotation.x = Math.PI/2.2;
+}
+
+// Клик
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+container.addEventListener('click',e=>{
+    mouse.x = (e.clientX/container.clientWidth)*2-1;
+    mouse.y = -(e.clientY/container.clientHeight)*2+1;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(planetMeshes);
+    if(hits.length>0){
+        const obj = hits[0].object;
+        document.getElementById('info-content').innerHTML = `<h3>${obj.userData.name||'Объект'}</h3><p>${obj.userData.desc||''}</p><p>Период: ${obj.userData.period?obj.userData.period+' дней':'Н/Д'}</p>`;
+        document.getElementById('info-popup').style.display = 'block';
+    }
+});
+
+function animate() {
+    requestAnimationFrame(animate);
+    const day = getDay();
+    
+    planetMeshes.forEach(mesh => {
+        const p = mesh.userData;
+        if (p.parentMesh) {
+            const parent = p.parentMesh;
+            const a = (day / p.period) * Math.PI * 2;
+            mesh.position.set(
+                parent.position.x + Math.cos(a)*p.orbit,
+                0,
+                parent.position.z + Math.sin(a)*p.orbit
+            );
+        } else if (p.orbit && p.period) {
+            const a = (day / p.period) * Math.PI * 2;
+            mesh.position.set(Math.cos(a)*p.orbit, 0, Math.sin(a)*p.orbit);
+            mesh.rotation.y += 0.001;
+        }
+    });
+    
+    controls.update();
+    renderer.render(scene, camera);
+    labelRenderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{
+    camera.aspect = container.clientWidth/container.clientHeight; camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    labelRenderer.setSize(container.clientWidth, container.clientHeight);
+});
+</script>
+</body>
+</html>
