@@ -6,68 +6,92 @@
     <title>Карта системы — China Space Live</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #000; height: 100vh; overflow: hidden; }
-        #container { width: 100%; height: 100%; }
-        .topbar {
+        body { background: #000; height: 100vh; overflow: hidden; font-family: 'Courier New', monospace; }
+        #viewport { width: 100%; height: 100%; }
+        #info-panel {
             position: absolute;
-            top: 0; left: 0; right: 0;
-            background: rgba(8,8,22,0.9);
-            padding: 10px 20px;
-            z-index: 10;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #1a1a3a;
-        }
-        .topbar a { color: #ccc; text-decoration: none; font-weight: bold; font-size: 14px; }
-        .topbar .brand { color: #cc0000; }
-        .info-panel {
-            position: absolute;
-            bottom: 20px;
+            top: 20px;
             right: 20px;
-            background: rgba(8,8,22,0.95);
-            border: 1px solid #1a1a3a;
-            border-radius: 8px;
-            padding: 15px;
+            background: rgba(10,10,20,0.9);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 20px;
             color: #e0e0e0;
-            max-width: 300px;
+            max-width: 350px;
             display: none;
             z-index: 10;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
         }
-        .info-panel h3 { color: #ffcc00; margin-bottom: 8px; }
-        .info-panel p { margin: 3px 0; color: #aaa; }
-        .legend {
+        #info-panel h3 { color: #cc0000; margin-bottom: 10px; }
+        #info-panel p { margin: 5px 0; font-size: 13px; color: #ccc; }
+        #info-panel .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            cursor: pointer;
+            color: #888;
+            font-size: 18px;
+        }
+        #controls {
             position: absolute;
             bottom: 20px;
             left: 20px;
-            background: rgba(8,8,22,0.9);
-            border: 1px solid #1a1a3a;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        #controls button {
+            background: rgba(10,10,20,0.8);
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        #controls button:hover { border-color: #cc0000; color: #fff; }
+        #legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(10,10,20,0.8);
+            border: 1px solid #333;
             border-radius: 8px;
             padding: 12px;
             color: #888;
             font-size: 11px;
             z-index: 10;
-            font-family: 'Courier New', monospace;
         }
-        .legend span { display: block; margin: 2px 0; }
-        .legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+        #legend span { display: block; margin: 3px 0; }
+        #legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #888;
+            text-decoration: none;
+            font-size: 13px;
+            z-index: 10;
+        }
+        .back-link:hover { color: #fff; }
     </style>
 </head>
 <body>
-<div id="container"></div>
-<div class="topbar">
-    <span class="brand">🌌 КАРТА СИСТЕМЫ</span>
-    <a href="../index.html">← На главную</a>
+<a href="../index.html" class="back-link">← На главную</a>
+<div id="viewport"></div>
+<div id="info-panel">
+    <span class="close" onclick="document.getElementById('info-panel').style.display='none'">✕</span>
+    <div id="info-content"></div>
 </div>
-<div class="info-panel" id="info-panel"></div>
-<div class="legend">
-    <span><span class="dot" style="background:#ff4444;"></span> Аппараты КНР</span>
-    <span><span class="dot" style="background:#ffcc00;"></span> Орбитальные станции</span>
-    <span><span class="dot" style="background:#00aaff;"></span> Лунные миссии</span>
-    <span><span class="dot" style="background:#ff8800;"></span> Марсианские миссии</span>
-    <span>Масштаб: 1:1 000 000 (1 ед = 1000 км)</span>
+<div id="controls">
+    <button onclick="focusEarth()">🌍 Земля</button>
+    <button onclick="focusMoon()">🌙 Луна</button>
+    <button onclick="focusMars()">🔴 Марс</button>
+    <button onclick="focusAll()">🌌 Вся система</button>
+</div>
+<div id="legend">
+    <span><span class="dot" style="background:#ffcc00;"></span> Китайский аппарат</span>
+    <span><span class="dot" style="background:#00aaff;"></span> Планета / Луна</span>
+    <span><span class="dot" style="background:#ff4400;"></span> Солнце</span>
 </div>
 
 <script type="importmap">
@@ -78,148 +102,232 @@
     }
 }
 </script>
+
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-const container = document.getElementById('container');
+const container = document.getElementById('viewport');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000011);
 
-const camera = new THREE.PerspectiveCamera(50, container.clientWidth/container.clientHeight, 1, 1000000);
-camera.position.set(0, 500, 1200);
+const camera = new THREE.PerspectiveCamera(50, container.clientWidth/container.clientHeight, 0.01, 500000);
+camera.position.set(0, 300, 500);
+camera.lookAt(0, 0, 0);
 
-const renderer = new THREE.WebGLRenderer({antialias: true});
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(container.clientWidth, container.clientHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 container.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
-controls.minDistance = 50;
-controls.maxDistance = 600000; // за Плутоном
+controls.minDistance = 0.5;
+controls.maxDistance = 120000; // За Плутоном
 controls.target.set(0, 0, 0);
-controls.update();
 
 // Звёзды
 const starsGeo = new THREE.BufferGeometry();
 const starsVerts = [];
-for (let i = 0; i < 10000; i++) {
-    const r = 100000 + Math.random() * 400000;
-    const th = Math.random() * Math.PI * 2;
-    const ph = Math.acos(2 * Math.random() - 1);
-    starsVerts.push(r*Math.sin(ph)*Math.cos(th), r*Math.sin(ph)*Math.sin(th), r*Math.cos(ph));
+for (let i = 0; i < 5000; i++) {
+    const r = 100000;
+    starsVerts.push((Math.random()-0.5)*2*r, (Math.random()-0.5)*2*r, (Math.random()-0.5)*2*r);
 }
 starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(starsVerts, 3));
-scene.add(new THREE.Points(starsGeo, new THREE.PointsMaterial({color:0xffffff, size:20})));
-
-// Солнце
-const sunGeo = new THREE.SphereGeometry(200, 64, 64);
-const sun = new THREE.Mesh(sunGeo, new THREE.MeshBasicMaterial({color:0xffdd44}));
-scene.add(sun);
+scene.add(new THREE.Points(starsGeo, new THREE.PointsMaterial({color:0xffffff, size: 5})));
 
 // Освещение
-const sunLight = new THREE.DirectionalLight(0xffffff, 2);
+const sunLight = new THREE.PointLight(0xffffff, 2, 0, 0);
 sunLight.position.set(0, 0, 0);
 scene.add(sunLight);
-scene.add(new THREE.AmbientLight(0x111133, 0.4));
+scene.add(new THREE.AmbientLight(0x111133, 0.3));
 
-// Планеты (масштаб 1:1000 км)
+// Солнце
+const sunGeo = new THREE.SphereGeometry(6.96, 32, 32);
+const sunMat = new THREE.MeshBasicMaterial({ color: 0xffcc00 });
+const sun = new THREE.Mesh(sunGeo, sunMat);
+scene.add(sun);
+
+// Планетные данные
 const planets = [
-    { name: 'Меркурий', dist: 57910, r: 24.4, color: 0xaaaaaa },
-    { name: 'Венера', dist: 108200, r: 60.5, color: 0xccaa44 },
-    { name: 'Земля', dist: 149600, r: 63.7, color: 0x4488ff, texture: 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg' },
-    { name: 'Марс', dist: 227940, r: 33.9, color: 0xcc4400 },
-    { name: 'Юпитер', dist: 778570, r: 699, color: 0xddaa77 },
-    { name: 'Сатурн', dist: 1433500, r: 582, color: 0xddcc88 },
-    { name: 'Уран', dist: 2872500, r: 254, color: 0x88ccdd },
-    { name: 'Нептун', dist: 4495100, r: 246, color: 0x2244cc },
-    { name: 'Плутон', dist: 5906400, r: 12, color: 0x886644 }
+    { name: 'Меркурий', a: 57.9, e: 0.2056, i: 7.0, L: 252.3, w: 29.1, O: 48.3, color: 0xaaaaaa, size: 0.244 },
+    { name: 'Венера', a: 108.2, e: 0.0068, i: 3.4, L: 182.0, w: 55.2, O: 76.7, color: 0xffcc88, size: 0.605 },
+    { name: 'Земля', a: 149.6, e: 0.0167, i: 0.0, L: 100.5, w: 102.9, O: 0.0, color: 0x4488ff, size: 0.637 },
+    { name: 'Марс', a: 227.9, e: 0.0934, i: 1.85, L: 355.5, w: 286.5, O: 49.6, color: 0xff4400, size: 0.339 },
+    { name: 'Юпитер', a: 778.6, e: 0.0484, i: 1.3, L: 34.4, w: 275.1, O: 100.5, color: 0xddaa77, size: 6.99 },
+    { name: 'Сатурн', a: 1433.5, e: 0.0539, i: 2.5, L: 50.1, w: 336.0, O: 113.7, color: 0xeeddbb, size: 5.82 },
+    { name: 'Уран', a: 2872.5, e: 0.0473, i: 0.8, L: 314.1, w: 96.5, O: 74.0, color: 0xaaddff, size: 2.54 },
+    { name: 'Нептун', a: 4495.1, e: 0.0086, i: 1.8, L: 304.3, w: 265.6, O: 131.7, color: 0x4466ff, size: 2.46 },
+    { name: 'Плутон', a: 5906.4, e: 0.2488, i: 17.2, L: 238.9, w: 113.8, O: 110.3, color: 0xcccccc, size: 0.119 }
 ];
 
 const planetMeshes = [];
+const now = new Date();
+const JD = (now.getTime() / 86400000) + 2440587.5;
+const T = (JD - 2451545.0) / 36525;
+
 planets.forEach(p => {
-    let mat;
-    if (p.texture) {
-        const tex = new THREE.TextureLoader().load(p.texture);
-        mat = new THREE.MeshPhongMaterial({map: tex});
-    } else {
-        mat = new THREE.MeshPhongMaterial({color: p.color});
-    }
-    const mesh = new THREE.Mesh(new THREE.SphereGeometry(p.r, 32, 32), mat);
-    mesh.position.set(p.dist, 0, 0);
-    mesh.userData = { name: p.name, type: 'Планета' };
+    const M = (p.L - p.w - p.O + 360000) % 360;
+    const n = 360 / (p.a === 0.387 ? 87.97 : p.a === 0.723 ? 224.7 : p.a === 1.0 ? 365.25 : p.a === 1.524 ? 687.0 : 4333);
+    const MA = (M + n * (JD - 2451545.0)) % 360;
+    const MAr = MA * Math.PI / 180;
+    let E = MAr;
+    for (let j = 0; j < 10; j++) E = MAr + p.e * Math.sin(E);
+    const xOrb = p.a * (Math.cos(E) - p.e);
+    const yOrb = p.a * Math.sqrt(1 - p.e*p.e) * Math.sin(E);
+    const dist = Math.sqrt(xOrb*xOrb + yOrb*yOrb);
+    const trueAnom = Math.atan2(yOrb, xOrb);
+    const wR = p.w * Math.PI/180;
+    const OR = p.O * Math.PI/180;
+    const iR = p.i * Math.PI/180;
+    const x = dist * (Math.cos(OR)*Math.cos(trueAnom+wR) - Math.sin(OR)*Math.sin(trueAnom+wR)*Math.cos(iR));
+    const z = dist * Math.sin(trueAnom+wR)*Math.sin(iR);
+    const y = dist * (Math.sin(OR)*Math.cos(trueAnom+wR) + Math.cos(OR)*Math.sin(trueAnom+wR)*Math.cos(iR));
+    
+    const geo = new THREE.SphereGeometry(p.size * 10, 32, 32);
+    const mat = new THREE.MeshPhongMaterial({ color: p.color, emissive: p.color, emissiveIntensity: 0.1 });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(x * 10, z * 10, y * 10);
+    mesh.userData = { name: p.name, type: 'planet' };
     scene.add(mesh);
     planetMeshes.push(mesh);
     
-    // Орбитальное кольцо
-    const ringGeo = new THREE.TorusGeometry(p.dist, 5, 8, 128);
-    const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({color: 0x222244, transparent: true, opacity: 0.3}));
-    ring.rotation.x = Math.PI/2;
-    scene.add(ring);
+    // Орбита
+    const orbitPts = [];
+    for (let a = 0; a <= 360; a += 5) {
+        const ar = a * Math.PI/180;
+        const ox = p.a * Math.cos(ar) * 10;
+        const oy = p.a * Math.sin(ar) * Math.sqrt(1-p.e*p.e) * 10;
+        const od = Math.sqrt(ox*ox + oy*oy);
+        const ota = Math.atan2(oy, ox);
+        orbitPts.push(new THREE.Vector3(
+            od*(Math.cos(OR)*Math.cos(ota+wR)-Math.sin(OR)*Math.sin(ota+wR)*Math.cos(iR)),
+            od*Math.sin(ota+wR)*Math.sin(iR),
+            od*(Math.sin(OR)*Math.cos(ota+wR)+Math.cos(OR)*Math.sin(ota+wR)*Math.cos(iR))
+        ));
+    }
+    const orbitLine = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(orbitPts),
+        new THREE.LineBasicMaterial({ color: 0x333355, transparent: true, opacity: 0.3 })
+    );
+    scene.add(orbitLine);
 });
+
+// Луна
+const earthMesh = planetMeshes.find(m => m.userData.name === 'Земля');
+const moonGeo = new THREE.SphereGeometry(0.173 * 10, 16, 16);
+const moonMat = new THREE.MeshPhongMaterial({ color: 0xcccccc });
+const moon = new THREE.Mesh(moonGeo, moonMat);
+const moonOrbitRadius = 3.84; // 384 400 км = 3.84 в масштабе (x10 = 38.4)
+const moonPhase = (JD % 27.3) / 27.3 * Math.PI * 2;
+moon.position.copy(earthMesh.position).add(new THREE.Vector3(Math.cos(moonPhase)*38.4, 0, Math.sin(moonPhase)*38.4));
+moon.userData = { name: 'Луна', type: 'moon' };
+scene.add(moon);
 
 // Китайские аппараты
-const chineseAssets = [
-    { name: 'Тяньгун', orbit: 6771, incl: 41.5, color: 0xffcc00, type: 'Орбитальная станция', launch: '2021' },
-    { name: 'CEOS-01', orbit: 6871, incl: 97.4, color: 0xff4444, type: 'Спутник CEOS', launch: '07.07.2026' },
-    { name: 'Цюэцяо-3', body: 'moon', color: 0x00aaff, type: 'Ретранслятор Луны', launch: '25.07.2026' },
-    { name: 'Чанъэ-8', body: 'moon', color: 0x00aaff, type: 'Посадочный модуль', launch: '27.09.2026' }
+const craft = [
+    { name: 'Тяньгун', body: 'earth', orbitAlt: 390, color: 0xffcc00, size: 0.3 },
+    { name: 'Тяньцзин (склад)', body: 'earth', orbitAlt: 350, color: 0xffcc00, size: 0.25 },
+    { name: 'CEOS-01', body: 'earth', orbitAlt: 500, color: 0xffcc00, size: 0.15 },
+    { name: 'CEOS-12', body: 'earth', orbitAlt: 500, color: 0xff8800, size: 0.15 },
+    { name: 'Цюэцяо-3', body: 'moon', orbitAlt: 650, color: 0xffcc00, size: 0.2 },
+    { name: 'Хэнъэ Гун (Луна)', body: 'moon', surface: true, lat: -89.9, lon: 0, color: 0xff4444, size: 0.3 },
+    { name: 'Чанъэ-8', body: 'moon', surface: true, lat: -89.9, lon: 2, color: 0xffcc00, size: 0.2 },
+    { name: 'Цюэцяо-4', body: 'mars', orbitAlt: 500, color: 0xffcc00, size: 0.2 }
 ];
 
-const assetMarkers = [];
-chineseAssets.forEach(a => {
-    const marker = new THREE.Mesh(new THREE.SphereGeometry(15, 8, 8), new THREE.MeshBasicMaterial({color: a.color}));
-    if (a.body === 'moon') {
-        marker.position.copy(moonMesh.position).add(new THREE.Vector3(20, 0, 0));
-    } else {
-        marker.position.set(a.orbit, 0, 0);
-    }
-    marker.userData = a;
-    scene.add(marker);
-    assetMarkers.push(marker);
+const craftMeshes = [];
+craft.forEach(c => {
+    const geo = new THREE.SphereGeometry(c.size, 8, 8);
+    const mat = new THREE.MeshBasicMaterial({ color: c.color });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.userData = { name: c.name, type: 'craft', craftData: c };
+    scene.add(mesh);
+    craftMeshes.push(mesh);
 });
 
-const moonMesh = planetMeshes.find(p => p.userData.name === 'Земля') ? 
-    (() => {
-        const mGeo = new THREE.SphereGeometry(17.37, 32, 32);
-        const mMesh = new THREE.Mesh(mGeo, new THREE.MeshPhongMaterial({color: 0xcccccc}));
-        mMesh.position.set(149600 + 384, 0, 0);
-        mMesh.userData = { name: 'Луна', type: 'Спутник' };
-        scene.add(mMesh);
-        return mMesh;
-    })() : null;
-
-// Клики
+// Клик по объекту
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 renderer.domElement.addEventListener('click', (e) => {
-    mouse.x = (e.clientX / container.clientWidth) * 2 - 1;
-    mouse.y = -(e.clientY / container.clientHeight) * 2 + 1;
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects([...planetMeshes, ...assetMarkers, moonMesh].filter(Boolean));
-    const panel = document.getElementById('info-panel');
-    if (intersects.length > 0 && intersects[0].object.userData) {
-        const d = intersects[0].object.userData;
+    const intersects = raycaster.intersectObjects([...planetMeshes, moon, ...craftMeshes]);
+    if (intersects.length > 0) {
+        const obj = intersects[0].object;
+        const panel = document.getElementById('info-panel');
+        const content = document.getElementById('info-content');
+        const d = obj.userData;
+        let html = `<h3>${d.name}</h3><p>Тип: ${d.type === 'planet' ? 'Планета' : d.type === 'moon' ? 'Спутник' : 'Космический аппарат КНР'}</p>`;
+        if (d.craftData) {
+            html += `<p>Орбита: ${d.craftData.body}</p>`;
+            if (d.craftData.surface) html += `<p>На поверхности (${d.craftData.lat}°, ${d.craftData.lon}°)</p>`;
+            else html += `<p>Высота орбиты: ${d.craftData.orbitAlt} км</p>`;
+        }
+        if (d.name === 'Земля') html += `<p>Расстояние от Солнца: ${planets[2].a} млн км</p>`;
+        if (d.name === 'Марс') html += `<p>Расстояние от Солнца: ${planets[3].a} млн км</p>`;
+        content.innerHTML = html;
         panel.style.display = 'block';
-        panel.innerHTML = `<h3>${d.name}</h3><p>Тип: ${d.type || '—'}</p><p>Запуск: ${d.launch || '—'}</p><p>Орбита: ${d.orbit ? d.orbit + ' км' : '—'}</p>`;
-    } else {
-        panel.style.display = 'none';
     }
 });
 
+function updateCraftPositions() {
+    const now2 = Date.now();
+    craftMeshes.forEach(mesh => {
+        const c = mesh.userData.craftData;
+        if (!c) return;
+        let center;
+        if (c.body === 'earth') center = earthMesh.position;
+        else if (c.body === 'moon') center = moon.position;
+        else if (c.body === 'mars') {
+            const marsMesh = planetMeshes.find(p => p.userData.name === 'Марс');
+            center = marsMesh ? marsMesh.position : new THREE.Vector3();
+        } else return;
+        
+        if (c.surface) {
+            const phi = (90 - c.lat) * Math.PI/180;
+            const theta = c.lon * Math.PI/180;
+            const r = c.body === 'moon' ? 1.737 * 10 : 3.39 * 10;
+            mesh.position.copy(center).add(new THREE.Vector3(
+                r * Math.sin(phi) * Math.cos(theta),
+                r * Math.cos(phi),
+                r * Math.sin(phi) * Math.sin(theta)
+            ));
+        } else {
+            const alt = c.orbitAlt / 100; // масштабирование
+            const angle = (now2 / 10000 + (c.name.charCodeAt(0) || 0)) % (Math.PI*2);
+            mesh.position.copy(center).add(new THREE.Vector3(Math.cos(angle)*(63.71+alt)*10, 0, Math.sin(angle)*(63.71+alt)*10));
+        }
+    });
+}
+
+// Функции фокуса
+window.focusEarth = () => {
+    controls.target.copy(earthMesh.position);
+    camera.position.copy(earthMesh.position).add(new THREE.Vector3(50, 50, 50));
+};
+window.focusMoon = () => {
+    controls.target.copy(moon.position);
+    camera.position.copy(moon.position).add(new THREE.Vector3(10, 10, 10));
+};
+window.focusMars = () => {
+    const marsMesh = planetMeshes.find(p => p.userData.name === 'Марс');
+    if (marsMesh) {
+        controls.target.copy(marsMesh.position);
+        camera.position.copy(marsMesh.position).add(new THREE.Vector3(30, 30, 30));
+    }
+};
+window.focusAll = () => {
+    controls.target.set(0, 0, 0);
+    camera.position.set(0, 300, 500);
+};
+
 function animate() {
     requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-}
-animate();
-
-window.addEventListener('resize', () => {
-    camera.aspect = container.clientWidth / container.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, container.clientHeight);
-});
-</script>
-</body>
-</html>
+    updateCraftPositions();
+    
+    // Вращаем Луну вокруг Земли
+    const moonAngle = (JD + performance.now()/86400000) % 27.3 / 27.3 * Math.PI * 2;
+    moon.position.copy(earthMesh.position).add(new THREE.Vector3(Math.cos(moonAngle)*38.4
