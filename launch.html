@@ -18,17 +18,9 @@
             overflow: hidden;
             display: flex;
         }
-
-        /* 3D-вьюпорт */
-        #viewport {
-            flex: 1;
-            position: relative;
-            cursor: grab;
-        }
+        #viewport { flex: 1; position: relative; cursor: grab; }
         #viewport:active { cursor: grabbing; }
         #viewport canvas { display: block; }
-
-        /* Правая панель */
         #panel {
             width: 420px;
             background: var(--bg);
@@ -53,19 +45,16 @@
             border-radius: 20px;
             font-size: 12px;
         }
-
-        /* Таймер */
         .timer-big {
-            font-size: 42px;
+            font-size: clamp(28px,4vw,42px);
             font-weight: bold;
             color: var(--gold);
             text-align: center;
             padding: 15px;
             font-family: 'Courier New', monospace;
             letter-spacing: 2px;
+            white-space: nowrap;
         }
-
-        /* Текущее событие */
         .current-event {
             margin: 10px 15px;
             padding: 15px;
@@ -74,9 +63,8 @@
             border-radius: 0 8px 8px 0;
             font-size: 15px;
             line-height: 1.5;
+            min-height: 60px;
         }
-
-        /* Телеметрия */
         .telemetry-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -104,8 +92,6 @@
             letter-spacing: 1px;
             margin-top: 2px;
         }
-
-        /* Дочерние объекты */
         .objects-section {
             padding: 0 15px;
             margin: 10px 0;
@@ -139,26 +125,8 @@
         .status-burning { background: #440000; color: #ff4444; }
         .status-splash { background: #004466; color: #00aaff; }
         .status-orbiting { background: #440044; color: #ff00ff; }
-
-        /* Легенда */
-        .legend {
-            padding: 0 15px;
-            margin: 10px 0;
-            font-size: 11px;
-            color: var(--muted);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .legend span { display: flex; align-items: center; gap: 4px; }
-        .legend .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-
-        /* Кнопки */
-        .btn-row {
-            display: flex;
-            gap: 10px;
-            padding: 15px;
-        }
+        .status-waiting { background: #222244; color: #8888cc; }
+        .btn-row { display: flex; gap: 10px; padding: 15px; }
         .btn {
             flex: 1;
             padding: 10px;
@@ -170,8 +138,6 @@
         }
         .btn-map { background: var(--red); color: #fff; }
         .btn-back { background: transparent; color: var(--muted); border: 1px solid #333; }
-
-        /* Адаптив */
         @media (max-width: 900px) {
             body { flex-direction: column; }
             #viewport { height: 50vh; }
@@ -180,21 +146,14 @@
     </style>
 </head>
 <body>
-
-<!-- 3D-вьюпорт -->
 <div id="viewport"></div>
-
-<!-- Правая панель -->
 <div id="panel">
     <div class="header">
         <span class="rocket-tag" id="rocket-badge">CZ-5B</span>
         <h2 id="mission-title">Загрузка...</h2>
     </div>
-
     <div class="timer-big" id="timer">T-00:00:00:00</div>
-
     <div class="current-event" id="event-text">Загрузка...</div>
-
     <div class="telemetry-grid">
         <div class="telem-card"><div class="val" id="alt">0</div><div class="lbl">Высота (км)</div></div>
         <div class="telem-card"><div class="val" id="vel">0</div><div class="lbl">Скорость (км/с)</div></div>
@@ -203,27 +162,16 @@
         <div class="telem-card"><div class="val" id="stage-name">—</div><div class="lbl">Этап</div></div>
         <div class="telem-card"><div class="val" id="downrange">0</div><div class="lbl">Дальность (км)</div></div>
     </div>
-
     <div class="objects-section">
         <h3>📦 Компоненты</h3>
         <div id="objects-list"></div>
     </div>
-
-    <div class="legend">
-        <span><span class="dot" style="background:#00ff00;"></span> Активен</span>
-        <span><span class="dot" style="background:#ffcc00;"></span> Отделён</span>
-        <span><span class="dot" style="background:#ff4444;"></span> Горит</span>
-        <span><span class="dot" style="background:#00aaff;"></span> Приводнился</span>
-        <span><span class="dot" style="background:#ff00ff;"></span> На орбите</span>
-    </div>
-
     <div class="btn-row">
         <a href="map/" class="btn btn-map">🌌 Карта системы</a>
         <a href="index.html" class="btn btn-back">← На главную</a>
     </div>
 </div>
 
-<!-- Three.js -->
 <script type="importmap">
 {
     "imports": {
@@ -232,154 +180,93 @@
     }
 }
 </script>
-
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// ========== СЦЕНА ==========
 const container = document.getElementById('viewport');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000011);
 
-const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 50000);
-camera.position.set(0, 100, 300);
+const camera = new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight, 0.1, 500000);
+camera.position.set(0, 200, 400);
 camera.lookAt(0, 0, 0);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize(container.clientWidth, container.clientHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
 container.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.dampingFactor = 0.05;
-controls.minDistance = 10;
-controls.maxDistance = 50000;
+controls.dampingFactor = 0.08;
+controls.minDistance = 5;
+controls.maxDistance = 600000; // за Плутоном
 controls.target.set(0, 0, 0);
+controls.update();
 
 // Звёзды
 const starsGeo = new THREE.BufferGeometry();
 const starsVerts = [];
-for (let i = 0; i < 3000; i++) {
-    const r = 10000;
+for (let i = 0; i < 5000; i++) {
+    const r = 50000 + Math.random() * 200000;
     const th = Math.random() * Math.PI * 2;
-    const ph = Math.random() * Math.PI;
-    starsVerts.push(r * Math.sin(ph) * Math.cos(th), r * Math.sin(ph) * Math.sin(th), r * Math.cos(ph));
+    const ph = Math.acos(2 * Math.random() - 1);
+    starsVerts.push(r*Math.sin(ph)*Math.cos(th), r*Math.sin(ph)*Math.sin(th), r*Math.cos(ph));
 }
 starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(starsVerts, 3));
-const stars = new THREE.Points(starsGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 2 }));
-scene.add(stars);
+scene.add(new THREE.Points(starsGeo, new THREE.PointsMaterial({color:0xffffff, size:5})));
+
+// Солнце
+const sunGeo = new THREE.SphereGeometry(100, 32, 32);
+const sunMat = new THREE.MeshBasicMaterial({color: 0xffdd44});
+const sun = new THREE.Mesh(sunGeo, sunMat);
+sun.position.set(0, 0, -15000000);
+scene.add(sun);
+
+// Земля
+const earthTex = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+const earthGeo = new THREE.SphereGeometry(63.71, 64, 64);
+const earthMesh = new THREE.Mesh(earthGeo, new THREE.MeshPhongMaterial({map: earthTex}));
+scene.add(earthMesh);
+
+// Луна
+const moonGeo = new THREE.SphereGeometry(17.37, 32, 32);
+const moonMesh = new THREE.Mesh(moonGeo, new THREE.MeshPhongMaterial({color: 0xcccccc}));
+moonMesh.position.set(3844, 0, 0); // 384 400 км → 3844 в масштабе 1:100
+scene.add(moonMesh);
 
 // Освещение
-const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
-sunLight.position.set(500, 300, 200);
+const sunLight = new THREE.DirectionalLight(0xffffff, 2);
+sunLight.position.copy(sun.position);
 scene.add(sunLight);
 scene.add(new THREE.AmbientLight(0x222244, 0.6));
 
-// ========== ЗЕМЛЯ ==========
-const earthTex = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
-const earthGeo = new THREE.SphereGeometry(63.71, 64, 64);
-const earthMat = new THREE.MeshPhongMaterial({ map: earthTex, specular: 0x222222, shininess: 10 });
-const earth = new THREE.Mesh(earthGeo, earthMat);
-scene.add(earth);
-
-// Атмосфера
-const atmoGeo = new THREE.SphereGeometry(64.5, 64, 64);
-const atmoMat = new THREE.MeshPhongMaterial({ color: 0x4488ff, transparent: true, opacity: 0.15, side: THREE.FrontSide });
-const atmosphere = new THREE.Mesh(atmoGeo, atmoMat);
-scene.add(atmosphere);
-
-// ========== КОСМОДРОМ ВЭНЬЧАН (19.6°N, 110.9°E) ==========
-function latLonToVec3(lat, lon, radius) {
-    const phi = (90 - lat) * Math.PI / 180;
-    const theta = lon * Math.PI / 180;
-    return new THREE.Vector3(
-        radius * Math.sin(phi) * Math.cos(theta),
-        radius * Math.cos(phi),
-        radius * Math.sin(phi) * Math.sin(theta)
-    );
+// Космодром Вэньчан
+function latLonToVec3(lat, lon, r) {
+    const phi = (90-lat)*Math.PI/180;
+    const theta = lon*Math.PI/180;
+    return new THREE.Vector3(r*Math.sin(phi)*Math.cos(theta), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(theta));
 }
-
 const wenchangPos = latLonToVec3(19.6, 110.9, 63.81);
-const padGeo = new THREE.CylinderGeometry(0.5, 0.5, 1, 8);
-const padMat = new THREE.MeshPhongMaterial({ color: 0xffcc00, emissive: 0x332200 });
-const pad = new THREE.Mesh(padGeo, padMat);
-pad.position.copy(wenchangPos);
-pad.lookAt(new THREE.Vector3(0,0,0));
-pad.rotateX(Math.PI/2);
-scene.add(pad);
+const padMarker = new THREE.Mesh(
+    new THREE.SphereGeometry(1, 8, 8),
+    new THREE.MeshBasicMaterial({color: 0xffcc00})
+);
+padMarker.position.copy(wenchangPos);
+scene.add(padMarker);
 
-// ========== РАКЕТА ==========
+// Ракета
 const rocketGroup = new THREE.Group();
 scene.add(rocketGroup);
+rocketGroup.position.copy(wenchangPos);
 
-// Центральный блок
-const coreGeo = new THREE.CylinderGeometry(0.8, 0.8, 18, 16);
-const coreMat = new THREE.MeshPhongMaterial({ color: 0xffffff });
-const core = new THREE.Mesh(coreGeo, coreMat);
-core.position.y = 9;
-rocketGroup.add(core);
+// Траектория
+const trajPoints = [];
+const trajLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({color:0xffcc00, transparent:true, opacity:0.5}));
+scene.add(trajLine);
 
-// Боковые ускорители (4 шт.)
-const boosters = [];
-for (let i = 0; i < 4; i++) {
-    const booster = new THREE.Group();
-    const bGeo = new THREE.CylinderGeometry(0.45, 0.45, 10, 8);
-    const bMesh = new THREE.Mesh(bGeo, new THREE.MeshPhongMaterial({ color: 0xdddddd }));
-    bMesh.position.y = 5;
-    booster.add(bMesh);
-    const nozzleGeo = new THREE.ConeGeometry(0.4, 1.5, 8);
-    const nozzle = new THREE.Mesh(nozzleGeo, new THREE.MeshPhongMaterial({ color: 0x333333 }));
-    nozzle.position.y = -0.5;
-    booster.add(nozzle);
-    const angle = (i * Math.PI / 2) + Math.PI/4;
-    booster.position.set(Math.cos(angle)*1.4, 0.5, Math.sin(angle)*1.4);
-    booster.userData = { mesh: bMesh, angle: angle, separated: false, pos: new THREE.Vector3(), vel: new THREE.Vector3() };
-    rocketGroup.add(booster);
-    boosters.push(booster);
-}
-
-// Вторая ступень / блок выведения
-const upperStage = new THREE.Group();
-const usGeo = new THREE.CylinderGeometry(0.7, 0.7, 6, 16);
-const usMesh = new THREE.Mesh(usGeo, new THREE.MeshPhongMaterial({ color: 0xeeeeff }));
-usMesh.position.y = 3;
-upperStage.add(usMesh);
-upperStage.position.y = 21;
-upperStage.visible = true;
-upperStage.userData = { separated: false, pos: new THREE.Vector3(), vel: new THREE.Vector3() };
-rocketGroup.add(upperStage);
-
-// Обтекатель
-const fairingGeo = new THREE.ConeGeometry(0.75, 5, 16);
-const fairing = new THREE.Mesh(fairingGeo, new THREE.MeshPhongMaterial({ color: 0xcccccc, transparent: true, opacity: 0.7 }));
-fairing.position.y = 27;
-fairing.userData = { separated: false, pos: new THREE.Vector3(), vel: new THREE.Vector3() };
-rocketGroup.add(fairing);
-
-// Пламя
-const flameGeo = new THREE.ConeGeometry(0.6, 8, 8);
-const flameMat = new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.9 });
-const flame = new THREE.Mesh(flameGeo, flameMat);
-flame.position.y = -4;
-flame.rotation.x = Math.PI;
-rocketGroup.add(flame);
-
-// Отделённые объекты
-const separatedObjects = [];
-const splashMarkers = [];
-
-// ========== ТРАЕКТОРИЯ ==========
-const trajectoryPoints = [];
-const trajectoryLine = new THREE.Line(
-    new THREE.BufferGeometry(),
-    new THREE.LineBasicMaterial({ color: 0xffcc00, transparent: true, opacity: 0.4 })
-);
-scene.add(trajectoryLine);
-
-// ========== ДАННЫЕ ЗАПУСКА ==========
+// ========== ДАННЫЕ ==========
 const params = new URLSearchParams(window.location.search);
 const launchId = params.get('id') || 'ceos-1';
 
@@ -387,35 +274,34 @@ fetch('../data/launches.json?' + Date.now())
   .then(r => r.json())
   .then(data => {
     const launch = data.launches.find(l => l.id === launchId) || data.launches[0];
-    initLaunch(launch);
-  });
-
-function initLaunch(launch) {
     document.getElementById('mission-title').textContent = launch.name;
     document.getElementById('rocket-badge').textContent = launch.rocket;
     
     const startTime = new Date(launch.start_time).getTime();
     const events = launch.events;
-    
-    // Начальная позиция
-    rocketGroup.position.copy(wenchangPos);
-    
-    const objectsList = document.getElementById('objects-list');
+    let elapsed = -Infinity;
     
     function update() {
         const now = Date.now();
-        const elapsed = (now - startTime) / 1000;
+        elapsed = (now - startTime) / 1000;
         
-        // Таймер
         const abs = Math.abs(elapsed);
-        const d = Math.floor(abs / 86400);
-        const h = Math.floor((abs % 86400) / 3600);
-        const mn = Math.floor((abs % 3600) / 60);
-        const s = Math.floor(abs % 60);
-        document.getElementById('timer').textContent = (elapsed < 0 ? 'T-' : 'T+') +
-            `${d}:${String(h).padStart(2,'0')}:${String(mn).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        const d = Math.floor(abs/86400);
+        const h = Math.floor((abs%86400)/3600);
+        const mn = Math.floor((abs%3600)/60);
+        const s = Math.floor(abs%60);
+        const sign = elapsed < 0 ? 'T-' : 'T+';
+        document.getElementById('timer').textContent = `${sign}${d}:${String(h).padStart(2,'0')}:${String(mn).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
         
-        // Находим текущее событие
+        if (elapsed < 0) {
+            document.getElementById('event-text').textContent = 'ГОТОВИТСЯ. Обратный отсчёт до старта.';
+            document.getElementById('stage-name').textContent = 'Подготовка';
+            document.getElementById('alt').textContent = '0';
+            document.getElementById('vel').textContent = '0';
+            document.getElementById('objects-list').innerHTML = '<div class="object-row"><span class="name">🔵 Центральный блок</span><span class="status status-waiting">Ожидание</span></div><div class="object-row"><span class="name">🟡 Ускорители (4)</span><span class="status status-waiting">Ожидание</span></div><div class="object-row"><span class="name">⚪ Обтекатель</span><span class="status status-waiting">Установлен</span></div><div class="object-row"><span class="name">🛰️ 12 спутников CEOS</span><span class="status status-waiting">Ожидание</span></div>';
+            return;
+        }
+        
         let cur = events[0];
         let nxt = events[1];
         for (let i = 0; i < events.length; i++) {
@@ -425,7 +311,6 @@ function initLaunch(launch) {
         document.getElementById('event-text').textContent = cur.text;
         document.getElementById('stage-name').textContent = cur.stage;
         
-        // Интерполяция телеметрии
         let alt = cur.alt, vel = cur.vel;
         if (cur !== nxt && elapsed > cur.t && elapsed < nxt.t) {
             const p = (elapsed - cur.t) / (nxt.t - cur.t);
@@ -435,135 +320,68 @@ function initLaunch(launch) {
         
         document.getElementById('alt').textContent = alt.toFixed(1);
         document.getElementById('vel').textContent = vel.toFixed(2);
-        document.getElementById('acc').textContent = (vel < 1 ? (vel*10+1).toFixed(1) : '1.0');
+        document.getElementById('acc').textContent = (alt < 50 ? (1 + Math.random()*0.3).toFixed(1) : (vel < 1 ? '1.5' : '0'));
         document.getElementById('dist').textContent = (alt * 1.5).toFixed(0);
         document.getElementById('downrange').textContent = (alt * 0.8).toFixed(0);
         
         // Позиция ракеты
-        if (elapsed > 0) {
-            const totalAlt = alt * 100; // масштаб: 1 км = 100 м в сцене
+        if (elapsed > 0 && elapsed < 600) {
+            const totalAlt = alt * 100;
             const dir = new THREE.Vector3(0, 1, 0.3).normalize();
             const pos = wenchangPos.clone().add(dir.clone().multiplyScalar(totalAlt));
             rocketGroup.position.copy(pos);
             rocketGroup.lookAt(new THREE.Vector3(0,0,0));
-            
-            // Траектория
-            trajectoryPoints.push(pos.clone());
-            if (trajectoryPoints.length > 500) trajectoryPoints.shift();
-            const lineGeo = new THREE.BufferGeometry().setFromPoints(trajectoryPoints);
-            trajectoryLine.geometry.dispose();
-            trajectoryLine.geometry = lineGeo;
-            
-            // Пламя
-            flame.visible = elapsed < 510;
-            flame.scale.y = elapsed < 510 ? 1 + Math.random() * 0.5 : 0;
+        }
+        if (elapsed > 540) {
+            rocketGroup.position.set(0, 10000, 0);
+            rocketGroup.visible = false;
         }
         
-        // Отделение ускорителей (T+165)
-        if (elapsed >= 165 && !boosters[0].userData.separated) {
-            boosters.forEach(b => {
-                b.userData.separated = true;
-                b.userData.pos = b.position.clone().add(rocketGroup.position);
-                b.userData.vel = new THREE.Vector3(Math.random()-0.5, -0.5, Math.random()-0.5).normalize().multiplyScalar(5);
-                separatedObjects.push(b);
-                rocketGroup.remove(b);
-            });
-            updateObjectsList();
+        // Траектория
+        if (elapsed > 0 && elapsed < 600) {
+            trajPoints.push(rocketGroup.position.clone());
+            if (trajPoints.length > 1000) trajPoints.shift();
+            const geo = new THREE.BufferGeometry().setFromPoints(trajPoints);
+            trajLine.geometry.dispose();
+            trajLine.geometry = geo;
         }
         
-        // Сброс обтекателя (T+260)
-        if (elapsed >= 260 && !fairing.userData.separated) {
-            fairing.userData.separated = true;
-            fairing.userData.pos = fairing.position.clone().add(rocketGroup.position);
-            fairing.userData.vel = new THREE.Vector3(1, -0.3, 0).normalize().multiplyScalar(3);
-            separatedObjects.push(fairing);
-            rocketGroup.remove(fairing);
-            updateObjectsList();
-        }
-        
-        // Отделение блока выведения (T+540)
-        if (elapsed >= 540 && !upperStage.userData.separated) {
-            upperStage.userData.separated = true;
-            upperStage.userData.pos = upperStage.position.clone().add(rocketGroup.position);
-            upperStage.userData.vel = new THREE.Vector3(0, 0, 0);
-            separatedObjects.push(upperStage);
-            // Ракета останавливается, upperStage продолжает
-        }
-        
-        // Анимируем отделённые объекты
-        separatedObjects.forEach(obj => {
-            if (obj.userData.vel) {
-                obj.userData.pos.add(obj.userData.vel.clone().multiplyScalar(0.016));
-                obj.position.copy(obj.userData.pos);
-                
-                // Сгорание в атмосфере (ниже 100 км)
-                if (obj.userData.pos.length() < 63.71 + 100) {
-                    obj.userData.vel.y -= 0.01;
-                    if (obj.userData.pos.length() < 63.71) {
-                        obj.visible = false;
-                    }
-                }
-            }
-        });
-        
-        // Камера следует за ракетой
-        if (elapsed > -10 && elapsed < 600) {
+        // Камера
+        if (elapsed < 600) {
             const target = rocketGroup.position.clone();
-            controls.target.lerp(target, 0.05);
-            const camPos = target.clone().add(new THREE.Vector3(30, 20, 50));
-            camera.position.lerp(camPos, 0.02);
+            controls.target.lerp(target, 0.02);
+            const cp = target.clone().add(new THREE.Vector3(50, 30, 80));
+            camera.position.lerp(cp, 0.02);
         }
         
-        updateObjectsList();
-    }
-    
-    function updateObjectsList() {
-        let html = '';
+        // Компоненты
+        let objHtml = '';
+        const coreAlive = elapsed < 510;
+        objHtml += `<div class="object-row"><span class="name">🔵 Центральный блок</span><span class="status ${coreAlive ? 'status-active' : (elapsed < 540 ? 'status-separated' : 'status-burning')}">${coreAlive ? 'Активен' : (elapsed < 540 ? 'Выключен' : 'Сгорел')}</span></div>`;
         
-        // Центральный блок
-        const coreStatus = (elapsed > 540 && elapsed < 10800) ? 'status-orbiting' : (elapsed > 510 ? 'status-separated' : 'status-active');
-        html += `<div class="object-row"><span class="name">🔵 Центральный блок</span><span class="status ${coreStatus}">${elapsed > 540 ? 'На орбите' : (elapsed > 510 ? 'Выключен' : 'Активен')}</span></div>`;
-        
-        // Ускорители
-        boosters.forEach((b, i) => {
-            const s = b.userData.separated ? (b.visible ? 'status-burning' : 'status-splash') : 'status-active';
-            const t = b.userData.separated ? (b.visible ? 'Падает' : 'Приводнился') : 'Активен';
-            html += `<div class="object-row"><span class="name">🟡 Ускоритель ${i+1}</span><span class="status ${s}">${t}</span></div>`;
-        });
-        
-        // Обтекатель
-        const fStatus = fairing.userData.separated ? (fairing.visible ? 'status-burning' : 'status-splash') : 'status-active';
-        html += `<div class="object-row"><span class="name">⚪ Обтекатель</span><span class="status ${fStatus}">${fairing.userData.separated ? (fairing.visible ? 'Падает' : 'Сгорел') : 'Активен'}</span></div>`;
-        
-        // Верхняя ступень
-        const usStatus = upperStage.userData.separated ? 'status-orbiting' : 'status-active';
-        html += `<div class="object-row"><span class="name">🟣 Блок выведения</span><span class="status ${usStatus}">${upperStage.userData.separated ? 'На орбите' : 'Активен'}</span></div>`;
-        
-        // Спутники
-        const satStatus = elapsed > 5400 ? (elapsed > 6480 ? 'status-orbiting' : 'status-active') : '';
-        if (elapsed > 5400) {
-            html += `<div class="object-row"><span class="name">🛰️ 12 спутников CEOS</span><span class="status ${satStatus}">${elapsed > 6480 ? 'На орбите' : 'Отделяются'}</span></div>`;
-        } else if (elapsed > 500) {
-            html += `<div class="object-row"><span class="name">🛰️ 12 спутников CEOS</span><span class="status status-active">Ожидание</span></div>`;
+        for (let i = 0; i < 4; i++) {
+            const sep = elapsed >= 165;
+            const splashed = elapsed >= 300;
+            objHtml += `<div class="object-row"><span class="name">🟡 Ускоритель ${i+1}</span><span class="status ${sep ? (splashed ? 'status-splash' : 'status-burning') : 'status-active'}">${sep ? (splashed ? 'Приводнился' : 'Падает') : 'Активен'}</span></div>`;
         }
         
-        document.getElementById('objects-list').innerHTML = html;
+        const fairSep = elapsed >= 260;
+        objHtml += `<div class="object-row"><span class="name">⚪ Обтекатель</span><span class="status ${fairSep ? 'status-splash' : 'status-active'}">${fairSep ? 'Сброшен' : 'Установлен'}</span></div>`;
+        
+        const usSep = elapsed >= 540;
+        objHtml += `<div class="object-row"><span class="name">🟣 Блок выведения</span><span class="status ${usSep ? (elapsed < 6480 ? 'status-orbiting' : 'status-burning') : 'status-active'}">${usSep ? (elapsed < 6480 ? 'На орбите' : 'Сошел') : 'Пристыкован'}</span></div>`;
+        
+        const satsSep = elapsed >= 5400;
+        const satsDone = elapsed >= 6480;
+        objHtml += `<div class="object-row"><span class="name">🛰️ 12 спутников CEOS</span><span class="status ${satsSep ? (satsDone ? 'status-orbiting' : 'status-active') : 'status-waiting'}">${satsSep ? (satsDone ? 'На орбите' : 'Отделяются') : 'Ожидание'}</span></div>`;
+        
+        document.getElementById('objects-list').innerHTML = objHtml;
     }
-    
-    // Переменная elapsed для updateObjectsList
-    let elapsed = -Infinity;
-    const origUpdate = update;
-    update = function() {
-        const now = Date.now();
-        elapsed = (now - startTime) / 1000;
-        origUpdate();
-    };
     
     setInterval(update, 250);
     update();
-}
+});
 
-// ========== РЕНДЕР ==========
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
