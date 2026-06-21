@@ -8,8 +8,11 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #000; height: 100vh; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
         #viewport { width: 100%; height: 100%; }
-        .topbar { position: absolute; top: 0; left: 0; right: 0; background: rgba(8,8,22,0.9); border-bottom: 1px solid #1a1a3a; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; color: #ccc; z-index: 10; }
+        .topbar { position: absolute; top: 0; left: 0; right: 0; background: rgba(8,8,22,0.9); border-bottom: 1px solid #1a1a3a; padding: 8px 15px; display: flex; justify-content: space-between; align-items: center; color: #ccc; z-index: 10; flex-wrap: wrap; gap: 5px; }
         .topbar a { color: #cc0000; text-decoration: none; font-weight: bold; }
+        .topbar .targets { display: flex; gap: 5px; flex-wrap: wrap; }
+        .topbar .targets button { background: #222; border: 1px solid #444; color: #ccc; padding: 4px 10px; border-radius: 12px; cursor: pointer; font-size: 11px; }
+        .topbar .targets button:hover, .topbar .targets button.active { background: #cc0000; border-color: #cc0000; color: #fff; }
         .info-popup { position: absolute; bottom: 20px; right: 20px; background: rgba(17,17,34,0.95); border: 1px solid #cc0000; padding: 20px; border-radius: 10px; color: #e0e0e0; max-width: 350px; display: none; z-index: 10; }
         .info-popup h3 { color: #fff; margin-bottom: 10px; }
         .info-popup p { margin: 5px 0; font-size: 14px; }
@@ -17,187 +20,88 @@
     </style>
 </head>
 <body>
-<div class="topbar"><span>🌌 Карта Солнечной системы — China Space Live</span><a href="index.html">← На главную</a></div>
+<div class="topbar">
+    <span>🌌 Карта Солнечной системы</span>
+    <div class="targets" id="target-buttons"></div>
+    <a href="index.html">← На главную</a>
+</div>
 <div id="viewport"></div>
 <div class="info-popup" id="info-popup"><span class="close" onclick="document.getElementById('info-popup').style.display='none'">✕</span><div id="info-content"></div></div>
-
-<script type="importmap">
-{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
-</script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-const container = document.getElementById('viewport');
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000011);
-const camera = new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight, 0.1, 300000);
-camera.position.set(0, 400, 600);
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(container.clientWidth, container.clientHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-container.appendChild(renderer.domElement);
+const container=document.getElementById('viewport');
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x000011);
+const camera=new THREE.PerspectiveCamera(45,container.clientWidth/container.clientHeight,0.1,300000);camera.position.set(0,300,500);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(container.clientWidth,container.clientHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));container.appendChild(renderer.domElement);
+const labelRenderer=new CSS2DRenderer();labelRenderer.setSize(container.clientWidth,container.clientHeight);labelRenderer.domElement.style.position='absolute';labelRenderer.domElement.style.top='0';labelRenderer.domElement.style.pointerEvents='none';container.appendChild(labelRenderer.domElement);
 
-const labelRenderer = new CSS2DRenderer();
-labelRenderer.setSize(container.clientWidth, container.clientHeight);
-labelRenderer.domElement.style.position = 'absolute';
-labelRenderer.domElement.style.top = '0';
-labelRenderer.domElement.style.pointerEvents = 'none';
-container.appendChild(labelRenderer.domElement);
+const starsGeo=new THREE.BufferGeometry();const sv=[];for(let i=0;i<8000;i++){const r=50000+Math.random()*30000,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);sv.push(r*Math.sin(ph)*Math.cos(th),r*Math.sin(ph)*Math.sin(th),r*Math.cos(ph));}starsGeo.setAttribute('position',new THREE.Float32BufferAttribute(sv,3));scene.add(new THREE.Points(starsGeo,new THREE.PointsMaterial({color:0xffffff,size:3})));
+const sunTex=new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/sun.jpg');
+const sun=new THREE.Mesh(new THREE.SphereGeometry(10,64,64),new THREE.MeshBasicMaterial({map:sunTex}));scene.add(sun);sun.add(new THREE.PointLight(0xffffff,2,0,0));scene.add(new THREE.AmbientLight(0x222244,0.3));
+const sunLabel=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:'Солнце'}));sunLabel.element.style.color='#ffff00';sunLabel.element.style.fontWeight='bold';sun.add(sunLabel);
 
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; controls.maxDistance = 80000; controls.minDistance = 5;
-
-// Звёзды
-const starsGeo = new THREE.BufferGeometry();
-const sv = [];
-for (let i=0;i<8000;i++){const r=50000+Math.random()*30000,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);sv.push(r*Math.sin(ph)*Math.cos(th),r*Math.sin(ph)*Math.sin(th),r*Math.cos(ph));}
-starsGeo.setAttribute('position',new THREE.Float32BufferAttribute(sv,3));
-scene.add(new THREE.Points(starsGeo,new THREE.PointsMaterial({color:0xffffff,size:3})));
-
-// Солнце — процедурная текстура
-const sunCanvas = document.createElement('canvas');
-sunCanvas.width = 512; sunCanvas.height = 256;
-const ctx = sunCanvas.getContext('2d');
-const gradient = ctx.createRadialGradient(256,128,0,256,128,256);
-gradient.addColorStop(0,'#ffff00'); gradient.addColorStop(0.3,'#ffdd00'); gradient.addColorStop(0.6,'#ff8800'); gradient.addColorStop(0.85,'#ff4400'); gradient.addColorStop(1,'#220000');
-ctx.fillStyle = gradient; ctx.fillRect(0,0,512,256);
-// Добавляем пятна
-for (let i=0;i<40;i++) {
-    const x = Math.random()*512, y = Math.random()*256, r = 5+Math.random()*25;
-    ctx.fillStyle = `rgba(255,${140+Math.random()*60},0,${0.2+Math.random()*0.4})`;
-    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
-}
-const sunTex = new THREE.CanvasTexture(sunCanvas);
-const sunGeo = new THREE.SphereGeometry(10,32,32);
-const sunMat = new THREE.MeshBasicMaterial({map:sunTex});
-const sun = new THREE.Mesh(sunGeo, sunMat);
-scene.add(sun);
-const sunLight = new THREE.PointLight(0xffffff, 2, 0, 0);
-sun.add(sunLight);
-scene.add(new THREE.AmbientLight(0x222244, 0.3));
-
-const sunLabel = new CSS2DObject(document.createElement('div'));
-sunLabel.element.textContent = 'Солнце'; sunLabel.element.style.color = '#ffff00'; sunLabel.element.style.fontWeight = 'bold';
-sun.add(sunLabel);
-
-// Планеты
-const planets = [
-    {name:'Меркурий',orbit:30,size:0.4,color:0xaaaaaa,period:88},
-    {name:'Венера',orbit:55,size:1,color:0xffcc88,period:225},
-    {name:'Земля',orbit:78,size:1.1,color:0x4488ff,period:365},
-    {name:'Марс',orbit:100,size:0.6,color:0xff4422,period:687},
-    {name:'Юпитер',orbit:180,size:5,color:0xffcc88,period:4333,
-        moons:[{name:'Ио',orbit:8,size:0.15,color:0xffff00,period:1.77},{name:'Европа',orbit:11,size:0.13,color:0xccccff,period:3.55},{name:'Ганимед',orbit:14,size:0.2,color:0xaaaaaa,period:7.15},{name:'Каллисто',orbit:17,size:0.18,color:0x888888,period:16.69}]},
-    {name:'Сатурн',orbit:260,size:4,color:0xffdd88,period:10759,
-        moons:[{name:'Титан',orbit:10,size:0.2,color:0xffcc88,period:15.95},{name:'Энцелад',orbit:7,size:0.08,color:0xffffff,period:1.37},{name:'Мимас',orbit:5,size:0.06,color:0xcccccc,period:0.94}]},
-    {name:'Уран',orbit:340,size:2.5,color:0x88ccff,period:30687,
-        moons:[{name:'Титания',orbit:6,size:0.12,color:0xaaaacc,period:8.71},{name:'Оберон',orbit:8,size:0.1,color:0x8888aa,period:13.46}]},
-    {name:'Нептун',orbit:400,size:2.3,color:0x4466ff,period:60190,
-        moons:[{name:'Тритон',orbit:7,size:0.15,color:0xcccccc,period:5.88}]},
-    {name:'Плутон',orbit:460,size:0.3,color:0xccbbaa,period:90560,
-        moons:[{name:'Харон',orbit:2,size:0.08,color:0x888888,period:6.39}]}
+const textureLoader=new THREE.TextureLoader();
+const planetDefs=[
+    {name:'Меркурий',orbit:30,size:0.4,tex:'https://threejs.org/examples/textures/planets/mercury.jpg',period:88},
+    {name:'Венера',orbit:55,size:1,tex:'https://threejs.org/examples/textures/planets/venus.jpg',period:225},
+    {name:'Земля',orbit:78,size:1.1,tex:'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',period:365,moons:[{name:'Луна',orbit:15,size:0.3,tex:'https://threejs.org/examples/textures/planets/moon.jpg',period:27.3}]},
+    {name:'Марс',orbit:100,size:0.6,tex:'https://threejs.org/examples/textures/planets/mars.jpg',period:687},
+    {name:'Юпитер',orbit:180,size:5,tex:'https://threejs.org/examples/textures/planets/jupiter.jpg',period:4333,moons:[{name:'Ио',orbit:8,size:0.15,color:0xffff00,period:1.77},{name:'Европа',orbit:11,size:0.13,color:0xccccff,period:3.55},{name:'Ганимед',orbit:14,size:0.2,color:0xaaaaaa,period:7.15},{name:'Каллисто',orbit:17,size:0.18,color:0x888888,period:16.69}]},
+    {name:'Сатурн',orbit:260,size:4,tex:'https://threejs.org/examples/textures/planets/saturn.jpg',period:10759,moons:[{name:'Титан',orbit:10,size:0.2,color:0xffcc88,period:15.95},{name:'Энцелад',orbit:7,size:0.08,color:0xffffff,period:1.37}]},
+    {name:'Уран',orbit:340,size:2.5,tex:'https://threejs.org/examples/textures/planets/uranus.jpg',period:30687},
+    {name:'Нептун',orbit:400,size:2.3,tex:'https://threejs.org/examples/textures/planets/neptune.jpg',period:60190,moons:[{name:'Тритон',orbit:7,size:0.15,color:0xcccccc,period:5.88}]},
+    {name:'Плутон',orbit:460,size:0.3,color:0xccbbaa,period:90560,moons:[{name:'Харон',orbit:2,size:0.08,color:0x888888,period:6.39}]}
 ];
 
-const planetMeshes = [];
-const J2000 = Date.UTC(2000,0,1,12,0,0);
-const msPerDay = 86400000;
-function getDay() { return (Date.now() - J2000) / msPerDay; }
+const allBodies=[];allBodies.push({name:'Солнце',obj:sun});
+const J2000=Date.UTC(2000,0,1,12,0,0);const msPerDay=86400000;function getDay(){return (Date.now()-J2000)/msPerDay;}
 
-planets.forEach(p => {
-    const mesh = new THREE.Mesh(new THREE.SphereGeometry(p.size,16,16), new THREE.MeshPhongMaterial({color:p.color}));
-    mesh.userData = p;
-    scene.add(mesh);
-    planetMeshes.push(mesh);
-    
-    const lbl = new CSS2DObject(document.createElement('div'));
-    lbl.element.textContent = p.name; lbl.element.style.color = '#ccc'; lbl.element.style.fontSize = '11px';
-    mesh.add(lbl);
-    
-    // Орбитальное кольцо в плоскости XZ (Y=0)
-    const ringGeo = new THREE.TorusGeometry(p.orbit, 0.08, 16, 200);
-    const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({color:0x222244,transparent:true,opacity:0.4}));
-    ring.rotation.x = -Math.PI/2; // кладём в плоскость XZ
-    scene.add(ring);
-    
-    if (p.moons) {
-        p.moons.forEach(m => {
-            const mm = new THREE.Mesh(new THREE.SphereGeometry(m.size,8,8), new THREE.MeshPhongMaterial({color:m.color}));
-            mm.userData = {name:m.name, parentMesh:mesh, orbit:m.orbit, period:m.period};
-            scene.add(mm);
-            planetMeshes.push(mm);
-            const mlbl = new CSS2DObject(document.createElement('div'));
-            mlbl.element.textContent = m.name; mlbl.element.style.color = '#999'; mlbl.element.style.fontSize = '9px';
-            mm.add(mlbl);
-        });
-    }
+planetDefs.forEach(p=>{
+    const mat=p.tex?new THREE.MeshPhongMaterial({map:textureLoader.load(p.tex),specular:0x111111,shininess:5}):new THREE.MeshPhongMaterial({color:p.color});
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(p.size,32,32),mat);mesh.userData=p;scene.add(mesh);
+    const lbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:p.name}));lbl.element.style.color='#ccc';lbl.element.style.fontSize='11px';mesh.add(lbl);
+    allBodies.push({name:p.name,obj:mesh});
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(p.orbit,0.08,16,200),new THREE.MeshBasicMaterial({color:0x222244,transparent:true,opacity:0.4}));ring.rotation.x=-Math.PI/2;scene.add(ring);
+    if(p.moons)p.moons.forEach(m=>{
+        const mMat=m.tex?new THREE.MeshPhongMaterial({map:textureLoader.load(m.tex),specular:0x111111,shininess:3}):new THREE.MeshPhongMaterial({color:m.color});
+        const mm=new THREE.Mesh(new THREE.SphereGeometry(m.size,16,16),mMat);mm.userData={name:m.name,parentMesh:mesh,orbit:m.orbit,period:m.period};scene.add(mm);
+        const mlbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:m.name}));mlbl.element.style.color='#999';mlbl.element.style.fontSize='9px';mm.add(mlbl);
+        allBodies.push({name:m.name,obj:mm});
+    });
 });
-
-// Земля — добавить Луну
-const earthMesh = planetMeshes.find(m=>m.userData.name==='Земля');
-const moon = new THREE.Mesh(new THREE.SphereGeometry(0.3,8,8), new THREE.MeshPhongMaterial({color:0xcccccc}));
-moon.userData = {name:'Луна', parentMesh:earthMesh, orbit:2.5, period:27.3, desc:'Естественный спутник Земли'};
-scene.add(moon); planetMeshes.push(moon);
-const moonLbl = new CSS2DObject(document.createElement('div'));
-moonLbl.element.textContent = 'Луна'; moonLbl.element.style.color = '#999'; moonLbl.element.style.fontSize = '9px';
-moon.add(moonLbl);
-
 // Кольцо Сатурна
-const saturnMesh = planetMeshes.find(m=>m.userData.name==='Сатурн');
-if (saturnMesh) {
-    const satRing = new THREE.Mesh(new THREE.TorusGeometry(6,0.6,16,100), new THREE.MeshBasicMaterial({color:0xffdd88,transparent:true,opacity:0.4,side:THREE.DoubleSide}));
-    saturnMesh.add(satRing);
-    satRing.rotation.x = Math.PI/2.2;
-}
+const sat=allBodies.find(b=>b.name==='Сатурн');if(sat){const r=new THREE.Mesh(new THREE.TorusGeometry(6,0.6,16,100),new THREE.MeshBasicMaterial({color:0xffdd88,transparent:true,opacity:0.4,side:THREE.DoubleSide}));sat.obj.add(r);r.rotation.x=Math.PI/2.2;}
+
+// Кнопки целей
+const btnContainer=document.getElementById('target-buttons');
+let currentTarget=sun;
+allBodies.forEach(b=>{const btn=document.createElement('button');btn.textContent=b.name;btn.onclick=()=>{currentTarget=b.obj;document.querySelectorAll('#target-buttons button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');};btnContainer.appendChild(btn);});
+btnContainer.children[0].classList.add('active');
 
 // Клик
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
+const raycaster=new THREE.Raycaster();const mouse=new THREE.Vector2();
 container.addEventListener('click',e=>{
-    mouse.x = (e.clientX/container.clientWidth)*2-1;
-    mouse.y = -(e.clientY/container.clientHeight)*2+1;
-    raycaster.setFromCamera(mouse, camera);
-    const hits = raycaster.intersectObjects(planetMeshes);
-    if(hits.length>0){
-        const obj = hits[0].object;
-        document.getElementById('info-content').innerHTML = `<h3>${obj.userData.name||'Объект'}</h3><p>${obj.userData.desc||''}</p><p>Период: ${obj.userData.period?obj.userData.period+' дней':'Н/Д'}</p>`;
-        document.getElementById('info-popup').style.display = 'block';
-    }
+    mouse.x=(e.clientX/container.clientWidth)*2-1;mouse.y=-(e.clientY/container.clientHeight)*2+1;
+    raycaster.setFromCamera(mouse,camera);
+    const hits=raycaster.intersectObjects(allBodies.map(b=>b.obj));
+    if(hits.length>0){const obj=hits[0].object;document.getElementById('info-content').innerHTML=`<h3>${obj.userData.name||'Объект'}</h3><p>Период: ${obj.userData.period?obj.userData.period+' дней':'Н/Д'}</p>`;document.getElementById('info-popup').style.display='block';}
 });
 
-function animate() {
+function animate(){
     requestAnimationFrame(animate);
-    const day = getDay();
-    
-    planetMeshes.forEach(mesh => {
-        const p = mesh.userData;
-        if (p.parentMesh) {
-            const parent = p.parentMesh;
-            const a = (day / p.period) * Math.PI * 2;
-            mesh.position.set(
-                parent.position.x + Math.cos(a)*p.orbit,
-                0,
-                parent.position.z + Math.sin(a)*p.orbit
-            );
-        } else if (p.orbit && p.period) {
-            const a = (day / p.period) * Math.PI * 2;
-            mesh.position.set(Math.cos(a)*p.orbit, 0, Math.sin(a)*p.orbit);
-            mesh.rotation.y += 0.001;
-        }
+    const day=getDay();
+    allBodies.forEach(b=>{
+        const p=b.obj.userData;
+        if(p.parentMesh){const a=(day/p.period)*Math.PI*2;b.obj.position.set(p.parentMesh.position.x+Math.cos(a)*p.orbit,0,p.parentMesh.position.z+Math.sin(a)*p.orbit);}
+        else if(p.orbit&&p.period){const a=(day/p.period)*Math.PI*2;b.obj.position.set(Math.cos(a)*p.orbit,0,Math.sin(a)*p.orbit);b.obj.rotation.y+=0.002;}
     });
-    
-    controls.update();
-    renderer.render(scene, camera);
-    labelRenderer.render(scene, camera);
-}
-animate();
-
-window.addEventListener('resize',()=>{
-    camera.aspect = container.clientWidth/container.clientHeight; camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    labelRenderer.setSize(container.clientWidth, container.clientHeight);
-});
+    if(currentTarget){const tp=currentTarget.position.clone();camera.position.lerp(tp.clone().add(new THREE.Vector3(30,20,40)),0.03);camera.lookAt(tp);}
+    renderer.render(scene,camera);labelRenderer.render(scene,camera);
+}animate();
+window.addEventListener('resize',()=>{camera.aspect=container.clientWidth/container.clientHeight;camera.updateProjectionMatrix();renderer.setSize(container.clientWidth,container.clientHeight);labelRenderer.setSize(container.clientWidth,container.clientHeight);});
 </script>
 </body>
 </html>
