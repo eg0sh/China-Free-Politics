@@ -330,4 +330,18 @@ function animate() {
     
     // Вращаем Луну вокруг Земли
     const moonAngle = (JD + performance.now()/86400000) % 27.3 / 27.3 * Math.PI * 2;
-    moon.position.copy(earthMesh.position).add(new THREE.Vector3(Math.cos(moonAngle)*38.4
+    moon.position.copy(earthMesh.position).add(new THREE.Vector3(Math.cos(moonAngle)*38.4, 0, Math.sin(moonAngle)*38.4));
+    
+    controls.update();
+    renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+    camera.aspect = container.clientWidth/container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+});
+</script>
+</body>
+</html>
