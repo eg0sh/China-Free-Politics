@@ -1,158 +1,534 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>China Space Live — 中国航天直播</title>
+    <title>China Space Live — Новости космической программы КНР</title>
     <style>
+        :root {
+            --bg: #08080f;
+            --surface: #101018;
+            --surface2: #161622;
+            --border: #1e1e30;
+            --red: #cc0000;
+            --red-glow: #ff2222;
+            --gold: #ffcc00;
+            --text: #d0d0d8;
+            --text2: #8888a0;
+            --text3: #606070;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            background: #0a0a0f;
-            color: #e0e0e0;
-            font-family: 'Courier New', monospace;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
+            line-height: 1.6;
             display: flex;
             flex-direction: column;
         }
-        nav {
-            background: #111122;
-            padding: 15px 30px;
-            border-bottom: 2px solid #cc0000;
+
+        /* ── HEADER ── */
+        .header {
+            background: #0c0c18;
+            border-bottom: 1px solid #1a1a30;
+            padding: 0 32px;
             display: flex;
-            gap: 30px;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
         }
-        nav a {
-            color: #ffffff;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+        .logo {
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+            color: #fff;
             text-decoration: none;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 5px 15px;
-            border: 1px solid #333;
-            border-radius: 3px;
+            white-space: nowrap;
         }
-        nav a:hover { background: #cc0000; border-color: #cc0000; }
-        nav a.active { background: #cc0000; }
-        main {
-            flex: 1;
-            padding: 40px;
-            max-width: 900px;
-            margin: 0 auto;
-            width: 100%;
-        }
-        h1 {
-            color: #cc0000;
-            font-size: 32px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        .subtitle {
-            text-align: center;
-            color: #888;
-            margin-bottom: 40px;
+        .logo span { color: var(--red); }
+        .nav-links { display: flex; gap: 0; }
+        .nav-links a {
+            color: var(--text2);
+            text-decoration: none;
             font-size: 14px;
+            font-weight: 500;
+            padding: 16px 20px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
         }
-        .news-item {
-            background: #111122;
-            border-left: 3px solid #cc0000;
-            padding: 15px 20px;
-            margin-bottom: 15px;
-            border-radius: 0 5px 5px 0;
+        .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.03); }
+        .nav-links a.active {
+            color: #fff;
+            border-bottom-color: var(--red);
         }
-        .news-time {
-            color: #888;
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .lang-btn {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .lang-btn:hover { border-color: #444; background: #1e1e30; }
+        .lang-menu {
+            position: absolute;
+            top: 48px;
+            right: 32px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: none;
+            flex-direction: column;
+            min-width: 120px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+        .lang-menu.show { display: flex; }
+        .lang-menu button {
+            background: none;
+            border: none;
+            color: var(--text);
+            padding: 10px 16px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .lang-menu button:hover { background: rgba(255,255,255,0.05); }
+        .lang-menu button.active { color: var(--red); }
+
+        /* ── MAIN ── */
+        .main-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            width: 100%;
+            flex: 1;
+        }
+
+        /* ── LIVE BAR ── */
+        .live-bar {
+            background: linear-gradient(135deg, #1a0a0a, #0a0a1a);
+            border: 1px solid #330000;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            background: #00ff44;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,68,0.6); }
+            50% { box-shadow: 0 0 0 12px rgba(0,255,68,0); }
+        }
+        .live-text { font-weight: 600; font-size: 14px; color: #fff; }
+        .live-info { color: var(--text2); font-size: 13px; }
+        .live-countdown {
+            font-family: 'Courier New', monospace;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--gold);
+        }
+        .map-btn {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .map-btn:hover { background: #1e1e30; border-color: #555; }
+
+        /* ── NEWS ── */
+        .section-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text3);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        .news-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px 32px;
+            margin-bottom: 16px;
+            transition: border-color 0.2s;
+            position: relative;
+        }
+        .news-card:hover { border-color: #333; }
+        .news-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .news-datetime {
+            color: var(--text3);
             font-size: 12px;
-            display: block;
-            margin-bottom: 5px;
+            font-family: 'Courier New', monospace;
         }
         .news-flag {
-            font-size: 20px;
-            margin-right: 10px;
+            font-size: 18px;
         }
-        .news-text {
-            color: #e0e0e0;
-            line-height: 1.6;
+        .news-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+            line-height: 1.4;
         }
+        .news-body {
+            color: var(--text);
+            font-size: 15px;
+            line-height: 1.8;
+        }
+        .news-body p { margin-bottom: 12px; }
+        .news-body .highlight {
+            background: rgba(255,204,0,0.1);
+            border-left: 3px solid var(--gold);
+            padding: 10px 14px;
+            border-radius: 0 6px 6px 0;
+            margin: 14px 0;
+            font-size: 14px;
+            color: var(--gold);
+        }
+        .news-body ul {
+            margin: 12px 0 12px 20px;
+        }
+        .news-body ul li {
+            margin-bottom: 6px;
+        }
+        .news-gallery {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .news-gallery img {
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            max-height: 200px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .news-gallery img:hover { transform: scale(1.02); }
+
         .loading {
             text-align: center;
-            color: #888;
-            font-size: 18px;
-            padding: 50px;
+            padding: 60px;
+            color: var(--text3);
         }
-        footer {
+
+        /* ── FOOTER ── */
+        .footer {
             text-align: center;
-            padding: 20px;
-            color: #666;
+            padding: 24px;
+            color: var(--text3);
             font-size: 12px;
-            border-top: 1px solid #222;
+            border-top: 1px solid var(--border);
         }
     </style>
 </head>
 <body>
-    <nav>
-        <a href="index.html" class="active">🇨🇳 Новости</a>
-        <a href="live/">📡 Live-трансляция</a>
-        <a href="map/">🌌 Карта аппаратов</a>
-    </nav>
-    
-    <main>
-        <h1>🚀 China Space Live</h1>
-        <p class="subtitle">中国航天直播 — Новости космической программы КНР</p>
-        
-        <div id="news-container">
-            <p class="loading">Загрузка новостей...</p>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <a href="index.html" class="logo">🚀 <span>China</span> Space Live</a>
+            <nav class="nav-links">
+                <a href="index.html" class="active" data-lang-ru="Новости" data-lang-en="News" data-lang-zh="新闻">Новости</a>
+                <a href="live/" data-lang-ru="Космическая программа" data-lang-en="Space Program" data-lang-zh="航天计划">Космическая программа</a>
+            </nav>
         </div>
+        <div class="header-right" style="position:relative;">
+            <button class="lang-btn" onclick="toggleLangMenu()" id="langBtn">
+                🌐 <span id="currentLang">RU</span> ▾
+            </button>
+            <div class="lang-menu" id="langMenu">
+                <button onclick="setLang('ru')" class="active">🇷🇺 Русский</button>
+                <button onclick="setLang('en')">🇬🇧 English</button>
+                <button onclick="setLang('zh')">🇨🇳 中文</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main-container">
+
+        <!-- LIVE BAR -->
+        <div class="live-bar">
+            <div>
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span class="live-text" data-lang-ru="Следующий запуск" data-lang-en="Next Launch" data-lang-zh="下次发射">Следующий запуск</span>
+                </div>
+                <div class="live-info" data-lang-ru="CEOS-1 · Ракета CZ-5B · Космодром Вэньчан" data-lang-en="CEOS-1 · CZ-5B · Wenchang" data-lang-zh="CEOS-1 · CZ-5B · 文昌">CEOS-1 · Ракета CZ-5B · Космодром Вэньчан</div>
+            </div>
+            <div class="live-countdown" id="countdown">15 дн 12 ч 34 мин</div>
+            <a href="map/" class="map-btn">🌌 <span data-lang-ru="Карта системы" data-lang-en="System Map" data-lang-zh="系统地图">Карта системы</span></a>
+        </div>
+
+        <!-- NEWS -->
+        <div class="section-title" data-lang-ru="Лента новостей" data-lang-en="News Feed" data-lang-zh="新闻动态">Лента новостей</div>
+        <div id="newsContainer"><div class="loading">Загрузка...</div></div>
+
     </main>
-    
-    <footer>
-        China Space Live © 2026 · Данные обновляются в реальном времени · Сделано в КНР
+
+    <footer class="footer">
+        China Space Live © 2026 · Данные обновляются в реальном времени
     </footer>
 
     <script>
-        // Временный скрипт — показывает тестовые новости
-        const news = [
+        // ── LANGUAGE SYSTEM ──
+        let currentLang = 'ru';
+        const translations = {};
+
+        function toggleLangMenu() {
+            document.getElementById('langMenu').classList.toggle('show');
+        }
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.header-right')) {
+                document.getElementById('langMenu').classList.remove('show');
+            }
+        });
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.getElementById('currentLang').textContent = lang.toUpperCase();
+            document.querySelectorAll('.lang-menu button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.lang-menu button[onclick="setLang('${lang}')"]`).classList.add('active');
+            document.getElementById('langMenu').classList.remove('show');
+            applyTranslations();
+        }
+
+        function applyTranslations() {
+            document.querySelectorAll('[data-lang-ru]').forEach(el => {
+                const key = `data-lang-${currentLang}`;
+                if (el.getAttribute(key)) {
+                    el.textContent = el.getAttribute(key);
+                }
+            });
+            // Retranslate news if already loaded
+            if (window.allNews) renderNews(window.allNews);
+        }
+
+        // ── COUNTDOWN ──
+        function updateCountdown() {
+            const launch = new Date('2026-07-07T04:00:00+08:00').getTime();
+            const now = Date.now();
+            const diff = launch - now;
+            if (diff <= 0) {
+                document.getElementById('countdown').textContent = 'ЗАПУСК!';
+                return;
+            }
+            const days = Math.floor(diff / 86400000);
+            const hours = Math.floor((diff % 86400000) / 3600000);
+            const mins = Math.floor((diff % 3600000) / 60000);
+            const secs = Math.floor((diff % 60000) / 1000);
+            document.getElementById('countdown').textContent = 
+                `${days}д ${String(hours).padStart(2,'0')}ч ${String(mins).padStart(2,'0')}м ${String(secs).padStart(2,'0')}с`;
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // ── NEWS ──
+        const allNews = [
             {
-                time: "2026-06-21 16:00",
+                datetime: "21 июня 2026, 23:30 (UTC+8)",
                 flag: "🇨🇳",
-                text: "Председатель КНР поручил МИД начать переговоры с Казахстаном о новых условиях аренды космодрома Байконур. Аренда продлевается до 2075 года."
+                title: "CNSA: более 16 000 заявок подано в 4-е поколение тайконавтов за первые сутки",
+                body: `
+                    <p>Китайское национальное космическое управление (CNSA) опубликовало промежуточную статистику набора тайконавтов 4-го поколения. По состоянию на 23:30 пекинского времени 21 июня, всего за <strong>28 часов</strong> с момента открытия приёма заявок подано <strong>16 000+ анкет</strong>.</p>
+                    <p>Из них:</p>
+                    <ul>
+                        <li><strong>15 800</strong> — граждане КНР (конкурс ~225 человек на место)</li>
+                        <li><strong>Россия</strong> — 18 заявок</li>
+                        <li><strong>Казахстан</strong> — 7 заявок</li>
+                        <li><strong>Бразилия</strong> — 5 заявок</li>
+                        <li><strong>Иран</strong> — 4 заявки</li>
+                        <li><strong>ЮАР</strong> — 3 заявки</li>
+                        <li><strong>Япония</strong> — 2 заявки</li>
+                    </ul>
+                    <div class="highlight">Набор продлится до 1 августа 2026 года. Требования: возраст до 35 лет, высшее инженерное или естественнонаучное образование, отличное здоровье. Впервые в истории к участию приглашены граждане стран-партнёров: Россия, Казахстан, Бразилия, Иран, ЮАР и Япония. Все иностранные участники будут включены в основные программы — «Тяньгун», «Луна» или «Марс». Никто не отправляется в резерв.</div>
+                    <p>Медицинские комиссии начнутся в июле. Первичный отсев по анкетам — около 20%. К финальному этапу (сентябрь) дойдут не более 200 кандидатов, из которых комиссия отберёт 78 основных и 15 резервистов.</p>
+                `
             },
             {
-                time: "2026-06-21 16:05",
-                flag: "🇨🇳",
-                text: "CNSA открыло приём заявок в 4-е поколение тайконавтов. 78 мест, включая 7 иностранных участников из 6 стран."
+                datetime: "21 июня 2026, 22:00 (UTC+8)",
+                flag: "🇨🇳🇰🇿",
+                title: "Казахстан предварительно согласился на новые условия аренды Байконура",
+                body: `
+                    <p>Министерство иностранных дел КНР подтвердило: сегодня в 21:40 по пекинскому времени получен официальный ответ от правительства Казахстана. Астана <strong>«заинтересована и готова к переговорам»</strong> по предложенному Китаем пакету условий аренды космодрома Байконур.</p>
+                    <p>Ключевые пункты китайского предложения:</p>
+                    <ul>
+                        <li>Аренда продлевается до <strong>2075 года</strong> (текущий срок — 2050)</li>
+                        <li>Два дополнительных стартовых стола специально под сверхтяжёлую ракету <strong>CZ-9</strong></li>
+                        <li>Третий стартовый стол Китай получает право построить самостоятельно</li>
+                        <li>Китайский обслуживающий персонал — до <strong>500 человек постоянно</strong></li>
+                        <li>Расширение зоны хранения криогенного топлива</li>
+                        <li>Арендная плата повышается с $115 млн/год до <strong>$400 млн/год</strong></li>
+                        <li>Китай инвестирует <strong>$2,5 млрд</strong> в модернизацию инфраструктуры Байконура</li>
+                    </ul>
+                    <div class="highlight">Первый раунд переговоров запланирован на 15 июля 2026 года в Астане. Китайскую делегацию возглавит заместитель министра иностранных дел. В случае успешного подписания договора первый стартовый стол под CZ-9 на Байконуре будет готов к концу 2027 года.</div>
+                `
             },
             {
-                time: "2026-06-20 08:00",
+                datetime: "21 июня 2026, 20:00 (UTC+8)",
                 flag: "🇨🇳",
-                text: "ГККЭ утвердила график запусков на 2026 год. Первый запуск CEOS — 7 июля."
+                title: "ГККЭ провела закрытое совещание: утверждён график модульной сборки плавучего космодрома «Красный Дракон»",
+                body: `
+                    <p>Государственная Комиссия по Космической Экспансии (ГККЭ) на вечернем заседании утвердила финальный график строительства первого в мире плавучего экваториального космодрома. Проект получил название <strong>«Красный Дракон» (赤龙, Chì Lóng)</strong>.</p>
+                    <p>Характеристики платформы:</p>
+                    <ul>
+                        <li>Размер: <strong>3 км × 2 км</strong></li>
+                        <li>Два стартовых стола (совместимы с CZ-9 и CZ-7 Heavy)</li>
+                        <li>Посадочная полоса для дронов</li>
+                        <li>Жилой комплекс на 500 человек персонала</li>
+                        <li>Порт приписки: Ситтуэ, Мьянма (после завершения операции)</li>
+                    </ul>
+                    <p>Платформа будет располагаться на экваторе (0° широты, 160° з.д., международные воды Тихого океана). Запуск с экватора даёт <strong>экономию 18% топлива</strong> за счёт максимальной скорости вращения Земли.</p>
+                    <div class="highlight">Первый модуль платформы уже заложен на судоверфи Даляня. Стыковка модулей на воде — январь 2027. Полная готовность первого стартового стола — декабрь 2027. Первый пуск — 1 июля 2028 (частная ракета Space Pioneer).</div>
+                `
             },
             {
-                time: "2026-06-18 09:00",
+                datetime: "21 июня 2026, 18:00 (UTC+8)",
                 flag: "🇨🇳",
-                text: "Опубликован указ о создании China University of Space Science and Technology (CUSST) в провинции Хайнань, рядом с космодромом Вэньчан."
+                title: "Геологоразведка LCC «Тайцзи»: скважина №1 достигла 200 метров, гранит монолитный",
+                body: `
+                    <p>Группа геологоразведки Академии наук КНР доложила о ходе бурения тестовых скважин для Большого Кольцевого Коллайдера <strong>«Тайцзи»</strong> в провинции Юньнань.</p>
+                    <p>На 18:00 21 июня:</p>
+                    <ul>
+                        <li><strong>Скважина №1:</strong> 200 м. Гранит монолитный. Трещин нет. Идеально.</li>
+                        <li><strong>Скважина №2:</strong> 120 м. Гранит.</li>
+                        <li><strong>Скважина №3:</strong> 80 м. Бурение продолжается.</li>
+                        <li><strong>Скважины №4 и №5:</strong> подготовительные работы завершены, бурение начнётся 22 июня.</li>
+                    </ul>
+                    <p>Трасса коллайдера — кольцо длиной <strong>120 км</strong> на глубине 350–400 метров под землёй. Центр кольца — в 50 км южнее Куньмина. Регион выбран благодаря Юньнаньскому гранитному щиту — одному из самых стабильных геологических образований на планете. Сейсмическая активность минимальна.</p>
+                    <div class="highlight">Заключение о пригодности трассы ожидается к 1 августа 2026 года. Если геологоразведка подтвердит стабильность пород, проходка тоннеля начнётся в сентябре 2026 года. Завершение строительства — 2035 год. Энергия столкновений — 150 ТэВ (против 13,6 ТэВ у Большого адронного коллайдера).</div>
+                `
             },
             {
-                time: "2026-06-16 09:00",
+                datetime: "21 июня 2026, 16:30 (UTC+8)",
                 flag: "🇨🇳",
-                text: "Опубликован Указ Председателя КНР «О создании Государственной Комиссии по Космической Экспансии» (ГККЭ)."
+                title: "CUSST: архитектурное бюро завершило эскизный проект Космического университета",
+                body: `
+                    <p>Проектное бюро при Академии наук КНР завершило эскизный проект <strong>China University of Space Science and Technology (CUSST)</strong> — крупнейшего в мире специализированного космического университета.</p>
+                    <p>Ключевые параметры кампуса:</p>
+                    <ul>
+                        <li>Площадь: <strong>12 км²</strong></li>
+                        <li>Главный корпус «Тяньгун» — 24 этажа, 120 метров, форма взлетающей ракеты</li>
+                        <li>7 факультетов: ракетостроение, космические аппараты, энергетика, связь, биология, фундаментальная физика, космическая оборона</li>
+                        <li>112 общежитий серии «Парус» (8 960 студентов)</li>
+                        <li>Собственный аэродром, морской терминал, монорельс до космодрома Вэньчан (12 км, 8 минут)</li>
+                    </ul>
+                    <p>Расположение: провинция Хайнань, район Лунлоу, <strong>в 12 км к северо-востоку от космодрома Вэньчан</strong>. Из окон главного корпуса в ясную погоду будет виден стартовый стол.</p>
+                    <div class="highlight">Председатель КНР утвердил проект с одним замечанием: «Добавить бамбуковую рощу у факультета физики. Учёным нужно место для размышлений». Строительство начнётся в сентябре 2026 года. Первый набор (5 000 студентов) — сентябрь 2027. Полная готовность — сентябрь 2029.</div>
+                `
             },
             {
-                time: "2026-06-16 09:05",
+                datetime: "21 июня 2026, 16:05 (UTC+8)",
                 flag: "🇨🇳",
-                text: "Опубликован Указ «О строительстве Большого Кольцевого Коллайдера» (LCC «Тайцзи»). Кольцо 120 км, энергия до 150 ТэВ."
+                title: "Открыт приём заявок в 4-е поколение тайконавтов: 78 мест, 7 стран",
+                body: `
+                    <p>CNSA официально открыло приём заявок на программу 4-го поколения тайконавтов КНР. Впервые в истории к участию приглашены граждане иностранных государств.</p>
+                    <p>Распределение мест:</p>
+                    <ul>
+                        <li><strong>71</strong> — граждане КНР</li>
+                        <li><strong>2</strong> — Россия</li>
+                        <li><strong>1</strong> — Казахстан</li>
+                        <li><strong>1</strong> — Япония</li>
+                        <li><strong>1</strong> — Бразилия</li>
+                        <li><strong>1</strong> — Иран</li>
+                        <li><strong>1</strong> — ЮАР</li>
+                    </ul>
+                    <p>Все иностранные участники будут распределены в основные программы: «Тяньгун» (Россия-1, Япония-1), Лунная база (Россия-2, Бразилия-1, Казахстан-1), Марс (Иран-1, ЮАР-1). Резерв формируется только из граждан КНР.</p>
+                    <div class="highlight">Приём заявок продлится до 1 августа 2026 года. Отбор — три этапа: медицинская комиссия, физические испытания, психологическое тестирование. Финальные собеседования — сентябрь 2026 года. Первый полёт иностранного тайконавта на китайской станции «Тяньгун» — март 2027 (Япония).</div>
+                `
+            },
+            {
+                datetime: "21 июня 2026, 16:00 (UTC+8)",
+                flag: "🇨🇳🇰🇿",
+                title: "Председатель КНР поручил МИД начать переговоры с Казахстаном о новых условиях аренды Байконура",
+                body: `
+                    <p>Сегодня в 16:00 по пекинскому времени Председатель КНР подписал поручение Министерству иностранных дел: начать официальные переговоры с Республикой Казахстан об изменении условий аренды космодрома Байконур.</p>
+                    <p>Китай предлагает Казахстану подписать новый договор на следующих условиях:</p>
+                    <ul>
+                        <li>Срок аренды продлевается до <strong>2075 года</strong></li>
+                        <li>Китай получает два дополнительных стартовых стола для сверхтяжёлых ракет CZ-9</li>
+                        <li>Право разместить китайский персонал — до 500 человек постоянно</li>
+                        <li>Расширение зоны хранения криогенного топлива</li>
+                        <li>Арендная плата повышается со $115 млн до <strong>$400 млн в год</strong></li>
+                        <li>Китай инвестирует <strong>$2,5 млрд</strong> в модернизацию инфраструктуры Байконура</li>
+                    </ul>
+                `
             }
         ];
 
-        const container = document.getElementById('news-container');
-        container.innerHTML = '';
-        news.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'news-item';
-            div.innerHTML = `
-                <span class="news-time">⏰ ${item.time}</span>
-                <p class="news-text"><span class="news-flag">${item.flag}</span> ${item.text}</p>
-            `;
-            container.appendChild(div);
-        });
+        function renderNews(news) {
+            const container = document.getElementById('newsContainer');
+            container.innerHTML = '';
+            news.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'news-card';
+                card.innerHTML = `
+                    <div class="news-meta">
+                        <span class="news-flag">${item.flag}</span>
+                        <span class="news-datetime">⏰ ${item.datetime}</span>
+                    </div>
+                    <div class="news-title">${item.title}</div>
+                    <div class="news-body">${item.body}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.allNews = allNews;
+        renderNews(allNews);
     </script>
 </body>
 </html>
