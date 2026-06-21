@@ -13,7 +13,6 @@
             --gold: #ffcc00;
             --text: #e0e0e0;
             --muted: #888888;
-            --hover: #1a1a30;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -24,49 +23,50 @@
             line-height: 1.6;
         }
 
-        /* === TOP BAR === */
+        /* TOP BAR */
         .topbar {
             background: #080816;
             border-bottom: 1px solid var(--border);
-            padding: 8px 30px;
+            padding: 10px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 13px;
             color: var(--muted);
+            flex-wrap: wrap;
+            gap: 10px;
         }
         .topbar .brand {
             color: var(--red);
             font-weight: bold;
-            font-size: 14px;
-            letter-spacing: 1px;
+            font-size: 15px;
+            letter-spacing: 2px;
         }
         .lang-switcher {
             display: flex;
-            gap: 5px;
+            gap: 4px;
             align-items: center;
         }
         .lang-switcher button {
             background: transparent;
             border: 1px solid #333;
             color: var(--muted);
-            padding: 4px 10px;
+            padding: 5px 12px;
             cursor: pointer;
             border-radius: 3px;
             font-size: 12px;
             transition: 0.2s;
+            font-weight: bold;
         }
         .lang-switcher button.active {
             background: var(--red);
             border-color: var(--red);
             color: #fff;
         }
-        .lang-switcher button:hover {
-            border-color: var(--red);
-            color: #fff;
-        }
+        .lang-switcher button:hover { border-color: var(--red); color: #fff; }
+        .lang-switcher .separator { color: #333; margin: 0 2px; }
 
-        /* === NAV === */
+        /* NAV */
         nav {
             background: var(--surface);
             padding: 0 30px;
@@ -83,17 +83,12 @@
             border-bottom: 3px solid transparent;
             margin-bottom: -2px;
             transition: 0.2s;
+            cursor: pointer;
         }
-        nav a:hover {
-            color: #fff;
-            background: var(--hover);
-        }
-        nav a.active {
-            color: #fff;
-            border-bottom-color: var(--red);
-        }
+        nav a:hover { color: #fff; background: #111128; }
+        nav a.active { color: #fff; border-bottom-color: var(--red); }
 
-        /* === MAIN LAYOUT === */
+        /* PAGES */
         .page {
             display: none;
             max-width: 1000px;
@@ -102,14 +97,13 @@
         }
         .page.active { display: block; }
 
-        /* === NEWS === */
+        /* NEWS */
         .news-item {
             background: var(--surface);
             border-left: 4px solid var(--red);
             border-radius: 0 8px 8px 0;
             padding: 25px 30px;
             margin-bottom: 25px;
-            position: relative;
         }
         .news-time {
             color: var(--muted);
@@ -120,44 +114,26 @@
             gap: 8px;
         }
         .news-time .dot {
-            width: 8px;
-            height: 8px;
+            width: 8px; height: 8px;
             background: var(--red);
             border-radius: 50%;
             display: inline-block;
         }
-        .news-flag {
-            font-size: 28px;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-        .news-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 12px;
-        }
-        .news-body {
-            color: #ccc;
-            font-size: 15px;
-            line-height: 1.8;
-        }
-        .news-body ul {
-            margin: 10px 0 10px 20px;
-        }
-        .news-body li {
-            margin-bottom: 6px;
-        }
+        .news-flag { font-size: 28px; margin-right: 8px; vertical-align: middle; }
+        .news-title { font-size: 20px; font-weight: bold; color: #fff; margin-bottom: 12px; }
+        .news-body { color: #ccc; font-size: 15px; line-height: 1.8; }
+        .news-body p { margin-bottom: 10px; }
+        .news-body ul { margin: 10px 0 10px 20px; }
+        .news-body li { margin-bottom: 6px; }
+        .news-body strong { color: #fff; }
+        .news-body em { color: var(--gold); font-style: normal; }
         .news-photo {
             margin-top: 18px;
             border-radius: 6px;
             overflow: hidden;
             border: 1px solid var(--border);
         }
-        .news-photo img {
-            width: 100%;
-            display: block;
-        }
+        .news-photo img { width: 100%; display: block; }
         .news-photo .caption {
             background: #0a0a18;
             padding: 8px 14px;
@@ -165,7 +141,7 @@
             color: var(--muted);
         }
 
-        /* === SPACE PROGRAM === */
+        /* SPACE PROGRAM */
         .mission-header {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -174,12 +150,8 @@
             text-align: center;
             margin-bottom: 25px;
         }
-        .mission-header h2 {
-            color: #fff;
-            font-size: 26px;
-            margin-bottom: 5px;
-        }
-        .mission-header .rocket-badge {
+        .mission-header h2 { color: #fff; font-size: 26px; margin-bottom: 5px; }
+        .rocket-badge {
             display: inline-block;
             background: var(--red);
             color: #fff;
@@ -219,18 +191,8 @@
             min-width: 130px;
             text-align: center;
         }
-        .telem-box .val {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--gold);
-        }
-        .telem-box .lbl {
-            font-size: 11px;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 4px;
-        }
+        .telem-box .val { font-size: 28px; font-weight: bold; color: var(--gold); }
+        .telem-box .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
         .map-btn {
             display: inline-block;
             margin-top: 20px;
@@ -245,11 +207,14 @@
             text-decoration: none;
             transition: 0.2s;
         }
-        .map-btn:hover {
-            background: #ee0000;
-        }
+        .map-btn:hover { background: #ee0000; }
 
-        /* === FOOTER === */
+        /* GOOGLE TRANSLATE */
+        .skiptranslate { display: none !important; }
+        body { top: 0 !important; }
+        .goog-te-banner-frame { display: none !important; }
+
+        /* FOOTER */
         footer {
             text-align: center;
             padding: 20px;
@@ -258,39 +223,58 @@
             border-top: 1px solid #1a1a2a;
             margin-top: 40px;
         }
+
+        /* LOADING */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 700px) {
+            nav { padding: 0 10px; }
+            nav a { padding: 14px 12px; font-size: 13px; }
+            .live-timer { font-size: 32px; }
+            .news-item { padding: 15px 18px; }
+            .telemetry-row { gap: 10px; }
+            .telem-box { min-width: 90px; padding: 12px; }
+        }
     </style>
 </head>
 <body>
 
-<!-- === TOP BAR === -->
+<!-- TOP BAR -->
 <div class="topbar">
     <span class="brand">CHINA SPACE LIVE</span>
     <div class="lang-switcher">
-        <button onclick="setLang('ru')" id="btn-ru" class="active">RU</button>
-        <button onclick="setLang('en')" id="btn-en">EN</button>
-        <button onclick="setLang('zh')" id="btn-zh">中文</button>
+        <button onclick="switchLang('ru')" id="btn-ru" class="active">RU</button>
+        <span class="separator">|</span>
+        <button onclick="switchLang('en')" id="btn-en">EN</button>
+        <span class="separator">|</span>
+        <button onclick="switchLang('zh')" id="btn-zh">中文</button>
     </div>
 </div>
 
-<!-- === NAV === -->
+<!-- NAV -->
 <nav>
-    <a href="#" class="active" onclick="showPage('news'); return false;" id="nav-news">📰 Новости</a>
-    <a href="#" onclick="showPage('space'); return false;" id="nav-space">🚀 Космическая программа</a>
+    <a class="active" onclick="showPage('news')" id="nav-news">📰 Новости</a>
+    <a onclick="showPage('space')" id="nav-space">🚀 Космическая программа</a>
 </nav>
 
-<!-- ==================== NEWS PAGE ==================== -->
+<!-- NEWS PAGE -->
 <div class="page active" id="page-news">
-    <div id="news-container"></div>
-    <div id="news-loading" style="text-align:center;padding:40px;color:var(--muted);">Загрузка новостей...</div>
+    <div id="news-container"><div class="loading">Загрузка новостей...</div></div>
 </div>
 
-<!-- ==================== SPACE PAGE ==================== -->
+<!-- SPACE PAGE -->
 <div class="page" id="page-space">
     <div class="mission-header">
         <span class="rocket-badge">CZ-5B</span>
         <h2 id="mission-name">CEOS-1 · Первая партия «Небесный глаз»</h2>
         <p style="color:var(--muted);">Космодром Вэньчан · Стартовый стол №1</p>
-        <div class="live-timer" id="live-timer">T-12:00:00:00</div>
+        <div class="live-timer" id="live-timer">T-15:00:00:00</div>
         <div class="event-current" id="live-event">Ожидание старта...</div>
         <div class="telemetry-row">
             <div class="telem-box"><div class="val" id="live-alt">0</div><div class="lbl">Высота (км)</div></div>
@@ -303,63 +287,48 @@
 
 <footer>China Space Live © 2026 · Данные обновляются в реальном времени</footer>
 
-<!-- ==================== SCRIPTS ==================== -->
+<!-- GOOGLE TRANSLATE -->
+<div id="google_translate_element" style="display:none;"></div>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
 <script>
-// ========== ЯЗЫК ==========
+// ========== GOOGLE TRANSLATE INIT ==========
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: 'ru',
+        includedLanguages: 'ru,en,zh-CN',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+        autoDisplay: false
+    }, 'google_translate_element');
+}
+
 let currentLang = 'ru';
 
-const translations = {
-    ru: {
-        news: '📰 Новости',
-        space: '🚀 Космическая программа',
-        loading: 'Загрузка новостей...',
-        mapBtn: '🌌 Карта системы',
-        awaiting: 'Ожидание старта...',
-        altitude: 'Высота (км)',
-        speed: 'Скорость (км/с)',
-        stage: 'Этап'
-    },
-    en: {
-        news: '📰 News',
-        space: '🚀 Space Program',
-        loading: 'Loading news...',
-        mapBtn: '🌌 System Map',
-        awaiting: 'Awaiting launch...',
-        altitude: 'Altitude (km)',
-        speed: 'Speed (km/s)',
-        stage: 'Stage'
-    },
-    zh: {
-        news: '📰 新闻',
-        space: '🚀 航天计划',
-        loading: '加载新闻...',
-        mapBtn: '🌌 系统地图',
-        awaiting: '等待发射...',
-        altitude: '高度 (公里)',
-        speed: '速度 (公里/秒)',
-        stage: '阶段'
-    }
-};
-
-function setLang(lang) {
+function switchLang(lang) {
     currentLang = lang;
     document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
     document.getElementById('btn-en').classList.toggle('active', lang === 'en');
     document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
     
-    const t = translations[lang];
-    document.getElementById('nav-news').textContent = t.news;
-    document.getElementById('nav-space').textContent = t.space;
-    document.getElementById('news-loading').textContent = t.loading;
-    document.querySelector('.map-btn').textContent = t.mapBtn;
-    document.getElementById('live-stage').parentElement.querySelector('.lbl').textContent = t.stage;
-    document.getElementById('live-alt').parentElement.querySelector('.lbl').textContent = t.altitude;
-    document.getElementById('live-vel').parentElement.querySelector('.lbl').textContent = t.speed;
+    // Google Translate: меняем язык
+    const select = document.querySelector('.goog-te-combo');
+    if (select) {
+        const langMap = { ru: 'ru', en: 'en', zh: 'zh-CN' };
+        select.value = langMap[lang];
+        select.dispatchEvent(new Event('change'));
+    }
     
-    loadNews();
+    // Если Google Translate не загрузился — пробуем ещё раз
+    setTimeout(() => {
+        const select2 = document.querySelector('.goog-te-combo');
+        if (select2 && select2.value !== ({ru:'ru',en:'en',zh:'zh-CN'}[lang])) {
+            select2.value = {ru:'ru',en:'en',zh:'zh-CN'}[lang];
+            select2.dispatchEvent(new Event('change'));
+        }
+    }, 500);
 }
 
-// ========== НАВИГАЦИЯ ==========
+// ========== NAV ==========
 function showPage(page) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + page).classList.add('active');
@@ -367,159 +336,34 @@ function showPage(page) {
     document.getElementById('nav-' + page).classList.add('active');
 }
 
-// ========== НОВОСТИ (подробные!) ==========
-const newsData = [
-    {
-        time: "2026-06-21T23:30:00+08:00",
-        flag: "🇨🇳",
-        title: "МИД КНР завершил подготовку планов эвакуации граждан с Ближнего Востока",
-        body: `<p>Министерство иностранных дел Китайской Народной Республики завершило подготовку детальных планов экстренной эвакуации китайских граждан из стран Ближнего Востока. Работа велась в закрытом режиме с 20 июня.</p>
-        <p><strong>Охват планов:</strong></p>
-        <ul>
-            <li><strong>Израиль:</strong> 8 000 граждан КНР. Основной маршрут — морская эвакуация через порт Хайфа при поддержке кораблей ВМС НОАК из состава антипиратской миссии в Красном море. Запасной маршрут — воздушный коридор через Амман (Иордания).</li>
-            <li><strong>Ливан:</strong> 1 500 граждан. Эвакуация через Бейрут → Кипр при содействии посольства КНР в Никосии.</li>
-            <li><strong>Иордания:</strong> 2 000 граждан. Воздушная эвакуация через Амман.</li>
-            <li><strong>Сирия:</strong> 500 граждан. Морская эвакуация через Латакию.</li>
-        </ul>
-        <p>Посольства КНР в Тель-Авиве, Бейруте, Аммане и Дамаске распространили через закрытые WeChat-группы памятки о порядке действий при чрезвычайной ситуации. Китайские туроператоры приостановили продажу туров в регион до особого распоряжения.</p>
-        <p>Отряд ВМС НОАК в составе эсминца, фрегата и судна снабжения завершил смещение к Баб-эль-Мандебскому проливу и находится в южной части Красного моря в готовности к приёму эвакуируемых. Официальная позиция МИД КНР: <em>«Китай — нейтральная сторона. Мы поддерживаем мирные переговоры и заботимся о безопасности наших граждан».</em></p>`,
-        photo: null
-    },
-    {
-        time: "2026-06-21T20:00:00+08:00",
-        flag: "🇨🇳",
-        title: "SIA: Председатель КНР провёл первый закрытый разговор с будущим директором Агентства стратегической разведки",
-        body: `<p>По данным из информированных источников, 21 июня в Пекине состоялся первый закрытый разговор Председателя КНР с назначенным директором нового Агентства стратегической разведки (Strategic Intelligence Agency, SIA). Личность директора не раскрывается — в публичной жизни он занимает должность заместителя директора департамента сельского хозяйства провинции Хэнань.</p>
-        <p><strong>Ключевые решения встречи:</strong></p>
-        <ul>
-            <li>Утверждена структура SIA: 6 отделов — «Глаз» (спутниковая аналитика, 120 аналитиков), «Ухо» (радиоэлектронная разведка, 60 специалистов), «Рука» (полевые операции, 40 агентов), «Тень» (дезинформация, 25 человек), «Меч» (секретные вооружения, 20 инженеров), «Зеркало» (контрразведка, 15 человек).</li>
-            <li>Штаб-квартира: подземный комплекс под оптовым овощным рынком в 40 км от Чжэнчжоу. 6 подземных этажей. Автономность — 90 суток.</li>
-            <li>Бюджет на 2026 год: $3 млрд, скрытых в семи разных статьях государственных расходов.</li>
-            <li>Директору поручено к 1 сентября представить детальный план создания Агентства. Полная операционная готовность — декабрь 2028.</li>
-            <li>SIA не входит в структуру ГККЭ. Подчиняется напрямую Председателю. Имеет полный доступ к данным CEOS в реальном времени, но ГККЭ не имеет доступа к SIA.</li>
-        </ul>`,
-        photo: null
-    },
-    {
-        time: "2026-06-21T16:05:00+08:00",
-        flag: "🇨🇳",
-        title: "CNSA открыло приём заявок в 4-е поколение тайконавтов — 78 мест, 7 стран",
-        body: `<p>Китайское национальное космическое управление официально открыло приём заявок в отряд тайконавтов 4-го поколения. Приём продлится до 1 августа 2026 года. Требования: возраст до 35 лет, высшее инженерное или естественнонаучное образование, отличное здоровье. Опыл полётов приветствуется.</p>
-        <p><strong>Квоты:</strong></p>
-        <ul>
-            <li>Граждане КНР — 71 место</li>
-            <li>Россия — 2 места</li>
-            <li>Казахстан — 1 место</li>
-            <li>Япония — 1 место</li>
-            <li>Бразилия — 1 место</li>
-            <li>Иран — 1 место</li>
-            <li>ЮАР — 1 место</li>
-        </ul>
-        <p><strong>Распределение по программам:</strong> «Тяньгун» (24 чел.), Лунная база (16 чел.), Марсианская миссия (20 чел.), Испытатели новой техники (8 чел.), Резерв (10 чел.).</p>
-        <p>Конкурс ожидается на уровне 200+ человек на место среди граждан КНР. Иностранные кандидаты выдвигаются через национальные космические агентства своих стран.</p>`,
-        photo: null
-    },
-    {
-        time: "2026-06-21T16:00:00+08:00",
-        flag: "🇨🇳",
-        title: "Председатель КНР поручил МИД начать переговоры с Казахстаном о новых условиях аренды космодрома Байконур",
-        body: `<p>Председатель КНР подписал поручение Министерству иностранных дел о начале официальных переговоров с Республикой Казахстан об изменении условий аренды космодрома Байконур.</p>
-        <p><strong>Китайская сторона предлагает:</strong></p>
-        <ul>
-            <li>Продление аренды до 2075 года (текущий срок истекает в 2050).</li>
-            <li>Строительство дополнительного стартового стола для сверхтяжёлых ракет CZ-9.</li>
-            <li>Право построить третий стартовый стол специально под CZ-9.</li>
-            <li>Размещение китайского обслуживающего персонала до 500 человек на постоянной основе.</li>
-            <li>Расширение зоны хранения ракетного топлива.</li>
-            <li>Повышение арендной платы со $115 млн/год до $400 млн/год.</li>
-            <li>Инвестиции $2,5 млрд в модернизацию инфраструктуры Байконура.</li>
-        </ul>
-        <p>Первый раунд переговоров запланирован на 15 июля в Астане. Казахстанская сторона предварительно выразила заинтересованность.</p>`,
-        photo: null
-    },
-    {
-        time: "2026-06-21T12:00:00+08:00",
-        flag: "🇨🇳",
-        title: "ГККЭ провела закрытое совещание по плавучему космодрому «Красный Дракон»",
-        body: `<p>Государственная Комиссия по Космической Экспансии провела закрытое совещание, на котором был утверждён окончательный график модульной сборки плавучего экваториального космодрома «Красный Дракон».</p>
-        <p><strong>Ключевые параметры проекта:</strong></p>
-        <ul>
-            <li>Платформа: 3 км × 2 км. Два стартовых стола. Посадочная полоса для дронов.</li>
-            <li>Жилой комплекс на 500 человек персонала.</li>
-            <li>Точка размещения: экватор, 0° широты, 160° з.д. (международные воды Тихого океана). Охрана — ВМС НОАК.</li>
-            <li>Порт приписки: Ситтуэ, Мьянма (логистический хаб).</li>
-            <li>Первый модуль платформы будет спущен на воду в марте 2027 года. Готовность первого стартового стола — декабрь 2027. Полная готовность — июнь 2028.</li>
-            <li>Головные подрядчики: судоверфи Даляня и Шанхая.</li>
-        </ul>
-        <p>Экваториальное размещение позволяет экономить до 18% топлива при запусках на геостационарную орбиту и к Луне за счёт максимальной скорости вращения Земли.</p>`,
-        photo: null
-    },
-    {
-        time: "2026-06-16T09:05:00+08:00",
-        flag: "🇨🇳",
-        title: "Опубликован Указ Председателя КНР «О строительстве Большого Кольцевого Коллайдера» (LCC «Тайцзи»)",
-        body: `<p>16 июня в 09:05 по пекинскому времени вступил в силу Указ Председателя КНР о начале строительства Большого Кольцевого Коллайдера «Тайцзи» (LCC).</p>
-        <p><strong>Технические характеристики:</strong></p>
-        <ul>
-            <li>Длина кольца: 120 км (CERN LHC — 27 км, планируемый FCC — 91 км).</li>
-            <li>Энергия столкновений (протон-протон): до 150 ТэВ.</li>
-            <li>Магниты: высокотемпературный сверхпроводник (ВТСП), 20+ Тесла.</li>
-            <li>Глубина залегания: 350–400 метров под землёй.</li>
-            <li>Локация: Сычуаньская котловина, в 50 км южнее Куньмина. Гранитный щит, минимальная сейсмичность.</li>
-            <li>Тоннель диаметром 8 метров. 6 подземных экспериментальных залов (каждый размером с собор).</li>
-            <li>Бюджет: $50 млрд. Срок строительства: 10 лет. Первый пучок — 2035 год.</li>
-        </ul>
-        <p>Строительство завода по выпуску ВТСП-ленты в Чэнду начнётся в августе. Геологоразведка трассы уже ведётся — пробурено 5 тестовых скважин. Предварительные данные: 93% трассы проходит через стабильный гранитный массив.</p>`,
-        photo: null
-    },
-    {
-        time: "2026-06-16T09:00:00+08:00",
-        flag: "🇨🇳",
-        title: "Опубликован Указ «О создании Государственной Комиссии по Космической Экспансии» (ГККЭ)",
-        body: `<p>Опубликован Указ Председателя КНР о создании Государственной Комиссии по Космической Экспансии — высшего органа управления космической программой страны.</p>
-        <p><strong>Состав Комиссии:</strong></p>
-        <ul>
-            <li>Председатель — лично Председатель КНР.</li>
-            <li>Заместители: Премьер Госсовета, Министр обороны, Министр науки и технологий, Директор CNSA.</li>
-            <li>Комиссия получает право вето на любые гражданские проекты, мешающие космической программе.</li>
-            <li>Бюджет на 2026 год: $300 млрд (из них $340 млрд с учётом резервов).</li>
-        </ul>
-        <p>Назначены руководители направлений: «Луна», «Марс», «Рой» (орбитальная энергетика), «Космодромы», «Небесный глаз» (CEOS), «Тайцзи» (LCC), «Кадры» (CUSST).</p>`,
-        photo: null
-    }
-];
-
-function loadNews() {
+// ========== LOAD NEWS ==========
+async function loadNews() {
     const container = document.getElementById('news-container');
-    container.innerHTML = '';
-    
-    newsData.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'news-item';
-        let html = `
-            <div class="news-time"><span class="dot"></span> ${formatDate(item.time)}</div>
-            <div class="news-title"><span class="news-flag">${item.flag}</span> ${item.title}</div>
-            <div class="news-body">${item.body}</div>
-        `;
-        if (item.photo) {
-            html += `
-            <div class="news-photo">
-                <img src="${item.photo.url}" alt="${item.photo.alt || ''}">
-                <div class="caption">${item.photo.caption || ''}</div>
-            </div>`;
-        }
-        div.innerHTML = html;
-        container.appendChild(div);
-    });
-    
-    document.getElementById('news-loading').style.display = 'none';
-}
-
-function formatDate(iso) {
-    const d = new Date(iso);
-    const opts = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Shanghai' };
-    const str = d.toLocaleString(currentLang === 'zh' ? 'zh-CN' : currentLang, opts);
-    return `⏰ ${str} (UTC+8)`;
+    try {
+        const response = await fetch('data/news.json');
+        const data = await response.json();
+        container.innerHTML = '';
+        
+        data.news.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'news-item';
+            let html = `
+                <div class="news-time"><span class="dot"></span> ⏰ ${item.time}</div>
+                <div class="news-title"><span class="news-flag">${item.flag}</span> ${item.title}</div>
+                <div class="news-body">${item.body}</div>`;
+            if (item.photo) {
+                html += `
+                <div class="news-photo">
+                    <img src="${item.photo.url}" alt="${item.photo.alt || ''}" loading="lazy">
+                    <div class="caption">${item.photo.caption || ''}</div>
+                </div>`;
+            }
+            div.innerHTML = html;
+            container.appendChild(div);
+        });
+    } catch (e) {
+        container.innerHTML = '<div class="loading">Ошибка загрузки новостей. Проверьте файл data/news.json</div>';
+    }
 }
 
 // ========== LIVE TIMER ==========
@@ -528,7 +372,7 @@ const events = [
     { t: -14400, text: 'Заправка: жидкий водород и кислород подаются в баки', alt: 0, vel: 0, stage: 'Заправка' },
     { t: -3600, text: 'Экипаж запуска на боевых постах. Проверка телеметрии', alt: 0, vel: 0, stage: 'Проверка' },
     { t: -600, text: 'Финальная проверка систем. Отключение наземного питания', alt: 0, vel: 0, stage: 'Готовность' },
-    { t: -60, text: 'ЗАЖИГАНИЕ. Тяга 10 620 кН', alt: 0, vel: 0, stage: 'Зажигание' },
+    { t: -60, text: 'ЗАЖИГАНИЕ. Двигатели выводятся на полную тягу', alt: 0, vel: 0, stage: 'Зажигание' },
     { t: 0, text: 'СТАРТ. Отрыв от стартового стола', alt: 0, vel: 0, stage: 'Старт' },
     { t: 60, text: 'Прохождение звукового барьера. 1 Мах', alt: 12, vel: 0.34, stage: 'Атмосферный' },
     { t: 90, text: 'Max Q — максимальное аэродинамическое сопротивление', alt: 18, vel: 0.46, stage: 'Max Q' },
@@ -537,43 +381,40 @@ const events = [
     { t: 510, text: 'Выключение центрального блока. Выход на орбиту 200×200 км', alt: 195, vel: 7.8, stage: 'Орбита' },
     { t: 540, text: 'Отделение блока выведения с 12 спутниками', alt: 200, vel: 7.8, stage: 'Отделение ПН' },
     { t: 1500, text: 'Подъём орбиты до 500×500 км', alt: 500, vel: 7.85, stage: 'Подъём орбиты' },
-    { t: 5400, text: 'Начало отделения спутников (12 шт., интервал 90 сек)', alt: 500, vel: 7.85, stage: 'Развёртывание' },
+    { t: 5400, text: 'Начало отделения спутников (12 шт., интервал 90 секунд)', alt: 500, vel: 7.85, stage: 'Развёртывание' },
     { t: 6480, text: 'Все 12 спутников отделены. Блок выведения пуст', alt: 500, vel: 7.85, stage: 'Завершение' },
-    { t: 10800, text: 'Все спутники подтвердили работоспособность', alt: 500, vel: 7.85, stage: 'Успех' }
+    { t: 10800, text: 'Все спутники подтвердили работоспособность. Миссия успешна', alt: 500, vel: 7.85, stage: 'Успех' }
 ];
 
 function updateLive() {
     const now = Date.now();
     const elapsed = (now - launchTime) / 1000;
     
-    // Таймер
     const timer = document.getElementById('live-timer');
     const abs = Math.abs(elapsed);
     const d = Math.floor(abs / 86400);
     const h = Math.floor((abs % 86400) / 3600);
     const m = Math.floor((abs % 3600) / 60);
     const s = Math.floor(abs % 60);
-    const sign = elapsed < 0 ? 'T-' : 'T+';
-    timer.textContent = `${sign}${d}:${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    timer.textContent = `${elapsed < 0 ? 'T-' : 'T+'}${d}:${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     
-    // Событие
     let currentEvent = events[0];
-    let nextEvent = events[1];
-    for (let i = 0; i < events.length; i++) {
+    let nextEvent = events[1] || events[0];
+    for (let i = events.length - 1; i >= 0; i--) {
         if (events[i].t <= elapsed) {
             currentEvent = events[i];
             nextEvent = events[i + 1] || events[i];
+            break;
         }
     }
     
     document.getElementById('live-event').textContent = currentEvent.text;
     document.getElementById('live-stage').textContent = currentEvent.stage;
     
-    // Интерполяция
-    if (currentEvent !== nextEvent && elapsed > currentEvent.t) {
-        const progress = Math.min(1, (elapsed - currentEvent.t) / (nextEvent.t - currentEvent.t));
-        document.getElementById('live-alt').textContent = (currentEvent.alt + (nextEvent.alt - currentEvent.alt) * progress).toFixed(1);
-        document.getElementById('live-vel').textContent = (currentEvent.vel + (nextEvent.vel - currentEvent.vel) * progress).toFixed(2);
+    if (currentEvent !== nextEvent && elapsed > currentEvent.t && nextEvent.t > currentEvent.t) {
+        const p = (elapsed - currentEvent.t) / (nextEvent.t - currentEvent.t);
+        document.getElementById('live-alt').textContent = (currentEvent.alt + (nextEvent.alt - currentEvent.alt) * p).toFixed(1);
+        document.getElementById('live-vel').textContent = (currentEvent.vel + (nextEvent.vel - currentEvent.vel) * p).toFixed(2);
     } else {
         document.getElementById('live-alt').textContent = currentEvent.alt;
         document.getElementById('live-vel').textContent = currentEvent.vel;
