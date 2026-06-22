@@ -70,30 +70,27 @@ const camera=new THREE.PerspectiveCamera(45,container.clientWidth/container.clie
 const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(container.clientWidth,container.clientHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));container.appendChild(renderer.domElement);
 const labelRenderer=new CSS2DRenderer();labelRenderer.setSize(container.clientWidth,container.clientHeight);labelRenderer.domElement.style.position='absolute';labelRenderer.domElement.style.top='0';labelRenderer.domElement.style.pointerEvents='none';container.appendChild(labelRenderer.domElement);
 
-// Звёзды
 const starsGeo=new THREE.BufferGeometry();const sv=[];
 for(let i=0;i<4000;i++){const r=5000+Math.random()*8000,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);sv.push(r*Math.sin(ph)*Math.cos(th),r*Math.sin(ph)*Math.sin(th),r*Math.cos(ph));}
 starsGeo.setAttribute('position',new THREE.Float32BufferAttribute(sv,3));scene.add(new THREE.Points(starsGeo,new THREE.PointsMaterial({color:0xffffff,size:2})));
 
 const texLoader=new THREE.TextureLoader();
 
-// Солнце (далеко, но видно)
-const sunGeom=new THREE.SphereGeometry(20,32,32);
-const sunTex=texLoader.load('https://upload.wikimedia.org/wikipedia/commons/a/a4/Solarsystemscope_texture_8k_sun.jpg');
-const sunMesh=new THREE.Mesh(sunGeom,new THREE.MeshBasicMaterial({map:sunTex}));
+// Солнце (центр системы, далеко)
+const sunMesh=new THREE.Mesh(new THREE.SphereGeometry(20,32,32),new THREE.MeshBasicMaterial({map:texLoader.load('https://upload.wikimedia.org/wikipedia/commons/a/a4/Solarsystemscope_texture_8k_sun.jpg')}));
 sunMesh.position.set(1500,600,900);scene.add(sunMesh);
-sunMesh.add(new THREE.PointLight(0xffffff,2,0,0));scene.add(new THREE.AmbientLight(0x444466,0.6));
+sunMesh.add(new THREE.PointLight(0xffffff,2.5,0,0));scene.add(new THREE.AmbientLight(0x333355,0.4));
 
-// Земля (шейдер день/ночь — исправлен)
+// Шейдер Земли
 const earthShader=new THREE.ShaderMaterial({
-    uniforms:{dayTex:{value:texLoader.load('https://i.postimg.cc/VvdQdfF6/Daytime_Earth.jpg')},nightTex:{value:texLoader.load('https://i.postimg.cc/brscsyRy/Night_Earth.jpg')},sunDir:{value:new THREE.Vector3(1,0,0)},ambientLight:{value:0.12}},
-    vertexShader:`varying vec2 vUv;varying vec3 vWorldNormal;void main(){vec4 worldPos=modelMatrix*vec4(position,1.0);vWorldNormal=normalize(mat3(modelMatrix)*normal);vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
-    fragmentShader:`varying vec2 vUv;varying vec3 vWorldNormal;uniform sampler2D dayTex;uniform sampler2D nightTex;uniform vec3 sunDir;uniform float ambientLight;void main(){float l=dot(normalize(vWorldNormal),normalize(sunDir));float mixVal=smoothstep(-0.1,0.3,l);vec4 dayCol=texture2D(dayTex,vUv);vec4 nightCol=texture2D(nightTex,vUv);vec4 col=mix(nightCol,dayCol,mixVal);col.rgb+=nightCol.rgb*ambientLight;gl_FragColor=col;}`
+    uniforms:{dayTex:{value:texLoader.load('https://i.postimg.cc/VvdQdfF6/Daytime_Earth.jpg')},nightTex:{value:texLoader.load('https://i.postimg.cc/brscsyRy/Night_Earth.jpg')},sunPos:{value:sunMesh.position.clone()}},
+    vertexShader:`varying vec2 vUv;varying vec3 vWorldPos;varying vec3 vWorldNormal;void main(){vec4 wp=modelMatrix*vec4(position,1.0);vWorldPos=wp.xyz;vWorldNormal=normalize(mat3(modelMatrix)*normal);vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+    fragmentShader:`varying vec2 vUv;varying vec3 vWorldPos;varying vec3 vWorldNormal;uniform sampler2D dayTex;uniform sampler2D nightTex;uniform vec3 sunPos;void main(){vec3 toSun=normalize(sunPos-vWorldPos);float l=dot(normalize(vWorldNormal),toSun);float m=smoothstep(-0.15,0.25,l);vec4 d=texture2D(dayTex,vUv);vec4 n=texture2D(nightTex,vUv);vec4 c=mix(n,d,m);c.rgb+=n.rgb*0.08;gl_FragColor=c;}`
 });
 const earth=new THREE.Mesh(new THREE.SphereGeometry(6.371,64,64),earthShader);scene.add(earth);
-scene.add(new THREE.Mesh(new THREE.SphereGeometry(6.5,64,64),new THREE.MeshPhongMaterial({color:0x4488ff,transparent:true,opacity:0.1})));
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(6.5,64,64),new THREE.MeshPhongMaterial({color:0x4488ff,transparent:true,opacity:0.08})));
 
-// Планеты (упрощённая карта для фона)
+// Фоновые планеты
 const refDate=new Date('2020-01-01T00:00:00Z').getTime();const msDay=86400000;function daysSince(){return (Date.now()-refDate)/msDay;}
 const bgPlanets=[
     {name:'Меркурий',orbit:25,size:0.3,tex:'https://upload.wikimedia.org/wikipedia/commons/2/27/Solarsystemscope_texture_8k_mercury.jpg',period:88,angle0:4.4},
@@ -105,9 +102,8 @@ const bgPlanets=[
 const bgPlanetMeshes=[];
 bgPlanets.forEach(p=>{
     const mat=new THREE.MeshPhongMaterial({map:texLoader.load(p.tex),specular:0x111111,shininess:5});
-    const mesh=new THREE.Mesh(new THREE.SphereGeometry(p.size,32,32),mat);
-    mesh.userData=p;scene.add(mesh);bgPlanetMeshes.push(mesh);
-    const ring=new THREE.Mesh(new THREE.TorusGeometry(p.orbit,0.1,16,200),new THREE.MeshBasicMaterial({color:0x334466,transparent:true,opacity:0.5}));ring.rotation.x=-Math.PI/2;scene.add(ring);
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(p.size,32,32),mat);mesh.userData=p;scene.add(mesh);bgPlanetMeshes.push(mesh);
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(p.orbit,0.04,8,300),new THREE.MeshBasicMaterial({color:0x8899bb,transparent:true,opacity:0.7}));ring.rotation.x=-Math.PI/2;scene.add(ring);
 });
 
 // Космодром
@@ -183,8 +179,7 @@ function animate(){
     requestAnimationFrame(animate);
     const days=daysSince();
     bgPlanetMeshes.forEach(m=>{const p=m.userData;const a=p.angle0+(days/p.period)*Math.PI*2;m.position.set(Math.cos(a)*p.orbit,0,Math.sin(a)*p.orbit);m.rotation.y+=0.0005;});
-    const sdir=sunMesh.position.clone().sub(earth.position).normalize();
-    earthShader.uniforms.sunDir.value.copy(sdir);
+    earthShader.uniforms.sunPos.value.copy(sunMesh.position);
     if(targetPos){const tp=targetPos;camera.position.lerp(new THREE.Vector3(tp.x+Math.cos(camAngle)*Math.cos(camPolar)*camDist,tp.y+Math.sin(camPolar)*camDist,tp.z+Math.sin(camAngle)*Math.cos(camPolar)*camDist),0.05);camera.lookAt(tp);}
     renderer.render(scene,camera);labelRenderer.render(scene,camera);
 }animate();
