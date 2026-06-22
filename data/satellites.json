@@ -1,0 +1,41 @@
+{
+  "satellites": [
+    {
+      "id": "tiangong",
+      "name": "Тяньгун",
+      "name_en": "Tiangong",
+      "name_zh": "天宫",
+      "type": "station",
+      "parent": "Earth",
+      "orbit_km": 390,
+      "period_days": 0.064,
+      "angle0_rad": 0,
+      "color": "#ff0000",
+      "size": 0.3,
+      "model": null,
+      "description": {
+        "ru": "Китайская орбитальная станция «Тяньгун».",
+        "en": "Chinese space station Tiangong.",
+        "zh": "中国天宫空间站。"
+      },
+      "url": "https://en.wikipedia.org/wiki/Tiangong_space_station"
+    },
+    {
+      "id": "ceos-01",
+      "name": "CEOS-01",
+      "type": "satellite",
+      "parent": "Earth",
+      "orbit_km": 500,
+      "period_days": 0.065,
+      "angle0_rad": 0.5,
+      "color": "#00ff00",
+      "size": 0.08,
+      "model": null,
+      "description": {
+        "ru": "Спутник наблюдения Земли CEOS.",
+        "en": "Earth observation satellite CEOS.",
+        "zh": "地球观测卫星CEOS。"
+      }
+    }
+  ]
+}
