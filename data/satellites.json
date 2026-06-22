@@ -28,7 +28,7 @@
       "angle0_rad": 1.2,
       "color": "#ffffff",
       "size": 0.1,
-      "model": "satellites/iss.glb",
+      "model": "https://63338rf6wo.ucarecd.net/a9f43b41-9f1c-447f-bb45-f37d3a24f067/iss.glb",
       "model_scale": 0.015,
       "trajectory_file": null,
       "description": {
