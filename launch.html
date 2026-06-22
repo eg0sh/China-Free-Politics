@@ -2,20 +2,22 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Запуск — China Space Live</title>
     <style>
         :root{--bg:#0a0a12;--surface:#111122;--border:#1a1a3a;--red:#cc0000;--gold:#ffcc00;--text:#e0e0e0;--muted:#888}
         *{margin:0;padding:0;box-sizing:border-box}
-        body{background:#000;color:var(--text);font-family:'Segoe UI','Courier New',monospace;height:100vh;overflow:hidden;display:flex}
+        body{background:#000;color:var(--text);font-family:'Segoe UI','Courier New',monospace;height:100vh;overflow:hidden;display:flex;touch-action:manipulation}
         #splash{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,#0a0a2e 0%,#000010 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;transition:opacity 0.6s}
         #splash.hidden{opacity:0;pointer-events:none}
-        #splash .logo{width:80px;height:80px;border:3px solid var(--red);border-radius:50%;animation:spin 3s linear infinite;margin-bottom:20px;position:relative}
-        #splash .logo::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:20px;height:20px;background:var(--red);border-radius:50%}
+        #splash .logo{width:100px;height:100px;position:relative;margin-bottom:25px}
+        #splash .logo .ring{position:absolute;top:0;left:0;width:100%;height:100%;border:3px solid var(--red);border-radius:50%;animation:spin 2s linear infinite}
+        #splash .logo .ring2{position:absolute;top:15%;left:15%;width:70%;height:70%;border:2px solid #4488ff;border-radius:50%;animation:spin 3s linear infinite reverse}
+        #splash .logo .dot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:12px;height:12px;background:#fff;border-radius:50%}
         @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-        #splash h1{color:#fff;font-size:32px;font-weight:300;letter-spacing:2px}
+        #splash h1{color:#fff;font-size:34px;font-weight:300;letter-spacing:3px;text-align:center}
         #splash h1 span{color:var(--red);font-weight:700}
-        #splash p{color:#888;margin-top:8px;font-size:14px}
+        #splash p{color:#888;margin-top:10px;font-size:15px;text-align:center;max-width:80%}
         #viewport{flex:1;position:relative}
         #viewport canvas{display:block}
         #panel{width:420px;background:var(--bg);border-left:2px solid var(--red);display:flex;flex-direction:column;overflow-y:auto;z-index:10}
@@ -41,13 +43,7 @@
     </style>
 </head>
 <body>
-
-<div id="splash">
-    <div class="logo"></div>
-    <h1>China<span>Space</span>Live</h1>
-    <p>Отслеживание и Визуализация в Реальном Времени</p>
-</div>
-
+<div id="splash"><div class="logo"><div class="ring"></div><div class="ring2"></div><div class="dot"></div></div><h1>China<span>Space</span>Live</h1><p>Отслеживание и Визуализация в Реальном Времени</p></div>
 <div id="viewport"></div>
 <div id="panel">
     <div class="header"><span class="rocket-tag" id="rocket-badge">CZ-5B</span><h2 id="mission-title">Загрузка...</h2><p style="font-size:12px;color:var(--muted);margin-top:4px" id="mission-date"></p></div>
@@ -62,7 +58,6 @@
     <div class="objects-section"><h3>📦 Компоненты</h3><div id="objects-list"></div></div>
     <div class="btn-row"><a href="map.html" class="btn btn-map">🌌 Карта системы</a><a href="index.html" class="btn btn-back">← На главную</a></div>
 </div>
-
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
@@ -72,60 +67,42 @@ const container=document.getElementById('viewport');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x000011);
 const camera=new THREE.PerspectiveCamera(45,container.clientWidth/container.clientHeight,0.001,50000);
 const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(container.clientWidth,container.clientHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));container.appendChild(renderer.domElement);
-
 const starsGeo=new THREE.BufferGeometry();const sv=[];
 for(let i=0;i<3000;i++){const r=3000+Math.random()*5000,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);sv.push(r*Math.sin(ph)*Math.cos(th),r*Math.sin(ph)*Math.sin(th),r*Math.cos(ph));}
 starsGeo.setAttribute('position',new THREE.Float32BufferAttribute(sv,3));scene.add(new THREE.Points(starsGeo,new THREE.PointsMaterial({color:0xffffff,size:1.5})));
 scene.add(new THREE.DirectionalLight(0xffffff,2));scene.add(new THREE.AmbientLight(0x333355,0.8));
-
 const texLoader=new THREE.TextureLoader();
-const earthDayTex=texLoader.load('https://i.postimg.cc/VvdQdfF6/Daytime_Earth.jpg');
-const earthNightTex=texLoader.load('https://i.postimg.cc/brscsyRy/Night_Earth.jpg');
 const earthShader=new THREE.ShaderMaterial({
-    uniforms:{dayTex:{value:earthDayTex},nightTex:{value:earthNightTex},sunDir:{value:new THREE.Vector3(1,0,0)}},
+    uniforms:{dayTex:{value:texLoader.load('https://i.postimg.cc/VvdQdfF6/Daytime_Earth.jpg')},nightTex:{value:texLoader.load('https://i.postimg.cc/brscsyRy/Night_Earth.jpg')},sunDir:{value:new THREE.Vector3(1,0,0)}},
     vertexShader:`varying vec2 vUv;varying vec3 vNorm;void main(){vUv=uv;vNorm=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
     fragmentShader:`varying vec2 vUv;varying vec3 vNorm;uniform sampler2D dayTex;uniform sampler2D nightTex;uniform vec3 sunDir;void main(){float l=dot(normalize(vNorm),normalize(sunDir));l=clamp(l,0.0,1.0);vec4 d=texture2D(dayTex,vUv);vec4 n=texture2D(nightTex,vUv);float m=smoothstep(0.05,0.35,l);gl_FragColor=mix(n,d,m);gl_FragColor.rgb+=n.rgb*0.12*(1.0-m);}`
 });
 const earth=new THREE.Mesh(new THREE.SphereGeometry(6.371,64,64),earthShader);scene.add(earth);
 scene.add(new THREE.Mesh(new THREE.SphereGeometry(6.45,64,64),new THREE.MeshPhongMaterial({color:0x4488ff,transparent:true,opacity:0.12})));
-
-const padR=6.38;const padPhi=(90-19.6)*Math.PI/180;const padTheta=110.9*Math.PI/180;
-const padPos=new THREE.Vector3(padR*Math.sin(padPhi)*Math.cos(padTheta),padR*Math.cos(padPhi),padR*Math.sin(padPhi)*Math.sin(padTheta));
-const padMarker=new THREE.Mesh(new THREE.ConeGeometry(0.08,0.3,8),new THREE.MeshPhongMaterial({color:0xffcc00,emissive:0x331100}));
-padMarker.position.copy(padPos);padMarker.lookAt(new THREE.Vector3(0,0,0));padMarker.rotateX(Math.PI/2);scene.add(padMarker);
-
+const padR=6.38;const padPhi=(90-19.6)*Math.PI/180;const padTheta=110.9*Math.PI/180;const padPos=new THREE.Vector3(padR*Math.sin(padPhi)*Math.cos(padTheta),padR*Math.cos(padPhi),padR*Math.sin(padPhi)*Math.sin(padTheta));
+const padMarker=new THREE.Mesh(new THREE.ConeGeometry(0.08,0.3,8),new THREE.MeshPhongMaterial({color:0xffcc00,emissive:0x331100}));padMarker.position.copy(padPos);padMarker.lookAt(new THREE.Vector3(0,0,0));padMarker.rotateX(Math.PI/2);scene.add(padMarker);
 const rocketGroup=new THREE.Group();rocketGroup.visible=false;scene.add(rocketGroup);
 const S=0.003;
-const core=new THREE.Mesh(new THREE.CylinderGeometry(2.5*S,2.5*S,53.7*S,16),new THREE.MeshPhongMaterial({color:0xffffff}));core.position.y=53.7*S/2;rocketGroup.add(core);
-const boosters=[];
-for(let i=0;i<4;i++){const bg=new THREE.Group();const bh=30*S;bg.add(new THREE.Mesh(new THREE.CylinderGeometry(1.5*S,1.5*S,bh,8),new THREE.MeshPhongMaterial({color:0xdddddd}))).position.y=bh/2;const a=i*Math.PI/2+Math.PI/4;bg.position.set(Math.cos(a)*0.012,0,Math.sin(a)*0.012);bg.userData={separated:false};rocketGroup.add(bg);boosters.push(bg);}
+rocketGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(2.5*S,2.5*S,53.7*S,16),new THREE.MeshPhongMaterial({color:0xffffff}))).position.y=53.7*S/2;
+const boosters=[];for(let i=0;i<4;i++){const bg=new THREE.Group();const bh=30*S;bg.add(new THREE.Mesh(new THREE.CylinderGeometry(1.5*S,1.5*S,bh,8),new THREE.MeshPhongMaterial({color:0xdddddd}))).position.y=bh/2;const a=i*Math.PI/2+Math.PI/4;bg.position.set(Math.cos(a)*0.012,0,Math.sin(a)*0.012);bg.userData={separated:false};rocketGroup.add(bg);boosters.push(bg);}
 const upperStage=new THREE.Group();const uh=12*S;upperStage.add(new THREE.Mesh(new THREE.CylinderGeometry(2.1*S,2.1*S,uh,16),new THREE.MeshPhongMaterial({color:0xeeeeff}))).position.y=uh/2;upperStage.position.y=53.7*S+0.01;upperStage.userData={separated:false};rocketGroup.add(upperStage);
 const fairing=new THREE.Mesh(new THREE.ConeGeometry(2.5*S,20.5*S,16),new THREE.MeshPhongMaterial({color:0xcccccc,transparent:true,opacity:0.6}));fairing.position.y=53.7*S+uh+20.5*S/2;fairing.userData={separated:false};rocketGroup.add(fairing);
 const flame=new THREE.Mesh(new THREE.ConeGeometry(0.015,0.06,8),new THREE.MeshBasicMaterial({color:0xff6600,transparent:true,opacity:0.9}));flame.position.y=-0.03;flame.rotation.x=Math.PI;rocketGroup.add(flame);
 const trajPts=[];const trajLine=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0xffcc00,transparent:true,opacity:0.5}));scene.add(trajLine);
 
-let launchData=null,startTime=0,events=[],targetPos=new THREE.Vector3(0,0,0),camAngle=0,camDist=25,camHeight=15;
+let launchData=null,startTime=0,events=[],prepMessages=[],targetPos=new THREE.Vector3(0,0,0),camDist=25,camAngle=0,camPolar=0.5;
 const params=new URLSearchParams(window.location.search);const launchId=params.get('id')||'ceos-1';
-
-// Сообщения подготовки (меняются раз в 30 сек до T-5 мин)
-const prepMessages=[
-    'ПРОВЕРКА СИСТЕМ. Инженеры проводят финальный осмотр ракеты CZ-5B на стартовом столе №1 космодрома Вэньчан.',
-    'ЗАПРАВКА НЕ НАЧАТА. Баки ракеты пока пусты. Заправка жидким водородом и кислородом начнётся за 4 часа до старта.',
-    'ПОЛЁТНОЕ ЗАДАНИЕ ЗАГРУЖЕНО. 12 спутников CEOS установлены под обтекателем. Проверка герметичности завершена.',
-    'МЕТЕОСВОДКА. Вэньчан: ветер 5 м/с, облачность 20%, +28°C. Условия благоприятные для запуска.',
-    'ЭКИПАЖ ЗАПУСКА ГОТОВ. 50 операторов ЦУПа прошли предполётный брифинг. Системы телеметрии проверены.'
-];
 
 fetch('data/launches.json?'+Date.now()).then(r=>r.json()).then(data=>{
     launchData=data.launches.find(l=>l.id===launchId)||data.launches[0];
     document.getElementById('mission-title').textContent=launchData.name;
     document.getElementById('rocket-badge').textContent=launchData.rocket;
     document.getElementById('mission-date').textContent=new Date(launchData.start_time).toLocaleString('ru-RU',{timeZone:'Asia/Shanghai'})+' (UTC+8)';
-    startTime=new Date(launchData.start_time).getTime();events=launchData.events;
+    startTime=new Date(launchData.start_time).getTime();events=launchData.events;prepMessages=launchData.prep_messages||[];
     update();setInterval(update,250);
 }).catch(()=>document.getElementById('mission-title').textContent='Ошибка');
 
-let prepIndex=0,prepTimer=0;
+let prepIndex=0;
 function update(){
     if(!launchData)return;
     const elapsed=(Date.now()-startTime)/1000;
@@ -133,10 +110,11 @@ function update(){
     const d=Math.floor(abs/86400),h=Math.floor((abs%86400)/3600),m=Math.floor((abs%3600)/60),s=Math.floor(abs%60);
     document.getElementById('timer').textContent=(elapsed<0?'T-':'T+')+`${d}:${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     
-    if(elapsed<-300){
-        prepTimer+=0.25;
-        if(prepTimer>30){prepTimer=0;prepIndex=(prepIndex+1)%prepMessages.length;}
-        document.getElementById('event-text').textContent=prepMessages[prepIndex];
+    // Поиск сообщения подготовки
+    if(elapsed<-300&&prepMessages.length>0){
+        let msg=prepMessages[0];
+        for(let i=prepMessages.length-1;i>=0;i--){if(prepMessages[i].t<=elapsed){msg=prepMessages[i];break;}}
+        document.getElementById('event-text').textContent=msg.text;
         document.getElementById('stage-name').textContent='Подготовка';
         document.getElementById('alt').textContent='0';document.getElementById('vel').textContent='0';document.getElementById('dist').textContent='0';
         rocketGroup.visible=false;flame.visible=false;targetPos.copy(padPos);
@@ -147,9 +125,9 @@ function update(){
     rocketGroup.visible=true;
     let cur=events[0],nxt=events[1]||events[0];
     for(let i=0;i<events.length;i++){if(events[i].t<=elapsed){cur=events[i];nxt=events[i+1]||events[i];}}
-    document.getElementById('event-text').textContent=cur.text;document.getElementById('stage-name').textContent=cur.stage;
-    let alt=cur.alt,vel=cur.vel;
-    if(cur!==nxt&&elapsed>cur.t&&elapsed<nxt.t){const p=(elapsed-cur.t)/(nxt.t-cur.t);alt=cur.alt+(nxt.alt-cur.alt)*p;vel=cur.vel+(nxt.vel-cur.vel)*p;}
+    document.getElementById('event-text').textContent=cur.text;document.getElementById('stage-name').textContent=cur.stage||'—';
+    let alt=cur.alt||0,vel=cur.vel||0;
+    if(cur!==nxt&&elapsed>cur.t&&elapsed<nxt.t){const p=(elapsed-cur.t)/(nxt.t-cur.t);alt=(cur.alt||0)+((nxt.alt||0)-(cur.alt||0))*p;vel=(cur.vel||0)+((nxt.vel||0)-(cur.vel||0))*p;}
     document.getElementById('alt').textContent=alt.toFixed(1);document.getElementById('vel').textContent=vel.toFixed(2);document.getElementById('dist').textContent=(alt*1.5).toFixed(0);
     
     if(elapsed>-300&&elapsed<600){
@@ -164,7 +142,6 @@ function update(){
     if(elapsed>=165&&!boosters[0].userData.separated)boosters.forEach(b=>{b.userData.separated=true;rocketGroup.remove(b);});
     if(elapsed>=260&&!fairing.userData.separated){fairing.userData.separated=true;rocketGroup.remove(fairing);}
     if(elapsed>=540&&!upperStage.userData.separated){upperStage.userData.separated=true;rocketGroup.remove(upperStage);}
-    
     let html='';const cs=elapsed>540?'status-orbiting':(elapsed>510?'status-separated':'status-active');
     html+=`<div class="object-row"><span class="name">🔵 Центральный блок</span><span class="status ${cs}">${elapsed>540?'На орбите':(elapsed>510?'Выключен':'Активен')}</span></div>`;
     boosters.forEach((b,i)=>html+=`<div class="object-row"><span class="name">🟡 Ускоритель ${i+1}</span><span class="status ${b.userData.separated?'status-splash':'status-active'}">${b.userData.separated?'Разрушен':'Активен'}</span></div>`);
@@ -174,20 +151,26 @@ function update(){
     document.getElementById('objects-list').innerHTML=html;
 }
 
-// Управление камерой
-container.addEventListener('wheel',e=>{camDist=Math.max(3,Math.min(5000,camDist+e.deltaY*0.3));});
-let dragging=false,lastX=0;
-container.addEventListener('mousedown',e=>{if(e.button===0){dragging=true;lastX=e.clientX;}});
-window.addEventListener('mouseup',()=>dragging=false);
-window.addEventListener('mousemove',e=>{if(dragging){camAngle+=(e.clientX-lastX)*0.005;lastX=e.clientX;}});
+// Управление (телефон + ПК)
+container.addEventListener('wheel',e=>{camDist=Math.max(3,Math.min(5000,camDist+e.deltaY*0.3));},{passive:true});
+let ltX=0,ltY=0,isDrag=false,lastPD=0;
+container.addEventListener('touchstart',e=>{if(e.touches.length===2){lastPD=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}else if(e.touches.length===1){ltX=e.touches[0].clientX;ltY=e.touches[0].clientY;isDrag=true;}});
+container.addEventListener('touchmove',e=>{
+    if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);camDist=Math.max(3,Math.min(5000,camDist+(lastPD-d)*0.3));lastPD=d;}
+    else if(e.touches.length===1&&isDrag){camAngle-=(e.touches[0].clientX-ltX)*0.005;camPolar=Math.max(-1.5,Math.min(1.5,camPolar+(e.touches[0].clientY-ltY)*0.005));ltX=e.touches[0].clientX;ltY=e.touches[0].clientY;}
+});
+container.addEventListener('touchend',()=>isDrag=false);
+container.addEventListener('mousedown',e=>{isDrag=true;ltX=e.clientX;ltY=e.clientY;});
+window.addEventListener('mouseup',()=>isDrag=false);
+window.addEventListener('mousemove',e=>{if(isDrag){camAngle-=(e.clientX-ltX)*0.005;camPolar=Math.max(-1.5,Math.min(1.5,camPolar+(e.clientY-ltY)*0.005));ltX=e.clientX;ltY=e.clientY;}});
 
 function animate(){
     requestAnimationFrame(animate);
     earthShader.uniforms.sunDir.value.copy(new THREE.Vector3(1,0.3,0).normalize());
     if(targetPos){
-        const cx=targetPos.x+Math.cos(camAngle)*camDist;
-        const cz=targetPos.z+Math.sin(camAngle)*camDist;
-        const cy=targetPos.y+camHeight;
+        const cx=targetPos.x+Math.cos(camAngle)*Math.cos(camPolar)*camDist;
+        const cy=targetPos.y+Math.sin(camPolar)*camDist;
+        const cz=targetPos.z+Math.sin(camAngle)*Math.cos(camPolar)*camDist;
         camera.position.lerp(new THREE.Vector3(cx,cy,cz),0.05);
         camera.lookAt(targetPos);
     }
