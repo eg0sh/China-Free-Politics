@@ -1,0 +1,17 @@
+{
+  "model_path": "satellites/example_model.glb",
+  "rotation": { "x": 0, "y": 45, "z": 0 },
+  "always_face": "Sun",
+  "size_km": 0.5,
+  "trajectory": [
+    {"t_days": 0, "x": 150, "y": 0, "z": 0},
+    {"t_days": 50, "x": 200, "y": 30, "z": 20},
+    {"t_days": 120, "x": 300, "y": -10, "z": 50},
+    {"t_days": 200, "x": 450, "y": 0, "z": 80},
+    {"t_days": 350, "x": 600, "y": 20, "z": 120},
+    {"t_days": 500, "x": 800, "y": 50, "z": 200},
+    {"t_days": 700, "x": 1100, "y": 0, "z": 400}
+  ],
+  "trajectory_color": "#ff8800",
+  "show_trajectory": true
+}
