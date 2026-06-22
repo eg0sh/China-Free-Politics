@@ -1,5 +1,6 @@
 {
   "model_path": "satellites/example_model.glb",
+  "model_scale":1 1
   "rotation": { "x": 0, "y": 45, "z": 0 },
   "always_face": "Sun",
   "size_km": 0.5,
