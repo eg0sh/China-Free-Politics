@@ -25,7 +25,7 @@
         #panel .header h2{color:#fff;font-size:16px;margin-bottom:5px;word-wrap:break-word}
         #panel .header .rocket-tag{display:inline-block;background:var(--red);color:#fff;padding:3px 12px;border-radius:20px;font-size:12px}
         .timer-big{font-size:clamp(28px,6vw,42px);font-weight:bold;color:var(--gold);text-align:center;padding:15px;font-family:'Courier New',monospace;letter-spacing:2px;word-break:break-all}
-        .current-event{margin:10px 15px;padding:15px;background:var(--surface);border-left:4px solid var(--gold);border-radius:0 8px 8px 0;font-size:15px;line-height:1.5;min-height:60px}
+        .current-event{margin:10px 15px;padding:15px;background:var(--surface);border-left:4px solid var(--gold);border-radius:0 8px 8px 0;font-size:15px;line-height:1.5}
         .telemetry-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 15px;margin:10px 0}
         .telem-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
         .telem-card .val{font-size:clamp(16px,3vw,22px);font-weight:bold;color:var(--gold);font-family:'Courier New',monospace}
@@ -61,26 +61,60 @@
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 setTimeout(()=>document.getElementById('splash').classList.add('hidden'),3000);
 
 const container=document.getElementById('viewport');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x000011);
-const camera=new THREE.PerspectiveCamera(45,container.clientWidth/container.clientHeight,0.001,50000);
+const camera=new THREE.PerspectiveCamera(45,container.clientWidth/container.clientHeight,0.01,50000);
 const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(container.clientWidth,container.clientHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));container.appendChild(renderer.domElement);
+const labelRenderer=new CSS2DRenderer();labelRenderer.setSize(container.clientWidth,container.clientHeight);labelRenderer.domElement.style.position='absolute';labelRenderer.domElement.style.top='0';labelRenderer.domElement.style.pointerEvents='none';container.appendChild(labelRenderer.domElement);
+
+// Звёзды
 const starsGeo=new THREE.BufferGeometry();const sv=[];
-for(let i=0;i<3000;i++){const r=3000+Math.random()*5000,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);sv.push(r*Math.sin(ph)*Math.cos(th),r*Math.sin(ph)*Math.sin(th),r*Math.cos(ph));}
-starsGeo.setAttribute('position',new THREE.Float32BufferAttribute(sv,3));scene.add(new THREE.Points(starsGeo,new THREE.PointsMaterial({color:0xffffff,size:1.5})));
-scene.add(new THREE.DirectionalLight(0xffffff,2));scene.add(new THREE.AmbientLight(0x333355,0.8));
+for(let i=0;i<4000;i++){const r=5000+Math.random()*8000,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);sv.push(r*Math.sin(ph)*Math.cos(th),r*Math.sin(ph)*Math.sin(th),r*Math.cos(ph));}
+starsGeo.setAttribute('position',new THREE.Float32BufferAttribute(sv,3));scene.add(new THREE.Points(starsGeo,new THREE.PointsMaterial({color:0xffffff,size:2})));
+
 const texLoader=new THREE.TextureLoader();
+
+// Солнце (далеко, но видно)
+const sunGeom=new THREE.SphereGeometry(20,32,32);
+const sunTex=texLoader.load('https://upload.wikimedia.org/wikipedia/commons/a/a4/Solarsystemscope_texture_8k_sun.jpg');
+const sunMesh=new THREE.Mesh(sunGeom,new THREE.MeshBasicMaterial({map:sunTex}));
+sunMesh.position.set(1500,600,900);scene.add(sunMesh);
+sunMesh.add(new THREE.PointLight(0xffffff,2,0,0));scene.add(new THREE.AmbientLight(0x444466,0.6));
+
+// Земля (шейдер день/ночь — исправлен)
 const earthShader=new THREE.ShaderMaterial({
-    uniforms:{dayTex:{value:texLoader.load('https://i.postimg.cc/VvdQdfF6/Daytime_Earth.jpg')},nightTex:{value:texLoader.load('https://i.postimg.cc/brscsyRy/Night_Earth.jpg')},sunDir:{value:new THREE.Vector3(1,0,0)}},
-    vertexShader:`varying vec2 vUv;varying vec3 vNorm;void main(){vUv=uv;vNorm=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
-    fragmentShader:`varying vec2 vUv;varying vec3 vNorm;uniform sampler2D dayTex;uniform sampler2D nightTex;uniform vec3 sunDir;void main(){float l=dot(normalize(vNorm),normalize(sunDir));l=clamp(l,0.0,1.0);vec4 d=texture2D(dayTex,vUv);vec4 n=texture2D(nightTex,vUv);float m=smoothstep(0.05,0.35,l);gl_FragColor=mix(n,d,m);gl_FragColor.rgb+=n.rgb*0.12*(1.0-m);}`
+    uniforms:{dayTex:{value:texLoader.load('https://i.postimg.cc/VvdQdfF6/Daytime_Earth.jpg')},nightTex:{value:texLoader.load('https://i.postimg.cc/brscsyRy/Night_Earth.jpg')},sunDir:{value:new THREE.Vector3(1,0,0)},ambientLight:{value:0.12}},
+    vertexShader:`varying vec2 vUv;varying vec3 vWorldNormal;void main(){vec4 worldPos=modelMatrix*vec4(position,1.0);vWorldNormal=normalize(mat3(modelMatrix)*normal);vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+    fragmentShader:`varying vec2 vUv;varying vec3 vWorldNormal;uniform sampler2D dayTex;uniform sampler2D nightTex;uniform vec3 sunDir;uniform float ambientLight;void main(){float l=dot(normalize(vWorldNormal),normalize(sunDir));float mixVal=smoothstep(-0.1,0.3,l);vec4 dayCol=texture2D(dayTex,vUv);vec4 nightCol=texture2D(nightTex,vUv);vec4 col=mix(nightCol,dayCol,mixVal);col.rgb+=nightCol.rgb*ambientLight;gl_FragColor=col;}`
 });
 const earth=new THREE.Mesh(new THREE.SphereGeometry(6.371,64,64),earthShader);scene.add(earth);
-scene.add(new THREE.Mesh(new THREE.SphereGeometry(6.45,64,64),new THREE.MeshPhongMaterial({color:0x4488ff,transparent:true,opacity:0.12})));
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(6.5,64,64),new THREE.MeshPhongMaterial({color:0x4488ff,transparent:true,opacity:0.1})));
+
+// Планеты (упрощённая карта для фона)
+const refDate=new Date('2020-01-01T00:00:00Z').getTime();const msDay=86400000;function daysSince(){return (Date.now()-refDate)/msDay;}
+const bgPlanets=[
+    {name:'Меркурий',orbit:25,size:0.3,tex:'https://upload.wikimedia.org/wikipedia/commons/2/27/Solarsystemscope_texture_8k_mercury.jpg',period:88,angle0:4.4},
+    {name:'Венера',orbit:45,size:0.8,tex:'https://upload.wikimedia.org/wikipedia/commons/5/57/Solarsystemscope_texture_4k_venus_atmosphere.jpg',period:225,angle0:1.7},
+    {name:'Марс',orbit:85,size:0.45,tex:'https://upload.wikimedia.org/wikipedia/commons/4/46/Solarsystemscope_texture_2k_mars.jpg',period:687,angle0:5.9},
+    {name:'Юпитер',orbit:160,size:4,tex:'https://upload.wikimedia.org/wikipedia/commons/0/02/Jupiter_Texture_Map_%28Hubble_2024%29.png',period:4333,angle0:4.8},
+    {name:'Сатурн',orbit:230,size:3.2,tex:'https://upload.wikimedia.org/wikipedia/commons/8/8d/Saturn_Equirectangular_Texture_-_8192x4096.png',period:10759,angle0:5.2}
+];
+const bgPlanetMeshes=[];
+bgPlanets.forEach(p=>{
+    const mat=new THREE.MeshPhongMaterial({map:texLoader.load(p.tex),specular:0x111111,shininess:5});
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(p.size,32,32),mat);
+    mesh.userData=p;scene.add(mesh);bgPlanetMeshes.push(mesh);
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(p.orbit,0.1,16,200),new THREE.MeshBasicMaterial({color:0x334466,transparent:true,opacity:0.5}));ring.rotation.x=-Math.PI/2;scene.add(ring);
+});
+
+// Космодром
 const padR=6.38;const padPhi=(90-19.6)*Math.PI/180;const padTheta=110.9*Math.PI/180;const padPos=new THREE.Vector3(padR*Math.sin(padPhi)*Math.cos(padTheta),padR*Math.cos(padPhi),padR*Math.sin(padPhi)*Math.sin(padTheta));
 const padMarker=new THREE.Mesh(new THREE.ConeGeometry(0.08,0.3,8),new THREE.MeshPhongMaterial({color:0xffcc00,emissive:0x331100}));padMarker.position.copy(padPos);padMarker.lookAt(new THREE.Vector3(0,0,0));padMarker.rotateX(Math.PI/2);scene.add(padMarker);
+
+// Ракета
 const rocketGroup=new THREE.Group();rocketGroup.visible=false;scene.add(rocketGroup);
 const S=0.003;
 rocketGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(2.5*S,2.5*S,53.7*S,16),new THREE.MeshPhongMaterial({color:0xffffff}))).position.y=53.7*S/2;
@@ -90,9 +124,8 @@ const fairing=new THREE.Mesh(new THREE.ConeGeometry(2.5*S,20.5*S,16),new THREE.M
 const flame=new THREE.Mesh(new THREE.ConeGeometry(0.015,0.06,8),new THREE.MeshBasicMaterial({color:0xff6600,transparent:true,opacity:0.9}));flame.position.y=-0.03;flame.rotation.x=Math.PI;rocketGroup.add(flame);
 const trajPts=[];const trajLine=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0xffcc00,transparent:true,opacity:0.5}));scene.add(trajLine);
 
-let launchData=null,startTime=0,events=[],prepMessages=[],targetPos=new THREE.Vector3(0,0,0),camDist=25,camAngle=0,camPolar=0.5;
+let launchData=null,startTime=0,events=[],prepMessages=[],targetPos=padPos.clone(),camDist=25,camAngle=0,camPolar=0.5;
 const params=new URLSearchParams(window.location.search);const launchId=params.get('id')||'ceos-1';
-
 fetch('data/launches.json?'+Date.now()).then(r=>r.json()).then(data=>{
     launchData=data.launches.find(l=>l.id===launchId)||data.launches[0];
     document.getElementById('mission-title').textContent=launchData.name;
@@ -102,26 +135,20 @@ fetch('data/launches.json?'+Date.now()).then(r=>r.json()).then(data=>{
     update();setInterval(update,250);
 }).catch(()=>document.getElementById('mission-title').textContent='Ошибка');
 
-let prepIndex=0;
 function update(){
     if(!launchData)return;
     const elapsed=(Date.now()-startTime)/1000;
     const abs=Math.abs(elapsed);
     const d=Math.floor(abs/86400),h=Math.floor((abs%86400)/3600),m=Math.floor((abs%3600)/60),s=Math.floor(abs%60);
     document.getElementById('timer').textContent=(elapsed<0?'T-':'T+')+`${d}:${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    
-    // Поиск сообщения подготовки
     if(elapsed<-300&&prepMessages.length>0){
-        let msg=prepMessages[0];
-        for(let i=prepMessages.length-1;i>=0;i--){if(prepMessages[i].t<=elapsed){msg=prepMessages[i];break;}}
-        document.getElementById('event-text').textContent=msg.text;
-        document.getElementById('stage-name').textContent='Подготовка';
+        let msg=prepMessages[0];for(let i=prepMessages.length-1;i>=0;i--){if(prepMessages[i].t<=elapsed){msg=prepMessages[i];break;}}
+        document.getElementById('event-text').textContent=msg.text;document.getElementById('stage-name').textContent='Подготовка';
         document.getElementById('alt').textContent='0';document.getElementById('vel').textContent='0';document.getElementById('dist').textContent='0';
         rocketGroup.visible=false;flame.visible=false;targetPos.copy(padPos);
         document.getElementById('objects-list').innerHTML='<div class="object-row"><span class="name">🔵 Центральный блок</span><span class="status status-waiting">Ожидание</span></div><div class="object-row"><span class="name">🟡 Ускорители (4)</span><span class="status status-waiting">Ожидание</span></div><div class="object-row"><span class="name">⚪ Обтекатель</span><span class="status status-waiting">Ожидание</span></div><div class="object-row"><span class="name">🟣 Блок выведения</span><span class="status status-waiting">Ожидание</span></div><div class="object-row"><span class="name">🛰️ 12 спутников</span><span class="status status-waiting">Ожидание</span></div>';
         return;
     }
-    
     rocketGroup.visible=true;
     let cur=events[0],nxt=events[1]||events[0];
     for(let i=0;i<events.length;i++){if(events[i].t<=elapsed){cur=events[i];nxt=events[i+1]||events[i];}}
@@ -129,15 +156,7 @@ function update(){
     let alt=cur.alt||0,vel=cur.vel||0;
     if(cur!==nxt&&elapsed>cur.t&&elapsed<nxt.t){const p=(elapsed-cur.t)/(nxt.t-cur.t);alt=(cur.alt||0)+((nxt.alt||0)-(cur.alt||0))*p;vel=(cur.vel||0)+((nxt.vel||0)-(cur.vel||0))*p;}
     document.getElementById('alt').textContent=alt.toFixed(1);document.getElementById('vel').textContent=vel.toFixed(2);document.getElementById('dist').textContent=(alt*1.5).toFixed(0);
-    
-    if(elapsed>-300&&elapsed<600){
-        const scaleAlt=alt*0.1;const dir=new THREE.Vector3(0,1,0.25).normalize();
-        const pos=padPos.clone().add(dir.clone().multiplyScalar(scaleAlt));
-        rocketGroup.position.copy(pos);rocketGroup.lookAt(new THREE.Vector3(0,0,0));
-        trajPts.push(pos.clone());if(trajPts.length>500)trajPts.shift();
-        trajLine.geometry.dispose();trajLine.geometry=new THREE.BufferGeometry().setFromPoints(trajPts);
-        targetPos.copy(pos);
-    }
+    if(elapsed>-300&&elapsed<600){const scaleAlt=alt*0.1;const dir=new THREE.Vector3(0,1,0.25).normalize();const pos=padPos.clone().add(dir.clone().multiplyScalar(scaleAlt));rocketGroup.position.copy(pos);rocketGroup.lookAt(new THREE.Vector3(0,0,0));trajPts.push(pos.clone());if(trajPts.length>500)trajPts.shift();trajLine.geometry.dispose();trajLine.geometry=new THREE.BufferGeometry().setFromPoints(trajPts);targetPos.copy(pos);}
     flame.visible=elapsed>-5&&elapsed<510;
     if(elapsed>=165&&!boosters[0].userData.separated)boosters.forEach(b=>{b.userData.separated=true;rocketGroup.remove(b);});
     if(elapsed>=260&&!fairing.userData.separated){fairing.userData.separated=true;rocketGroup.remove(fairing);}
@@ -151,14 +170,10 @@ function update(){
     document.getElementById('objects-list').innerHTML=html;
 }
 
-// Управление (телефон + ПК)
 container.addEventListener('wheel',e=>{camDist=Math.max(3,Math.min(5000,camDist+e.deltaY*0.3));},{passive:true});
 let ltX=0,ltY=0,isDrag=false,lastPD=0;
 container.addEventListener('touchstart',e=>{if(e.touches.length===2){lastPD=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}else if(e.touches.length===1){ltX=e.touches[0].clientX;ltY=e.touches[0].clientY;isDrag=true;}});
-container.addEventListener('touchmove',e=>{
-    if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);camDist=Math.max(3,Math.min(5000,camDist+(lastPD-d)*0.3));lastPD=d;}
-    else if(e.touches.length===1&&isDrag){camAngle-=(e.touches[0].clientX-ltX)*0.005;camPolar=Math.max(-1.5,Math.min(1.5,camPolar+(e.touches[0].clientY-ltY)*0.005));ltX=e.touches[0].clientX;ltY=e.touches[0].clientY;}
-});
+container.addEventListener('touchmove',e=>{if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);camDist=Math.max(3,Math.min(5000,camDist+(lastPD-d)*0.3));lastPD=d;}else if(e.touches.length===1&&isDrag){camAngle-=(e.touches[0].clientX-ltX)*0.005;camPolar=Math.max(-1.5,Math.min(1.5,camPolar+(e.touches[0].clientY-ltY)*0.005));ltX=e.touches[0].clientX;ltY=e.touches[0].clientY;}});
 container.addEventListener('touchend',()=>isDrag=false);
 container.addEventListener('mousedown',e=>{isDrag=true;ltX=e.clientX;ltY=e.clientY;});
 window.addEventListener('mouseup',()=>isDrag=false);
@@ -166,17 +181,14 @@ window.addEventListener('mousemove',e=>{if(isDrag){camAngle-=(e.clientX-ltX)*0.0
 
 function animate(){
     requestAnimationFrame(animate);
-    earthShader.uniforms.sunDir.value.copy(new THREE.Vector3(1,0.3,0).normalize());
-    if(targetPos){
-        const cx=targetPos.x+Math.cos(camAngle)*Math.cos(camPolar)*camDist;
-        const cy=targetPos.y+Math.sin(camPolar)*camDist;
-        const cz=targetPos.z+Math.sin(camAngle)*Math.cos(camPolar)*camDist;
-        camera.position.lerp(new THREE.Vector3(cx,cy,cz),0.05);
-        camera.lookAt(targetPos);
-    }
-    renderer.render(scene,camera);
+    const days=daysSince();
+    bgPlanetMeshes.forEach(m=>{const p=m.userData;const a=p.angle0+(days/p.period)*Math.PI*2;m.position.set(Math.cos(a)*p.orbit,0,Math.sin(a)*p.orbit);m.rotation.y+=0.0005;});
+    const sdir=sunMesh.position.clone().sub(earth.position).normalize();
+    earthShader.uniforms.sunDir.value.copy(sdir);
+    if(targetPos){const tp=targetPos;camera.position.lerp(new THREE.Vector3(tp.x+Math.cos(camAngle)*Math.cos(camPolar)*camDist,tp.y+Math.sin(camPolar)*camDist,tp.z+Math.sin(camAngle)*Math.cos(camPolar)*camDist),0.05);camera.lookAt(tp);}
+    renderer.render(scene,camera);labelRenderer.render(scene,camera);
 }animate();
-window.addEventListener('resize',()=>{camera.aspect=container.clientWidth/container.clientHeight;camera.updateProjectionMatrix();renderer.setSize(container.clientWidth,container.clientHeight);});
+window.addEventListener('resize',()=>{camera.aspect=container.clientWidth/container.clientHeight;camera.updateProjectionMatrix();renderer.setSize(container.clientWidth,container.clientHeight);labelRenderer.setSize(container.clientWidth,container.clientHeight);});
 </script>
 </body>
 </html>
