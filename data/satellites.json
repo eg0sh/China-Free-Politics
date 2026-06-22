@@ -3,62 +3,38 @@
     {
       "id": "tiangong",
       "name": "Тяньгун",
-      "name_en": "Tiangong",
-      "name_zh": "天宫",
       "type": "station",
       "parent": "Earth",
       "orbit_km": 390,
       "period_days": 0.064,
       "angle0_rad": 0,
       "color": "#ff4444",
-      "size": 0.3,
+      "size": 0.12,
       "model": null,
       "trajectory_file": null,
       "description": {
-        "ru": "Китайская орбитальная станция «Тяньгун». Постоянно обитаема с 2021 года.",
-        "en": "Chinese space station Tiangong. Permanently inhabited since 2021.",
-        "zh": "中国天宫空间站。自2021年起长期有人驻留。"
-      },
-      "url": "https://en.wikipedia.org/wiki/Tiangong_space_station"
-    },
-    {
-      "id": "ceos-01",
-      "name": "CEOS-01",
-      "name_en": "CEOS-01",
-      "name_zh": "CEOS-01",
-      "type": "satellite",
-      "parent": "Earth",
-      "orbit_km": 500,
-      "period_days": 0.065,
-      "angle0_rad": 0.5,
-      "color": "#00ff88",
-      "size": 0.08,
-      "model": null,
-      "trajectory_file": null,
-      "description": {
-        "ru": "Спутник наблюдения Земли системы CEOS.",
-        "en": "Earth observation satellite of the CEOS system.",
-        "zh": "CEOS系统地球观测卫星。"
+        "ru": "Китайская орбитальная станция «Тяньгун».",
+        "en": "Chinese space station Tiangong.",
+        "zh": "中国天宫空间站。"
       }
     },
     {
-      "id": "quqiao-3",
-      "name": "Цюэцяо-3",
-      "name_en": "Queqiao-3",
-      "name_zh": "鹊桥三号",
-      "type": "probe",
-      "parent": "Moon",
-      "orbit_km": 65,
-      "period_days": 14,
-      "angle0_rad": 0,
-      "color": "#ffcc00",
-      "size": 0.06,
-      "model": null,
+      "id": "iss",
+      "name": "МКС",
+      "type": "station",
+      "parent": "Earth",
+      "orbit_km": 410,
+      "period_days": 0.065,
+      "angle0_rad": 1.2,
+      "color": "#ffffff",
+      "size": 0.1,
+      "model": "satellites/iss.glb",
+      "model_scale": 0.015,
       "trajectory_file": null,
       "description": {
-        "ru": "Спутник-ретранслятор у точки L2 Луны.",
-        "en": "Relay satellite at Lunar L2 point.",
-        "zh": "月球L2点中继卫星。"
+        "ru": "Международная космическая станция.",
+        "en": "International Space Station.",
+        "zh": "国际空间站。"
       }
     }
   ]
