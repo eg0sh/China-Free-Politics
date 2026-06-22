@@ -19,16 +19,15 @@
         #splash h1 span{color:#4488ff;font-weight:700}
         #splash p{color:#888;margin-top:10px;font-size:15px;text-align:center;max-width:80%}
         #viewport{width:100%;height:100%}
-        .hud-row{position:absolute;top:14px;left:16px;right:16px;display:flex;justify-content:space-between;z-index:10;pointer-events:none}
-        .hud-date{color:#fff;font-size:17px;font-weight:bold;text-shadow:0 0 8px rgba(0,0,0,0.8)}
-        .hud-time{color:#ccc;font-size:15px;text-shadow:0 0 8px rgba(0,0,0,0.8);margin-right:50px}
+        .hud-row{position:absolute;top:14px;left:16px;z-index:10;pointer-events:none;color:#fff;font-size:16px;font-weight:bold;text-shadow:0 0 8px rgba(0,0,0,0.8);display:flex;gap:12px;align-items:baseline}
+        .hud-date{color:#fff}.hud-time{color:#ccc;font-size:14px;font-weight:normal}
         .btn-menu{position:absolute;top:10px;right:10px;background:var(--surface);border:1px solid var(--border);color:#ccc;padding:8px 14px;border-radius:8px;cursor:pointer;z-index:11;font-size:13px;backdrop-filter:blur(6px)}
         .btn-menu:hover{background:var(--red);border-color:var(--red);color:#fff}
         .bottom-bar{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:10;color:#ccc;font-size:12px;background:var(--surface);padding:8px 16px;border-radius:10px;border:1px solid var(--border);backdrop-filter:blur(6px)}
         .bottom-bar input[type=range]{width:140px;accent-color:#cc0000}
         .bottom-bar button{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:#ccc;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap}
         .bottom-bar button.active,.bottom-bar button:hover{background:var(--red);border-color:var(--red);color:#fff}
-        .bottom-bar .speed-text{color:#aaa;font-size:10px;min-width:55px;text-align:center}
+        .bottom-bar .speed-text{color:#aaa;font-size:10px;min-width:70px;text-align:center}
         .info-panel{position:absolute;bottom:0;left:0;right:0;background:rgba(8,8,22,0.93);border-top:1px solid rgba(255,255,255,0.1);padding:18px 22px;z-index:10;max-height:52vh;overflow-y:auto;display:none;color:var(--text);backdrop-filter:blur(8px)}
         .info-panel.visible{display:block}
         .info-panel .close-btn{position:absolute;top:10px;right:16px;color:var(--muted);cursor:pointer;font-size:20px;z-index:2}
@@ -41,7 +40,7 @@
         .info-panel .moon-link:hover{background:rgba(68,136,255,0.1)}
         .menu-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:20;display:none;justify-content:center;align-items:center;backdrop-filter:blur(3px)}
         .menu-overlay.visible{display:flex}
-        .menu-box{background:rgba(12,12,28,0.94);border:1px solid var(--border);border-radius:14px;padding:22px;min-width:360px;max-width:520px;color:var(--text);backdrop-filter:blur(10px)}
+        .menu-box{background:rgba(12,12,28,0.94);border:1px solid var(--border);border-radius:14px;padding:22px;min-width:360px;max-width:520px;color:var(--text);backdrop-filter:blur(10px);max-height:80vh;overflow-y:auto}
         .menu-box h3{color:#fff;margin-bottom:14px;font-size:18px}
         .menu-box input[type=text]{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:#fff;padding:10px;border-radius:6px;font-size:14px;margin-bottom:10px}
         .menu-box .menu-list{max-height:300px;overflow-y:auto}
@@ -55,6 +54,8 @@
         .menu-box .menu-action{display:block;width:100%;padding:10px;margin:6px 0;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:#ccc;border-radius:6px;cursor:pointer;text-align:left;font-size:13px}
         .menu-box .menu-action:hover{background:rgba(68,136,255,0.15)}
         .menu-box .result{color:var(--gold);font-size:13px;margin:8px 0;padding:8px;background:rgba(255,204,0,0.08);border-radius:6px}
+        .menu-box select{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:#fff;padding:10px;border-radius:6px;font-size:14px;margin:6px 0}
+        .menu-box select option{background:#111;color:#fff}
     </style>
 </head>
 <body>
@@ -85,6 +86,7 @@ camera.position.set(0,400,600);
 const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(container.clientWidth,container.clientHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));container.appendChild(renderer.domElement);
 const labelRenderer=new CSS2DRenderer();labelRenderer.setSize(container.clientWidth,container.clientHeight);labelRenderer.domElement.style.position='absolute';labelRenderer.domElement.style.top='0';labelRenderer.domElement.style.pointerEvents='none';container.appendChild(labelRenderer.domElement);
 
+// Звёзды
 const starsGeo=new THREE.BufferGeometry();const sv=[];
 for(let i=0;i<10000;i++){const r=60000+Math.random()*40000,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);sv.push(r*Math.sin(ph)*Math.cos(th),r*Math.sin(ph)*Math.sin(th),r*Math.cos(ph));}
 starsGeo.setAttribute('position',new THREE.Float32BufferAttribute(sv,3));scene.add(new THREE.Points(starsGeo,new THREE.PointsMaterial({color:0xffffff,size:3})));
@@ -108,7 +110,7 @@ const speedText=document.getElementById('speed-text');
 const hudDate=document.getElementById('hud-date');const hudTime=document.getElementById('hud-time');
 
 function speedFromSlider(v){return (v/100)*secPerYear;}
-function formatSpeed(s){if(s===0)return'LIVE';const a=Math.abs(s);if(a>=secPerYear)return(s/secPerYear).toFixed(1)+' лет/с';if(a>=86400)return(s/86400).toFixed(1)+' дн/с';if(a>=3600)return(s/3600).toFixed(1)+' ч/с';return s.toFixed(0)+' сек/с';}
+function formatSpeed(s){if(s===0)return'LIVE';const a=Math.abs(s);if(a>=86400)return(s/86400).toFixed(1)+' дн/с';if(a>=3600)return(s/3600).toFixed(1)+' ч/с';return s.toFixed(0)+' сек/с';}
 function getSimDays(){return (simTime-refDate)/msDay;}
 
 speedSlider.addEventListener('input',()=>{const v=parseFloat(speedSlider.value);if(v===0){isLive=true;timeSpeed=0;btnLive.classList.add('active');simTime=Date.now();isPaused=false;btnPause.textContent='⏸';}else{isLive=false;timeSpeed=speedFromSlider(v);btnLive.classList.remove('active');isPaused=false;btnPause.textContent='⏸';}lastFrameTime=performance.now();updateSpeedUI();});
@@ -167,7 +169,6 @@ planetDefs.forEach(p=>{
     const mesh=new THREE.Mesh(new THREE.SphereGeometry(p.size,48,48),mat);mesh.userData=p;scene.add(mesh);
     const lbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:p.name}));lbl.element.style.color='#ccc';lbl.element.style.fontSize='12px';mesh.add(lbl);
     allBodies.push({name:p.name,obj:mesh,type:p.key==='Ceres'||p.key==='Pluto'?'Карликовая планета':'Планета',url:p.url,key:p.key,size:p.size});planetMeshes.push(mesh);
-    // Простая орбита в плоскости XZ (все планеты на одной плоскости)
     const ringGeo=new THREE.TorusGeometry(p.orbit,0.03,8,500);
     const ring=new THREE.Mesh(ringGeo,new THREE.MeshBasicMaterial({color:0x8899bb,transparent:true,opacity:0.7}));
     ring.rotation.x=-Math.PI/2;scene.add(ring);orbitRings.push({ring,planet:mesh});
@@ -209,68 +210,80 @@ function moonWorldPos(mdata,parentPos,tiltRad,angle){const lx=Math.cos(angle)*md
 fetch('data/objects.json?'+Date.now()).then(r=>r.json()).then(d=>{objectsData=d;}).catch(()=>{});
 
 let satMeshes=[],satTrajectories=[],satLabels=[];
-fetch('data/satellites.json?'+Date.now()).then(r=>r.json()).then(d=>{
-    satellitesData=d;
-    d.satellites.forEach(sat=>{
-        const color=sat.color||'#ffffff';
-        const size=sat.size||0.08;
-        let mesh;
-        if(sat.model){
-            const loader=new GLTFLoader();
-            loader.load('data/'+sat.model,gltf=>{
-                mesh=gltf.scene;
-                const scl=sat.model_scale||size;
-                mesh.scale.setScalar(scl);
-                scene.add(mesh);
-                const lbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:sat.name}));
-                lbl.element.style.color='#aaa';lbl.element.style.fontSize='9px';mesh.add(lbl);
-                satLabels.push({mesh,lbl});
-                satMeshes.push({mesh,data:sat});
-            },undefined,()=>{
-                // fallback: точка
-                mesh=createDot(sat,color,size);
-            });
-        }else{
-            mesh=createDot(sat,color,size);
-        }
-    });
-}).catch(()=>{});
-
+function loadSatellites(){
+    fetch('data/satellites.json?'+Date.now()).then(r=>r.json()).then(d=>{
+        satellitesData=d;
+        d.satellites.forEach(sat=>{
+            if(sat.trajectory_file){
+                fetch('data/'+sat.trajectory_file).then(r=>r.json()).then(traj=>{
+                    createSatelliteFromTrajectory(sat,traj);
+                }).catch(()=>{createSatellite(sat);});
+            }else{
+                createSatellite(sat);
+            }
+        });
+    }).catch(()=>{});
+}
+function createSatellite(sat){
+    const color=sat.color||'#ffffff';const size=sat.size||0.08;
+    let mesh;
+    if(sat.model){
+        const loader=new GLTFLoader();
+        const modelUrl=sat.model.startsWith('http')?sat.model:'data/'+sat.model;
+        loader.load(modelUrl,gltf=>{
+            mesh=gltf.scene;
+            const scl=sat.model_scale||size;
+            mesh.scale.setScalar(scl);
+            scene.add(mesh);
+            const lbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:sat.name}));
+            lbl.element.style.color='#aaa';lbl.element.style.fontSize='9px';mesh.add(lbl);
+            satLabels.push({mesh,lbl});satMeshes.push({mesh,data:sat,trajectoryData:null});
+        },undefined,()=>{createDot(sat,color,size);});
+    }else{createDot(sat,color,size);}
+}
+function createSatelliteFromTrajectory(sat,traj){
+    const color=traj.trajectory_color||sat.color||'#ffffff';
+    let mesh;
+    if(sat.model){
+        const loader=new GLTFLoader();
+        const modelUrl=sat.model.startsWith('http')?sat.model:'data/'+sat.model;
+        loader.load(modelUrl,gltf=>{
+            mesh=gltf.scene;
+            const scl=traj.model_scale||sat.model_scale||sat.size||0.08;
+            mesh.scale.setScalar(scl);
+            scene.add(mesh);
+            const lbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:sat.name}));
+            lbl.element.style.color='#aaa';lbl.element.style.fontSize='9px';mesh.add(lbl);
+            satLabels.push({mesh,lbl});satMeshes.push({mesh,data:sat,trajectoryData:traj});
+            if(traj.trajectory&&traj.trajectory.length>1){
+                const pts=traj.trajectory.map(p=>new THREE.Vector3(p.x,p.y,p.z));
+                const lineGeo=new THREE.BufferGeometry().setFromPoints(pts);
+                const line=new THREE.Line(lineGeo,new THREE.LineBasicMaterial({color:color,transparent:true,opacity:0.6}));
+                scene.add(line);
+                satTrajectories.push({mesh,traj,data:sat,line});
+            }
+        },undefined,()=>{createDot(sat,color,sat.size||0.08);});
+    }else{createDot(sat,color,sat.size||0.08);}
+}
 function createDot(sat,color,size){
     const geo=new THREE.SphereGeometry(size,6,6);
     const mat=new THREE.MeshBasicMaterial({color:new THREE.Color(color)});
     const mesh=new THREE.Mesh(geo,mat);scene.add(mesh);
     const lbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:sat.name}));
     lbl.element.style.color='#aaa';lbl.element.style.fontSize='9px';mesh.add(lbl);
-    satLabels.push({mesh,lbl});
-    satMeshes.push({mesh,data:sat});
-    return mesh;
+    satLabels.push({mesh,lbl});satMeshes.push({mesh,data:sat,trajectoryData:null});
 }
+loadSatellites();
 
-// Траектории
-function loadTrajectory(sat,mesh){
-    if(!sat.trajectory_file)return;
-    fetch('data/'+sat.trajectory_file).then(r=>r.json()).then(traj=>{
-        const pts=traj.trajectory.map(p=>new THREE.Vector3(p.x,p.y,p.z));
-        const lineGeo=new THREE.BufferGeometry().setFromPoints(pts);
-        const line=new THREE.Line(lineGeo,new THREE.LineBasicMaterial({color:traj.trajectory_color||'#ff8800',transparent:true,opacity:0.6}));
-        scene.add(line);
-        satTrajectories.push({mesh,traj,data:sat,line});
-    }).catch(()=>{});
-}
-
-function getBodyByKey(key){return allBodies.find(b=>b.key===key||b.name===key);}
+function getBodyByKey(key){return allBodies.find(b=>b.key===key||b.name===key)||satMeshes.find(s=>s.data.id===key||s.data.name===key);}
 function t(key){const obj=objectsData[key]||{};const names=obj.names||{};return names[currentLang]||key;}
 function td(key){const obj=objectsData[key]||{};const desc=obj.description||{};return desc[currentLang]||'';}
 function tr(key){const obj=objectsData[key]||{};const rel=obj.related||{};return rel[currentLang]||[];}
 
 let currentTarget=sun;
 function showInfo(key){
-    const body=getBodyByKey(key);if(!body){// Может быть спутник
-        const sat=satMeshes.find(s=>s.data.id===key||s.data.name===key);
-        if(sat){showSatInfo(sat);return;}
-        return;
-    }
+    const body=getBodyByKey(key);if(!body)return;
+    if(body.data){showSatInfo(body);return;}
     selectedKey=key;currentTarget=body.obj;
     const names=objectsData[key]?.names||{};const name=names[currentLang]||body.name;
     const descText=td(key);const relatedList=tr(key);const url=body.url||'';
@@ -314,10 +327,12 @@ function showSatInfo(sat){
     const desc=d.description?.[currentLang]||d.description?.ru||'';
     content.innerHTML=`<h2>${name}</h2><span class="type-badge">${d.type||'Спутник'}</span><div class="desc">${desc}</div>`;
     panel.classList.add('visible');
+    currentTarget=sat.mesh;selectedKey=d.id||d.name;
 }
 
 const raycaster=new THREE.Raycaster();const mouse=new THREE.Vector2();
 container.addEventListener('click',e=>{
+    if(measureState)return;
     mouse.x=(e.clientX/container.clientWidth)*2-1;mouse.y=-(e.clientY/container.clientHeight)*2+1;
     raycaster.setFromCamera(mouse,camera);
     const allObjs=[sun,...allBodies.map(b=>b.obj),...satMeshes.map(s=>s.mesh)];
@@ -340,7 +355,7 @@ window.openMenu=function(){
     const distLabel=currentLang==='ru'?'📏 Измерить расстояние':(currentLang==='zh'?'📏 测量距离':'📏 Measure distance');
     const compareLabel=currentLang==='ru'?'📐 Сравнить размеры':(currentLang==='zh'?'📐 比较大小':'📐 Compare sizes');
     const homeLabel=currentLang==='ru'?'🏠 На главную':(currentLang==='zh'?'🏠 返回主页':'🏠 Back to home');
-    const allItems=[...allBodies,...satMeshes.map(s=>({name:s.data.name,type:s.data.type||'ИСЗ',key:s.data.id||s.data.name,obj:s.mesh}))];
+    const allItems=[...allBodies.map(b=>({name:b.name,type:b.type,key:b.key||b.name})),...satMeshes.map(s=>({name:s.data.name,type:s.data.type||'ИСЗ',key:s.data.id||s.data.name}))];
     let html=`
         <span class="close-menu" onclick="document.getElementById('menu-overlay').classList.remove('visible')">✕</span>
         <h3>${menuTitle}</h3>
@@ -351,7 +366,7 @@ window.openMenu=function(){
         </div>
         <input type="text" placeholder="${searchPlaceholder}" oninput="searchObjects(this.value)" id="menu-search">
         <div class="menu-list" id="menu-list">
-            ${allItems.map(b=>`<div class="menu-item" onclick="selectFromMenu('${b.key||b.name}')"><span>${b.name}</span><span class="type">${b.type}</span></div>`).join('')}
+            ${allItems.map(b=>`<div class="menu-item" onclick="selectFromMenu('${b.key}')"><span>${b.name}</span><span class="type">${b.type}</span></div>`).join('')}
         </div>
         <button class="menu-action" onclick="startMeasureDist()">${distLabel}</button>
         <button class="menu-action" onclick="startCompareSize()">${compareLabel}</button>
@@ -366,15 +381,14 @@ window.selectFromMenu=function(key){
 };
 window.searchObjects=function(q){
     const list=document.getElementById('menu-list');if(!list)return;
-    const allItems=[...allBodies,...satMeshes.map(s=>({name:s.data.name,type:s.data.type||'ИСЗ',key:s.data.id||s.data.name}))];
+    const allItems=[...allBodies.map(b=>({name:b.name,type:b.type,key:b.key||b.name})),...satMeshes.map(s=>({name:s.data.name,type:s.data.type||'ИСЗ',key:s.data.id||s.data.name}))];
     const filtered=allItems.filter(b=>b.name.toLowerCase().includes(q.toLowerCase()));
-    list.innerHTML=filtered.map(b=>`<div class="menu-item" onclick="selectFromMenu('${b.key||b.name}')"><span>${b.name}</span><span class="type">${b.type}</span></div>`).join('');
+    list.innerHTML=filtered.map(b=>`<div class="menu-item" onclick="selectFromMenu('${b.key}')"><span>${b.name}</span><span class="type">${b.type}</span></div>`).join('');
 };
 window.setLang=function(l){
     currentLang=l;
     document.querySelectorAll('.lang-switch button').forEach(b=>b.classList.remove('active'));
     const btn=document.getElementById('lang-'+l);if(btn)btn.classList.add('active');
-    // Обновить подписи
     allBodies.forEach(b=>{
         const lbl=b.obj.children.find(c=>c.isCSS2DObject);
         if(lbl){const names=objectsData[b.key]?.names;lbl.element.textContent=names?.[currentLang]||b.name;}
@@ -390,15 +404,21 @@ window.setLang=function(l){
 
 let measureState=null;
 window.startMeasureDist=function(){
+    document.getElementById('menu-overlay').classList.remove('visible');
     measureState={type:'dist',first:null};
-    document.getElementById('menu-result').style.display='block';
-    document.getElementById('menu-result').textContent=currentLang==='ru'?'Нажмите на первый объект':(currentLang==='zh'?'点击第一个天体':'Click first object');
+    const box=document.getElementById('menu-box');
+    box.innerHTML='<h3 style="color:#fff">'+ (currentLang==='ru'?'Измерение расстояния':(currentLang==='zh'?'测量距离':'Measure distance')) +'</h3><p style="color:var(--muted)">'+ (currentLang==='ru'?'Нажмите на первый объект на карте':(currentLang==='zh'?'点击地图上的第一个天体':'Click first object on map')) +'</p><button class="menu-action" onclick="cancelMeasure()">'+ (currentLang==='ru'?'Отмена':(currentLang==='zh'?'取消':'Cancel')) +'</button>';
+    document.getElementById('menu-overlay').classList.add('visible');
 };
 window.startCompareSize=function(){
+    document.getElementById('menu-overlay').classList.remove('visible');
     measureState={type:'compare',first:null};
-    document.getElementById('menu-result').style.display='block';
-    document.getElementById('menu-result').textContent=currentLang==='ru'?'Нажмите на первый объект':(currentLang==='zh'?'点击第一个天体':'Click first object');
+    const box=document.getElementById('menu-box');
+    box.innerHTML='<h3 style="color:#fff">'+ (currentLang==='ru'?'Сравнение размеров':(currentLang==='zh'?'比较大小':'Compare sizes')) +'</h3><p style="color:var(--muted)">'+ (currentLang==='ru'?'Нажмите на первый объект на карте':(currentLang==='zh'?'点击地图上的第一个天体':'Click first object on map')) +'</p><button class="menu-action" onclick="cancelMeasure()">'+ (currentLang==='ru'?'Отмена':(currentLang==='zh'?'取消':'Cancel')) +'</button>';
+    document.getElementById('menu-overlay').classList.add('visible');
 };
+window.cancelMeasure=function(){measureState=null;document.getElementById('menu-overlay').classList.remove('visible');};
+
 container.addEventListener('click',e=>{
     if(!measureState)return;
     mouse.x=(e.clientX/container.clientWidth)*2-1;mouse.y=-(e.clientY/container.clientHeight)*2+1;
@@ -410,15 +430,17 @@ container.addEventListener('click',e=>{
         let body=allBodies.find(b=>b.obj===obj);
         if(!body){const sat=satMeshes.find(s=>s.mesh===obj);if(sat)body={name:sat.data.name,obj:sat.mesh,size:sat.data.size||0.1};}
         if(!body)return;
-        if(!measureState.first){measureState.first=body;document.getElementById('menu-result').textContent=`${body.name} — ${currentLang==='ru'?'теперь второй':(currentLang==='zh'?'现在第二个':'now second')}`;}
-        else{
-            const b1=measureState.first;const b2=body;const resDiv=document.getElementById('menu-result');
+        if(!measureState.first){measureState.first=body;
+            const box=document.getElementById('menu-box');
+            box.innerHTML='<h3 style="color:#fff">'+ (currentLang==='ru'?'Выберите второй объект':(currentLang==='zh'?'选择第二个天体':'Select second object')) +'</h3><p style="color:var(--gold)">'+body.name+'</p><button class="menu-action" onclick="cancelMeasure()">'+ (currentLang==='ru'?'Отмена':(currentLang==='zh'?'取消':'Cancel')) +'</button>';
+        }else{
+            const b1=measureState.first;const b2=body;const box=document.getElementById('menu-box');
             if(measureState.type==='dist'){
                 const dist=b1.obj.position.distanceTo(b2.obj.position);const distAU=(dist/145).toFixed(2);
-                resDiv.textContent=`${currentLang==='ru'?'Расстояние':(currentLang==='zh'?'距离':'Distance')} ${b1.name} → ${b2.name}: ${dist.toFixed(0)} ед (${distAU} а.е.)`;
+                box.innerHTML='<h3 style="color:#fff">'+ (currentLang==='ru'?'Результат':(currentLang==='zh'?'结果':'Result')) +'</h3><p style="color:var(--gold)">'+ (currentLang==='ru'?'Расстояние':(currentLang==='zh'?'距离':'Distance')) +' '+b1.name+' → '+b2.name+': '+dist.toFixed(0)+' ед ('+distAU+' а.е.)</p><button class="menu-action" onclick="cancelMeasure()">'+ (currentLang==='ru'?'Закрыть':(currentLang==='zh'?'关闭':'Close')) +'</button>';
             }else{
                 const s1=b1.size||1;const s2=b2.size||1;const ratio=(s1/s2).toFixed(2);
-                resDiv.textContent=`${b1.name} ${currentLang==='ru'?'в':(currentLang==='zh'?'比':'is')} ${ratio} ${currentLang==='ru'?'раз(а) больше':(currentLang==='zh'?'倍大':'times larger')} ${b2.name}`;
+                box.innerHTML='<h3 style="color:#fff">'+ (currentLang==='ru'?'Результат':(currentLang==='zh'?'结果':'Result')) +'</h3><p style="color:var(--gold)">'+b1.name+' '+ (currentLang==='ru'?'в':(currentLang==='zh'?'比':'is')) +' '+ratio+' '+ (currentLang==='ru'?'раз(а) больше':(currentLang==='zh'?'倍大':'times larger')) +' '+b2.name+'</p><button class="menu-action" onclick="cancelMeasure()">'+ (currentLang==='ru'?'Закрыть':(currentLang==='zh'?'关闭':'Close')) +'</button>';
             }
             measureState=null;
         }
@@ -442,8 +464,10 @@ function animate(timestamp){
     lastFrameTime=timestamp;
     const days=getSimDays();
     const d=new Date(simTime);
-    hudDate.textContent=d.toLocaleDateString('ru-RU',{year:'numeric',month:'long',day:'numeric'});
-    hudTime.textContent=d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const dateStr=d.toLocaleDateString(currentLang==='zh'?'zh-CN':currentLang,{year:'numeric',month:'long',day:'numeric'});
+    const timeStr=d.toLocaleTimeString(currentLang==='zh'?'zh-CN':currentLang,{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    hudDate.textContent=dateStr;
+    hudTime.textContent=timeStr;
     updateSpeedUI();
 
     planetMeshes.forEach(m=>{
@@ -468,35 +492,32 @@ function animate(timestamp){
         ol.line.geometry.dispose();ol.line.geometry=new THREE.BufferGeometry().setFromPoints(pts);
     });
 
-    // Искусственные спутники
     satMeshes.forEach(s=>{
-        const sat=s.data;if(!sat.parent)return;
-        const parentBody=allBodies.find(b=>b.name===sat.parent||b.key===sat.parent);
-        if(parentBody&&sat.orbit_km){
-            const parentPos=parentBody.obj.position.clone();
-            const orb=sat.orbit_km*0.01;
-            const a=(sat.angle0_rad||0)+(days/(sat.period_days||1))*Math.PI*2;
-            s.mesh.position.set(parentPos.x+Math.cos(a)*orb,parentPos.y,parentPos.z+Math.sin(a)*orb);
+        const sat=s.data;
+        if(s.trajectoryData&&s.trajectoryData.trajectory&&s.trajectoryData.trajectory.length>1){
+            const traj=s.trajectoryData;
+            const tDays=days;
+            let p0=traj.trajectory[0],p1=traj.trajectory[traj.trajectory.length-1];
+            for(let i=0;i<traj.trajectory.length-1;i++){
+                if(tDays>=traj.trajectory[i].t_days&&tDays<=traj.trajectory[i+1].t_days){p0=traj.trajectory[i];p1=traj.trajectory[i+1];break;}
+            }
+            const frac=(tDays-p0.t_days)/(p1.t_days-p0.t_days||1);
+            s.mesh.position.set(p0.x+(p1.x-p0.x)*frac,p0.y+(p1.y-p0.y)*frac,p0.z+(p1.z-p0.z)*frac);
+            if(traj.always_face&&traj.always_face!=='no'){
+                const target=allBodies.find(b=>b.name===traj.always_face||b.key===traj.always_face);
+                if(target)s.mesh.lookAt(target.obj.position);
+            }
+        }else if(sat.parent&&sat.orbit_km){
+            const parentBody=allBodies.find(b=>b.name===sat.parent||b.key===sat.parent);
+            if(parentBody){
+                const parentPos=parentBody.obj.position.clone();
+                const orb=sat.orbit_km*0.01;
+                const a=(sat.angle0_rad||0)+(days/(sat.period_days||1))*Math.PI*2;
+                s.mesh.position.set(parentPos.x+Math.cos(a)*orb,parentPos.y,parentPos.z+Math.sin(a)*orb);
+            }
         }
-        // Видимость подписи
         const lbl=s.mesh.children.find(c=>c.isCSS2DObject);
-        if(lbl){const dist=camera.position.distanceTo(s.mesh.position);lbl.element.style.display=dist<20?'block':'none';}
-    });
-
-    // Траектории
-    satTrajectories.forEach(st=>{
-        const traj=st.traj;if(!traj.trajectory||traj.trajectory.length<2)return;
-        const tDays=days;
-        let p0=traj.trajectory[0],p1=traj.trajectory[traj.trajectory.length-1];
-        for(let i=0;i<traj.trajectory.length-1;i++){
-            if(tDays>=traj.trajectory[i].t_days&&tDays<=traj.trajectory[i+1].t_days){p0=traj.trajectory[i];p1=traj.trajectory[i+1];break;}
-        }
-        const frac=(tDays-p0.t_days)/(p1.t_days-p0.t_days||1);
-        st.mesh.position.set(p0.x+(p1.x-p0.x)*frac,p0.y+(p1.y-p0.y)*frac,p0.z+(p1.z-p0.z)*frac);
-        if(traj.always_face){
-            const target=allBodies.find(b=>b.name===traj.always_face||b.key===traj.always_face);
-            if(target)st.mesh.lookAt(target.obj.position);
-        }
+        if(lbl){const dist=camera.position.distanceTo(s.mesh.position);lbl.element.style.display=dist<15?'block':'none';}
     });
 
     orbitRings.forEach(o=>{const dist=camera.position.distanceTo(o.planet.position);o.ring.visible=dist>o.planet.userData.size*15;});
