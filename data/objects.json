@@ -1,0 +1,219 @@
+{
+  "Sun": {
+    "type": "star",
+    "names": { "ru": "Солнце", "en": "Sun", "zh": "太阳" },
+    "description": {
+      "ru": "Солнце — звезда в центре Солнечной системы. Это почти идеальная сфера горячей плазмы, разогретой до свечения в результате реакций ядерного синтеза в её ядре. Солнце излучает энергию в основном в виде видимого света и инфракрасного излучения. Это самый важный источник энергии для жизни на Земле.",
+      "en": "The Sun is the star at the center of the Solar System. It is a nearly perfect sphere of hot plasma, heated to incandescence by nuclear fusion reactions in its core. The Sun radiates energy mainly as visible light and infrared radiation. It is the most important source of energy for life on Earth.",
+      "zh": "太阳是太阳系中心的恒星。它是一个近乎完美的热等离子体球体，通过核心的核聚变反应加热至白炽状态。太阳主要以可见光和红外辐射的形式辐射能量。它是地球生命最重要的能量来源。"
+    },
+    "url": "https://science.nasa.gov/sun/",
+    "related": ["Parker Solar Probe", "Solar Orbiter", "SOHO", "STEREO"]
+  },
+  "Mercury": {
+    "type": "planet",
+    "names": { "ru": "Меркурий", "en": "Mercury", "zh": "水星" },
+    "description": {
+      "ru": "Меркурий — самая маленькая планета в Солнечной системе и ближайшая к Солнцу. Его орбита вокруг Солнца занимает 87,97 земных дней, что является самым коротким периодом среди всех планет. Меркурий не имеет спутников.",
+      "en": "Mercury is the smallest planet in the Solar System and the closest to the Sun. Its orbit around the Sun takes 87.97 Earth days, the shortest of all the planets. Mercury has no moons.",
+      "zh": "水星是太阳系中最小的行星，也是最靠近太阳的行星。它绕太阳公转一周需要87.97个地球日，是所有行星中最短的。水星没有卫星。"
+    },
+    "url": "https://science.nasa.gov/mercury/",
+    "related": ["Mariner 10", "MESSENGER", "BepiColombo"]
+  },
+  "Venus": {
+    "type": "planet",
+    "names": { "ru": "Венера", "en": "Venus", "zh": "金星" },
+    "description": {
+      "ru": "Венера — вторая планета от Солнца. Это каменистая планета с самой плотной атмосферой среди всех планет земной группы. Венера вращается вокруг своей оси в направлении, противоположном большинству планет.",
+      "en": "Venus is the second planet from the Sun. It is a rocky planet with the densest atmosphere of all the terrestrial planets. Venus rotates around its axis in the opposite direction to most planets.",
+      "zh": "金星是距离太阳第二近的行星。它是一颗岩石行星，拥有所有类地行星中最稠密的大气层。金星的自转方向与大多数行星相反。"
+    },
+    "url": "https://science.nasa.gov/venus/",
+    "related": ["Mariner 2", "Venera", "Magellan", "Venus Express", "Akatsuki"]
+  },
+  "Earth": {
+    "type": "planet",
+    "names": { "ru": "Земля", "en": "Earth", "zh": "地球" },
+    "description": {
+      "ru": "Земля — третья планета от Солнца и единственное известное астрономическое тело, на котором существует жизнь. Это самая большая из четырёх планет земной группы. Около 71% поверхности Земли покрыто водой.",
+      "en": "Earth is the third planet from the Sun and the only known astronomical body to harbor life. It is the largest of the four terrestrial planets. About 71% of Earth's surface is covered with water.",
+      "zh": "地球是距离太阳第三远的行星，也是已知唯一存在生命的天体。它是四颗类地行星中最大的一颗。地球表面约71%被水覆盖。"
+    },
+    "url": "https://science.nasa.gov/earth/",
+    "related": ["ISS", "Hubble", "Landsat", "GOES"]
+  },
+  "Mars": {
+    "type": "planet",
+    "names": { "ru": "Марс", "en": "Mars", "zh": "火星" },
+    "description": {
+      "ru": "Марс — четвёртая планета от Солнца. Это каменистая планета с тонкой атмосферой. Марс имеет два небольших спутника: Фобос и Деймос. Поверхность Марса красноватого цвета из-за оксида железа.",
+      "en": "Mars is the fourth planet from the Sun. It is a rocky planet with a thin atmosphere. Mars has two small moons: Phobos and Deimos. The surface of Mars is reddish due to iron oxide.",
+      "zh": "火星是距离太阳第四远的行星。它是一颗岩石行星，大气层稀薄。火星有两颗小卫星：火卫一和火卫二。火星表面因氧化铁而呈红色。"
+    },
+    "url": "https://science.nasa.gov/mars/",
+    "related": ["Perseverance", "Curiosity", "MAVEN", "Mars Reconnaissance Orbiter", "Ingenuity"]
+  },
+  "Jupiter": {
+    "type": "planet",
+    "names": { "ru": "Юпитер", "en": "Jupiter", "zh": "木星" },
+    "description": {
+      "ru": "Юпитер — пятая планета от Солнца и крупнейшая в Солнечной системе. Это газовый гигант с массой, в два с половиной раза превышающей массу всех остальных планет вместе взятых. Юпитер имеет 95 известных спутников, включая четыре крупнейших: Ио, Европу, Ганимед и Каллисто.",
+      "en": "Jupiter is the fifth planet from the Sun and the largest in the Solar System. It is a gas giant with a mass more than two and a half times that of all the other planets combined. Jupiter has 95 known moons, including the four largest: Io, Europa, Ganymede, and Callisto.",
+      "zh": "木星是距离太阳第五远的行星，也是太阳系中最大的行星。它是一颗气态巨行星，质量是其他所有行星总和的两倍半以上。木星有95颗已知卫星，包括最大的四颗：木卫一、木卫二、木卫三和木卫四。"
+    },
+    "url": "https://science.nasa.gov/jupiter/",
+    "related": ["Juno", "Galileo", "Voyager 1", "Voyager 2", "Europa Clipper"]
+  },
+  "Saturn": {
+    "type": "planet",
+    "names": { "ru": "Сатурн", "en": "Saturn", "zh": "土星" },
+    "description": {
+      "ru": "Сатурн — шестая планета от Солнца и вторая по величине в Солнечной системе после Юпитера. Это газовый гигант, известный своей обширной системой колец. Сатурн имеет 146 известных спутников, крупнейший из которых — Титан.",
+      "en": "Saturn is the sixth planet from the Sun and the second largest in the Solar System after Jupiter. It is a gas giant known for its extensive ring system. Saturn has 146 known moons, the largest of which is Titan.",
+      "zh": "土星是距离太阳第六远的行星，也是太阳系中第二大的行星，仅次于木星。它是一颗以广阔的环系统闻名的气态巨行星。土星有146颗已知卫星，其中最大的是土卫六。"
+    },
+    "url": "https://science.nasa.gov/saturn/",
+    "related": ["Cassini", "Huygens", "Dragonfly (2027)"]
+  },
+  "Uranus": {
+    "type": "planet",
+    "names": { "ru": "Уран", "en": "Uranus", "zh": "天王星" },
+    "description": {
+      "ru": "Уран — седьмая планета от Солнца. Это ледяной гигант с третьим по величине диаметром в Солнечной системе. Уран имеет уникальный наклон оси около 98°, из-за чего он вращается «на боку».",
+      "en": "Uranus is the seventh planet from the Sun. It is an ice giant with the third largest diameter in the Solar System. Uranus has a unique axial tilt of about 98°, causing it to rotate 'on its side'.",
+      "zh": "天王星是距离太阳第七远的行星。它是一颗冰巨行星，直径在太阳系中排名第三。天王星有独特的约98°轴倾斜，导致它「侧躺着」旋转。"
+    },
+    "url": "https://science.nasa.gov/uranus/",
+    "related": ["Voyager 2"]
+  },
+  "Neptune": {
+    "type": "planet",
+    "names": { "ru": "Нептун", "en": "Neptune", "zh": "海王星" },
+    "description": {
+      "ru": "Нептун — восьмая и самая дальняя планета от Солнца. Это ледяной гигант, известный своими сильными ветрами, достигающими скорости 2100 км/ч. Нептун имеет 16 известных спутников, крупнейший из которых — Тритон.",
+      "en": "Neptune is the eighth and farthest planet from the Sun. It is an ice giant known for its strong winds, reaching speeds of 2100 km/h. Neptune has 16 known moons, the largest of which is Triton.",
+      "zh": "海王星是距离太阳第八远也是最远的行星。它是一颗以强风闻名的冰巨行星，风速可达2100公里/小时。海王星有16颗已知卫星，其中最大的是海卫一。"
+    },
+    "url": "https://science.nasa.gov/neptune/",
+    "related": ["Voyager 2", "James Webb Space Telescope"]
+  },
+  "Pluto": {
+    "type": "dwarf_planet",
+    "names": { "ru": "Плутон", "en": "Pluto", "zh": "冥王星" },
+    "description": {
+      "ru": "Плутон — карликовая планета в поясе Койпера. Это самый крупный известный объект в поясе Койпера. Плутон имеет пять известных спутников, крупнейший из которых — Харон.",
+      "en": "Pluto is a dwarf planet in the Kuiper belt. It is the largest known object in the Kuiper belt. Pluto has five known moons, the largest of which is Charon.",
+      "zh": "冥王星是柯伊伯带中的一颗矮行星。它是柯伊伯带中已知最大的天体。冥王星有五颗已知卫星，其中最大的是冥卫一。"
+    },
+    "url": "https://science.nasa.gov/dwarf-planets/pluto/",
+    "related": ["New Horizons"]
+  },
+  "Moon": {
+    "type": "moon",
+    "parent": "Earth",
+    "names": { "ru": "Луна", "en": "Moon", "zh": "月球" },
+    "description": {
+      "ru": "Луна — единственный естественный спутник Земли. Это пятый по величине спутник в Солнечной системе. Луна находится в приливном захвате с Землёй, всегда показывая одну и ту же сторону.",
+      "en": "The Moon is Earth's only natural satellite. It is the fifth largest satellite in the Solar System. The Moon is tidally locked with Earth, always showing the same side.",
+      "zh": "月球是地球唯一的天然卫星。它是太阳系中第五大的卫星。月球与地球潮汐锁定，始终以同一面朝向地球。"
+    },
+    "url": "https://science.nasa.gov/moon/",
+    "related": ["Apollo 11", "Lunar Reconnaissance Orbiter", "Artemis"]
+  },
+  "Io": {
+    "type": "moon",
+    "parent": "Jupiter",
+    "names": { "ru": "Ио", "en": "Io", "zh": "木卫一" },
+    "description": {
+      "ru": "Ио — самый вулканически активный мир в Солнечной системе. На нём сотни вулканов, некоторые извергают лавовые фонтаны высотой в десятки километров. Активность Ио вызвана приливными силами Юпитера.",
+      "en": "Io is the most volcanically active world in the Solar System, with hundreds of volcanoes, some erupting lava fountains dozens of miles high. Io's activity is caused by tidal forces from Jupiter.",
+      "zh": "木卫一是太阳系中火山活动最活跃的世界，有数百座火山，其中一些喷发出数十公里高的熔岩喷泉。木卫一的活动是由木星的潮汐力引起的。"
+    },
+    "url": "https://science.nasa.gov/jupiter/moons/io/",
+    "related": ["Galileo", "Juno", "Voyager 1"]
+  },
+  "Europa": {
+    "type": "moon",
+    "parent": "Jupiter",
+    "names": { "ru": "Европа", "en": "Europa", "zh": "木卫二" },
+    "description": {
+      "ru": "Европа — один из спутников Юпитера, известный своей ледяной поверхностью и потенциальным подповерхностным океаном. Считается одним из наиболее вероятных мест для поиска внеземной жизни в Солнечной системе.",
+      "en": "Europa is one of Jupiter's moons, known for its icy surface and potential subsurface ocean. It is considered one of the most promising places to search for extraterrestrial life in the Solar System.",
+      "zh": "木卫二是木星的卫星之一，以其冰层表面和潜在的冰下海洋闻名。它被认为是太阳系中寻找地外生命最有希望的地方之一。"
+    },
+    "url": "https://science.nasa.gov/jupiter/moons/europa/",
+    "related": ["Galileo", "Europa Clipper (2024)"]
+  },
+  "Ganymede": {
+    "type": "moon",
+    "parent": "Jupiter",
+    "names": { "ru": "Ганимед", "en": "Ganymede", "zh": "木卫三" },
+    "description": {
+      "ru": "Ганимед — крупнейший спутник в Солнечной системе, даже больше Меркурия. Это единственный спутник, у которого есть собственное магнитное поле.",
+      "en": "Ganymede is the largest moon in the Solar System, even larger than Mercury. It is the only moon known to have its own magnetic field.",
+      "zh": "木卫三是太阳系中最大的卫星，甚至比水星还大。它是已知唯一拥有自己磁场的卫星。"
+    },
+    "url": "https://science.nasa.gov/jupiter/moons/ganymede/",
+    "related": ["Galileo", "JUICE (2023)"]
+  },
+  "Callisto": {
+    "type": "moon",
+    "parent": "Jupiter",
+    "names": { "ru": "Каллисто", "en": "Callisto", "zh": "木卫四" },
+    "description": {
+      "ru": "Каллисто — второй по величине спутник Юпитера. Его поверхность сильно кратерирована и является одной из старейших в Солнечной системе.",
+      "en": "Callisto is the second largest moon of Jupiter. Its surface is heavily cratered and is one of the oldest in the Solar System.",
+      "zh": "木卫四是木星的第二大卫星。它的表面布满了陨石坑，是太阳系中最古老的表面之一。"
+    },
+    "url": "https://science.nasa.gov/jupiter/moons/callisto/",
+    "related": ["Galileo", "JUICE"]
+  },
+  "Titan": {
+    "type": "moon",
+    "parent": "Saturn",
+    "names": { "ru": "Титан", "en": "Titan", "zh": "土卫六" },
+    "description": {
+      "ru": "Титан — крупнейший спутник Сатурна и единственный спутник в Солнечной системе с плотной атмосферой. На его поверхности есть озёра и моря из жидких углеводородов.",
+      "en": "Titan is Saturn's largest moon and the only moon in the Solar System with a dense atmosphere. Its surface has lakes and seas of liquid hydrocarbons.",
+      "zh": "土卫六是土星最大的卫星，也是太阳系中唯一拥有稠密大气层的卫星。它的表面有液态碳氢化合物的湖泊和海洋。"
+    },
+    "url": "https://science.nasa.gov/saturn/moons/titan/",
+    "related": ["Cassini", "Huygens", "Dragonfly (2027)"]
+  },
+  "Triton": {
+    "type": "moon",
+    "parent": "Neptune",
+    "names": { "ru": "Тритон", "en": "Triton", "zh": "海卫一" },
+    "description": {
+      "ru": "Тритон — крупнейший спутник Нептуна. Это единственный крупный спутник в Солнечной системе с ретроградной орбитой. На его поверхности есть гейзеры, извергающие азот.",
+      "en": "Triton is Neptune's largest moon. It is the only large moon in the Solar System with a retrograde orbit. Its surface has geysers erupting nitrogen.",
+      "zh": "海卫一是海王星最大的卫星。它是太阳系中唯一具有逆行轨道的大型卫星。它的表面有喷发氮气的间歇泉。"
+    },
+    "url": "https://science.nasa.gov/neptune/moons/triton/",
+    "related": ["Voyager 2"]
+  },
+  "Ceres": {
+    "type": "dwarf_planet",
+    "names": { "ru": "Церера", "en": "Ceres", "zh": "谷神星" },
+    "description": {
+      "ru": "Церера — карликовая планета в поясе астероидов между Марсом и Юпитером. Это крупнейший объект в поясе астероидов. Церера была открыта в 1801 году и стала первым обнаруженным астероидом.",
+      "en": "Ceres is a dwarf planet in the asteroid belt between Mars and Jupiter. It is the largest object in the asteroid belt. Ceres was discovered in 1801 and was the first asteroid discovered.",
+      "zh": "谷神星是火星和木星之间小行星带中的一颗矮行星。它是小行星带中最大的天体。谷神星于1801年被发现，是第一颗被发现的小行星。"
+    },
+    "url": "https://science.nasa.gov/dwarf-planets/ceres/",
+    "related": ["Dawn"]
+  },
+  "Phobos": {
+    "type": "moon",
+    "parent": "Mars",
+    "names": { "ru": "Фобос", "en": "Phobos", "zh": "火卫一" },
+    "description": {
+      "ru": "Фобос — больший из двух спутников Марса. Он вращается очень близко к планете и постепенно приближается к ней. Через несколько миллионов лет он может разрушиться и образовать кольцо вокруг Марса.",
+      "en": "Phobos is the larger of Mars' two moons. It orbits very close to the planet and is gradually getting closer. In a few million years it may break apart and form a ring around Mars.",
+      "zh": "火卫一是火星两颗卫星中较大的一颗。它的轨道非常靠近火星，并且正逐渐靠近。在几百万年后它可能会分裂并形成围绕火星的环。"
+    },
+    "url": "https://science.nasa.gov/mars/moons/phobos/",
+    "related": ["Mars Express", "MMX (2026)"]
+  }
+}
