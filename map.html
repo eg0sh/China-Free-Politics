@@ -45,24 +45,17 @@ camera.position.set(0,300,500);
 const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(container.clientWidth,container.clientHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));container.appendChild(renderer.domElement);
 const labelRenderer=new CSS2DRenderer();labelRenderer.setSize(container.clientWidth,container.clientHeight);labelRenderer.domElement.style.position='absolute';labelRenderer.domElement.style.top='0';labelRenderer.domElement.style.pointerEvents='none';container.appendChild(labelRenderer.domElement);
 
-// Звёзды
 const starsGeo=new THREE.BufferGeometry();const sv=[];
 for(let i=0;i<8000;i++){const r=50000+Math.random()*30000,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);sv.push(r*Math.sin(ph)*Math.cos(th),r*Math.sin(ph)*Math.sin(th),r*Math.cos(ph));}
 starsGeo.setAttribute('position',new THREE.Float32BufferAttribute(sv,3));scene.add(new THREE.Points(starsGeo,new THREE.PointsMaterial({color:0xffffff,size:3})));
 
 const texLoader=new THREE.TextureLoader();
-// Солнце
 const sunTex=texLoader.load('https://upload.wikimedia.org/wikipedia/commons/a/a4/Solarsystemscope_texture_8k_sun.jpg');
 const sun=new THREE.Mesh(new THREE.SphereGeometry(10,64,64),new THREE.MeshBasicMaterial({map:sunTex}));
-scene.add(sun);sun.add(new THREE.PointLight(0xffffff,2,0,0));scene.add(new THREE.AmbientLight(0x222244,0.3));
+scene.add(sun);sun.add(new THREE.PointLight(0xffffff,2,0,0));scene.add(new THREE.AmbientLight(0x333355,0.5));
 const sunLabel=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:'Солнце'}));sunLabel.element.style.color='#ffff00';sunLabel.element.style.fontWeight='bold';sun.add(sunLabel);
 
 const allBodies=[{name:'Солнце',obj:sun}];
-
-// === РЕАЛЬНЫЕ ДАННЫЕ ПЛАНЕТ ===
-// Источник: JPL Horizons, 1 января 2020 00:00 UTC
-// Угол в радианах от произвольного нуля (направление на точку весеннего равноденствия)
-// Период в земных днях
 const refDate=new Date('2020-01-01T00:00:00Z').getTime();
 const msPerDay=86400000;
 function daysSinceRef(){return (Date.now()-refDate)/msPerDay;}
@@ -105,9 +98,9 @@ const T={
 };
 
 const earthShader=new THREE.ShaderMaterial({
-    uniforms:{dayTex:{value:texLoader.load(T.earthDay)},nightTex:{value:texLoader.load(T.earthNight)},sunDir:{value:new THREE.Vector3()}},
-    vertexShader:`varying vec2 vUv;varying vec3 vNorm;void main(){vUv=uv;vNorm=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
-    fragmentShader:`varying vec2 vUv;varying vec3 vNorm;uniform sampler2D dayTex;uniform sampler2D nightTex;uniform vec3 sunDir;void main(){float l=dot(normalize(vNorm),normalize(sunDir));l=clamp(l,0.0,1.0);vec4 d=texture2D(dayTex,vUv);vec4 n=texture2D(nightTex,vUv);float m=smoothstep(0.05,0.35,l);gl_FragColor=mix(n,d,m);gl_FragColor.rgb+=n.rgb*0.12*(1.0-m);}`
+    uniforms:{dayTex:{value:texLoader.load(T.earthDay)},nightTex:{value:texLoader.load(T.earthNight)},sunDir:{value:new THREE.Vector3(1,0,0)},ambientLight:{value:0.15}},
+    vertexShader:`varying vec2 vUv;varying vec3 vWorldNormal;void main(){vec4 worldPos=modelMatrix*vec4(position,1.0);vWorldNormal=normalize(mat3(modelMatrix)*normal);vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+    fragmentShader:`varying vec2 vUv;varying vec3 vWorldNormal;uniform sampler2D dayTex;uniform sampler2D nightTex;uniform vec3 sunDir;uniform float ambientLight;void main(){float l=dot(normalize(vWorldNormal),normalize(sunDir));float mixVal=smoothstep(-0.1,0.3,l);vec4 dayCol=texture2D(dayTex,vUv);vec4 nightCol=texture2D(nightTex,vUv);vec4 col=mix(nightCol,dayCol,mixVal);col.rgb+=nightCol.rgb*ambientLight;gl_FragColor=col;}`
 });
 
 const planetMeshes=[],moonMeshes=[];
@@ -122,11 +115,12 @@ planetData.forEach(p=>{
     scene.add(mesh);
     const lbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:p.name}));lbl.element.style.color='#ccc';lbl.element.style.fontSize='11px';mesh.add(lbl);
     allBodies.push({name:p.name,obj:mesh});planetMeshes.push(mesh);
-    
-    // Орбитальное кольцо
-    const ring=new THREE.Mesh(new THREE.TorusGeometry(p.orbit,0.08,16,200),new THREE.MeshBasicMaterial({color:0x222244,transparent:true,opacity:0.4}));ring.rotation.x=-Math.PI/2;scene.add(ring);
-    
-    // Кольцо Сатурна
+
+    // Яркое орбитальное кольцо
+    const ringGeo=new THREE.TorusGeometry(p.orbit,0.15,16,300);
+    const ring=new THREE.Mesh(ringGeo,new THREE.MeshBasicMaterial({color:0x334466,transparent:true,opacity:0.6}));
+    ring.rotation.x=-Math.PI/2;scene.add(ring);
+
     if(p.hasRing){
         const rt=texLoader.load(T.saturnRing);
         const rg=new THREE.RingGeometry(p.size*1.3,p.size*1.7,128);
@@ -134,8 +128,6 @@ planetData.forEach(p=>{
         for(let i=0;i<pos.count;i++){const x=pos.getX(i),y=pos.getY(i),r=Math.sqrt(x*x+y*y);uv.setXY(i,(r-p.size*1.3)/(p.size*0.4),0.5);}
         const rm=new THREE.Mesh(rg,new THREE.MeshBasicMaterial({map:rt,side:THREE.DoubleSide,transparent:true,opacity:0.7}));rm.rotation.x=-Math.PI/2;mesh.add(rm);
     }
-    
-    // Спутники
     if(p.moons)p.moons.forEach(m=>{
         const mMat=T[m.tex]?new THREE.MeshPhongMaterial({map:texLoader.load(T[m.tex]),specular:0x111111,shininess:3}):new THREE.MeshPhongMaterial({color:0x888888});
         const mm=new THREE.Mesh(new THREE.SphereGeometry(m.size,16,16),mMat);
@@ -143,21 +135,21 @@ planetData.forEach(p=>{
         scene.add(mm);
         const mlbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:m.name}));mlbl.element.style.color='#999';mlbl.element.style.fontSize='9px';mm.add(mlbl);
         allBodies.push({name:m.name,obj:mm});moonMeshes.push(mm);
+        // Орбита спутника
+        const moRing=new THREE.Mesh(new THREE.TorusGeometry(m.orbit,0.05,8,100),new THREE.MeshBasicMaterial({color:0x223344,transparent:true,opacity:0.35}));
+        moRing.rotation.x=-Math.PI/2;mesh.add(moRing);
     });
 });
 
-// Пояс астероидов
 const asteroidBelt=[];
 for(let i=0;i<2000;i++){const r=140+Math.random()*50;const a=new THREE.Mesh(new THREE.SphereGeometry(0.05+Math.random()*0.2,4,4),new THREE.MeshPhongMaterial({color:0x888888}));a.position.set(r,0,0);a.userData={orbit:r,period:r*12,startAngle:Math.random()*Math.PI*2,yOffset:(Math.random()-0.5)*8};scene.add(a);asteroidBelt.push(a);}
 for(let i=0;i<1000;i++){const r=470+Math.random()*60;const a=new THREE.Mesh(new THREE.SphereGeometry(0.08+Math.random()*0.3,4,4),new THREE.MeshPhongMaterial({map:texLoader.load(T.kuiper)}));a.position.set(r,0,0);a.userData={orbit:r,period:r*20,startAngle:Math.random()*Math.PI*2,yOffset:(Math.random()-0.5)*20};scene.add(a);asteroidBelt.push(a);}
 
-// Выпадающий список
 const select=document.getElementById('target-select');
 allBodies.forEach(b=>{const o=document.createElement('option');o.value=b.name;o.textContent=b.name;select.appendChild(o);});
 let currentTarget=sun;select.value='Солнце';
 select.onchange=()=>{const b=allBodies.find(x=>x.name===select.value);if(b)currentTarget=b.obj;};
 
-// Управление
 let camDist=50,camAngle=0,camPolar=0.5;
 container.addEventListener('wheel',e=>{camDist=Math.max(5,Math.min(50000,camDist+e.deltaY*0.5));},{passive:true});
 let ltX=0,ltY=0,isDrag=false,lastPD=0;
@@ -168,40 +160,21 @@ container.addEventListener('mousedown',e=>{isDrag=true;ltX=e.clientX;ltY=e.clien
 window.addEventListener('mouseup',()=>isDrag=false);
 window.addEventListener('mousemove',e=>{if(isDrag){camAngle-=(e.clientX-ltX)*0.005;camPolar=Math.max(-1.5,Math.min(1.5,camPolar+(e.clientY-ltY)*0.005));ltX=e.clientX;ltY=e.clientY;}});
 
-// Клик
 const raycaster=new THREE.Raycaster();const mouse=new THREE.Vector2();
 container.addEventListener('click',e=>{mouse.x=(e.clientX/container.clientWidth)*2-1;mouse.y=-(e.clientY/container.clientHeight)*2+1;raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(allBodies.map(b=>b.obj));if(hits.length>0){const obj=hits[0].object;document.getElementById('info-content').innerHTML=`<h3>${obj.userData.name||'Объект'}</h3><p>Период: ${obj.userData.period?obj.userData.period+' дней':'Н/Д'}</p>`;document.getElementById('info-popup').style.display='block';}});
 
 function animate(){
     requestAnimationFrame(animate);
     const days=daysSinceRef();
-    
-    // Планеты
-    planetMeshes.forEach(m=>{
-        const d=m.userData;
-        const angle=d.angle0+(days/d.period)*Math.PI*2;
-        m.position.set(Math.cos(angle)*d.orbit,0,Math.sin(angle)*d.orbit);
-        m.rotation.y+=0.0005;
-    });
-    
-    // Спутники
-    moonMeshes.forEach(mm=>{
-        const d=mm.userData;
-        if(d.parent){
-            const a=(days/d.period)*Math.PI*2;
-            mm.position.copy(d.parent.position).add(new THREE.Vector3(Math.cos(a)*d.orbit,0,Math.sin(a)*d.orbit));
-        }
-    });
-    
-    // Астероиды
+    planetMeshes.forEach(m=>{const d=m.userData;const a=d.angle0+(days/d.period)*Math.PI*2;m.position.set(Math.cos(a)*d.orbit,0,Math.sin(a)*d.orbit);m.rotation.y+=0.0005;});
+    moonMeshes.forEach(mm=>{const d=mm.userData;if(d.parent){const a=(days/d.period)*Math.PI*2;mm.position.copy(d.parent.position).add(new THREE.Vector3(Math.cos(a)*d.orbit,0,Math.sin(a)*d.orbit));}});
     asteroidBelt.forEach(a=>{const d=a.userData;a.position.set(Math.cos(d.startAngle+(days/d.period)*Math.PI*2)*d.orbit,d.yOffset,Math.sin(d.startAngle+(days/d.period)*Math.PI*2)*d.orbit);});
-    
-    // Камера
     if(currentTarget){
         const tp=currentTarget.position.clone();
         camera.position.lerp(new THREE.Vector3(tp.x+Math.cos(camAngle)*Math.cos(camPolar)*camDist,tp.y+Math.sin(camPolar)*camDist,tp.z+Math.sin(camAngle)*Math.cos(camPolar)*camDist),0.05);
         camera.lookAt(tp);
-        earthShader.uniforms.sunDir.value.copy(sun.position.clone().normalize());
+        const sdir=sun.position.clone().normalize();
+        earthShader.uniforms.sunDir.value.copy(sdir);
     }
     renderer.render(scene,camera);labelRenderer.render(scene,camera);
 }animate();
