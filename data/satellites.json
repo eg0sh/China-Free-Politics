@@ -30,7 +30,7 @@
       "size": 0.1,
       "model": "https://63338rf6wo.ucarecd.net/a9f43b41-9f1c-447f-bb45-f37d3a24f067/iss.glb",
       "model_scale": 0.015,
-      "trajectory_file": "satellites/iss_trajectory.json",
+      "trajectory_file": null,
       "description": {
         "ru": "Международная космическая станция.",
         "en": "International Space Station.",
