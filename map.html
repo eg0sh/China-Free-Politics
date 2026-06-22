@@ -19,8 +19,9 @@
         #splash h1 span{color:#4488ff;font-weight:700}
         #splash p{color:#888;margin-top:10px;font-size:15px;text-align:center;max-width:80%}
         #viewport{width:100%;height:100%}
-        .hud-date{position:absolute;top:14px;left:16px;color:#fff;font-size:17px;font-weight:bold;z-index:10;pointer-events:none;text-shadow:0 0 8px rgba(0,0,0,0.8)}
-        .hud-time{position:absolute;top:14px;right:60px;color:#ccc;font-size:15px;z-index:10;pointer-events:none;text-shadow:0 0 8px rgba(0,0,0,0.8)}
+        .hud-row{position:absolute;top:14px;left:16px;right:16px;display:flex;justify-content:space-between;z-index:10;pointer-events:none}
+        .hud-date{color:#fff;font-size:17px;font-weight:bold;text-shadow:0 0 8px rgba(0,0,0,0.8)}
+        .hud-time{color:#ccc;font-size:15px;text-shadow:0 0 8px rgba(0,0,0,0.8);margin-right:50px}
         .btn-menu{position:absolute;top:10px;right:10px;background:var(--surface);border:1px solid var(--border);color:#ccc;padding:8px 14px;border-radius:8px;cursor:pointer;z-index:11;font-size:13px;backdrop-filter:blur(6px)}
         .btn-menu:hover{background:var(--red);border-color:var(--red);color:#fff}
         .bottom-bar{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:10;color:#ccc;font-size:12px;background:var(--surface);padding:8px 16px;border-radius:10px;border:1px solid var(--border);backdrop-filter:blur(6px)}
@@ -54,17 +55,14 @@
         .menu-box .menu-action{display:block;width:100%;padding:10px;margin:6px 0;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:#ccc;border-radius:6px;cursor:pointer;text-align:left;font-size:13px}
         .menu-box .menu-action:hover{background:rgba(68,136,255,0.15)}
         .menu-box .result{color:var(--gold);font-size:13px;margin:8px 0;padding:8px;background:rgba(255,204,0,0.08);border-radius:6px}
-        @media(max-width:768px){.hud-date{font-size:13px;top:8px;left:8px}.hud-time{font-size:11px;top:8px;right:50px}.bottom-bar{gap:5px;bottom:6px;padding:6px 10px}.bottom-bar input[type=range]{width:80px}.info-panel{padding:12px 14px;max-height:40vh}.info-panel h2{font-size:16px}.menu-box{min-width:300px;max-width:95vw;padding:16px}}
     </style>
 </head>
 <body>
 <div id="splash"><div class="logo"><div class="ring"></div><div class="ring2"></div><div class="dot"></div></div><h1>China<span>Space</span>Live</h1><p>Карта Солнечной системы в реальном времени</p></div>
-<div class="hud-date" id="hud-date"></div>
-<div class="hud-time" id="hud-time"></div>
-<button class="btn-menu" id="btn-menu" onclick="openMenu()">☰ Меню</button>
+<div class="hud-row"><span class="hud-date" id="hud-date"></span><span class="hud-time" id="hud-time"></span></div>
+<button class="btn-menu" onclick="openMenu()">☰ Меню</button>
 <div id="viewport"></div>
 <div class="bottom-bar">
-    <button id="btn-rew" title="Замедлить">⏪</button>
     <button id="btn-pause" title="Пауза">⏸</button>
     <input type="range" id="speed-slider" min="-300" max="300" value="0" step="1">
     <button id="btn-live" class="active" title="Реальное время">● LIVE</button>
@@ -77,6 +75,7 @@
 <script type="module">
 import * as THREE from 'three';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 setTimeout(()=>document.getElementById('splash').classList.add('hidden'),3000);
 
 const container=document.getElementById('viewport');
@@ -94,11 +93,10 @@ const texLoader=new THREE.TextureLoader();
 const sunTex=texLoader.load('https://upload.wikimedia.org/wikipedia/commons/a/a4/Solarsystemscope_texture_8k_sun.jpg');
 const sun=new THREE.Mesh(new THREE.SphereGeometry(15,64,64),new THREE.MeshBasicMaterial({map:sunTex}));
 scene.add(sun);sun.add(new THREE.PointLight(0xffffff,3,0,0));scene.add(new THREE.AmbientLight(0x333355,0.2));
-// Свечение солнца
 const glowGeo=new THREE.SphereGeometry(17,64,64);
 const glowMat=new THREE.ShaderMaterial({uniforms:{},vertexShader:`varying vec3 vNormal;void main(){vNormal=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,fragmentShader:`varying vec3 vNormal;void main(){float i=pow(0.65-dot(vNormal,vec3(0,0,1)),3.0);gl_FragColor=vec4(1.0,0.6,0.1,i*0.5);}`,transparent:true,depthWrite:false});
 const glow=new THREE.Mesh(glowGeo,glowMat);sun.add(glow);
-const sunLabel=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:'Солнце'}));sunLabel.element.style.color='#ffff00';sunLabel.element.style.fontWeight='bold';sun.add(sunLabel);
+sun.userData={name:'Солнце',key:'Sun',type:'Звезда',url:'https://science.nasa.gov/sun/',size:15};
 
 const refDate=new Date('2020-01-01T00:00:00Z').getTime();const msDay=86400000;const secPerYear=31557600;
 let simTime=Date.now(),timeSpeed=0,isLive=true,isPaused=false,lastFrameTime=performance.now();
@@ -151,16 +149,16 @@ const planetMeshes=[],moonDataArr=[],moonOrbitLines=[],allBodies=[],orbitRings=[
 allBodies.push({name:'Солнце',obj:sun,type:'Звезда',url:'https://science.nasa.gov/sun/',key:'Sun',size:15});
 
 const planetDefs=[
-    {name:'Меркурий',orbit:55,size:0.5,tex:T.mercury,period:87.969,angle0:4.429,rotPeriod:1407.6,axialTilt:0.034,incl:7.0,lan:48.3,url:'https://science.nasa.gov/mercury/',key:'Mercury'},
-    {name:'Венера',orbit:100,size:1.2,tex:T.venus,period:224.701,angle0:1.745,rotPeriod:-5832.5,axialTilt:177.4,incl:3.4,lan:76.7,url:'https://science.nasa.gov/venus/',key:'Venus'},
-    {name:'Земля',orbit:145,size:1.3,isEarth:true,period:365.256,angle0:1.571,rotPeriod:24,axialTilt:23.44,incl:0.0,lan:0,url:'https://science.nasa.gov/earth/',key:'Earth'},
-    {name:'Марс',orbit:190,size:0.7,tex:T.mars,period:686.980,angle0:5.934,rotPeriod:24.6,axialTilt:25.19,incl:1.85,lan:49.6,url:'https://science.nasa.gov/mars/',key:'Mars'},
-    {name:'Церера',orbit:250,size:0.4,tex:T.ceres,period:1680,angle0:2.1,axialTilt:4,incl:10.6,lan:80.3,url:'https://science.nasa.gov/dwarf-planets/ceres/',key:'Ceres'},
-    {name:'Юпитер',orbit:340,size:7,tex:T.jupiter,period:4332.59,angle0:4.774,rotPeriod:9.93,axialTilt:3.13,incl:1.3,lan:100.5,url:'https://science.nasa.gov/jupiter/',key:'Jupiter'},
-    {name:'Сатурн',orbit:480,size:5.5,tex:T.saturn,period:10759.22,angle0:5.236,rotPeriod:10.7,axialTilt:26.73,incl:2.49,lan:113.7,hasRing:true,url:'https://science.nasa.gov/saturn/',key:'Saturn'},
-    {name:'Уран',orbit:620,size:3.5,tex:T.uranus,period:30688.5,angle0:0.785,rotPeriod:-17.2,axialTilt:97.77,incl:0.77,lan:74.0,url:'https://science.nasa.gov/uranus/',key:'Uranus'},
-    {name:'Нептун',orbit:740,size:3.3,tex:T.neptune,period:60182,angle0:3.665,rotPeriod:16.1,axialTilt:28.32,incl:1.77,lan:131.7,url:'https://science.nasa.gov/neptune/',key:'Neptune'},
-    {name:'Плутон',orbit:850,size:0.35,tex:T.pluto,period:90560,angle0:2.268,rotPeriod:-153.3,axialTilt:122.5,incl:17.16,lan:110.3,url:'https://science.nasa.gov/dwarf-planets/pluto/',key:'Pluto'}
+    {name:'Меркурий',orbit:55,size:0.5,tex:T.mercury,period:87.969,angle0:4.429,rotPeriod:1407.6,axialTilt:0.034,url:'https://science.nasa.gov/mercury/',key:'Mercury'},
+    {name:'Венера',orbit:100,size:1.2,tex:T.venus,period:224.701,angle0:1.745,rotPeriod:-5832.5,axialTilt:177.4,url:'https://science.nasa.gov/venus/',key:'Venus'},
+    {name:'Земля',orbit:145,size:1.3,isEarth:true,period:365.256,angle0:1.571,rotPeriod:24,axialTilt:23.44,url:'https://science.nasa.gov/earth/',key:'Earth'},
+    {name:'Марс',orbit:190,size:0.7,tex:T.mars,period:686.980,angle0:5.934,rotPeriod:24.6,axialTilt:25.19,url:'https://science.nasa.gov/mars/',key:'Mars'},
+    {name:'Церера',orbit:250,size:0.4,tex:T.ceres,period:1680,angle0:2.1,axialTilt:4,url:'https://science.nasa.gov/dwarf-planets/ceres/',key:'Ceres'},
+    {name:'Юпитер',orbit:340,size:7,tex:T.jupiter,period:4332.59,angle0:4.774,rotPeriod:9.93,axialTilt:3.13,url:'https://science.nasa.gov/jupiter/',key:'Jupiter'},
+    {name:'Сатурн',orbit:480,size:5.5,tex:T.saturn,period:10759.22,angle0:5.236,rotPeriod:10.7,axialTilt:26.73,hasRing:true,url:'https://science.nasa.gov/saturn/',key:'Saturn'},
+    {name:'Уран',orbit:620,size:3.5,tex:T.uranus,period:30688.5,angle0:0.785,rotPeriod:-17.2,axialTilt:97.77,url:'https://science.nasa.gov/uranus/',key:'Uranus'},
+    {name:'Нептун',orbit:740,size:3.3,tex:T.neptune,period:60182,angle0:3.665,rotPeriod:16.1,axialTilt:28.32,url:'https://science.nasa.gov/neptune/',key:'Neptune'},
+    {name:'Плутон',orbit:850,size:0.35,tex:T.pluto,period:90560,angle0:2.268,rotPeriod:-153.3,axialTilt:122.5,url:'https://science.nasa.gov/dwarf-planets/pluto/',key:'Pluto'}
 ];
 
 const planetInfo={};
@@ -169,15 +167,10 @@ planetDefs.forEach(p=>{
     const mesh=new THREE.Mesh(new THREE.SphereGeometry(p.size,48,48),mat);mesh.userData=p;scene.add(mesh);
     const lbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:p.name}));lbl.element.style.color='#ccc';lbl.element.style.fontSize='12px';mesh.add(lbl);
     allBodies.push({name:p.name,obj:mesh,type:p.key==='Ceres'||p.key==='Pluto'?'Карликовая планета':'Планета',url:p.url,key:p.key,size:p.size});planetMeshes.push(mesh);
-    // Орбита с наклонением: поворот вокруг Z на LAN, затем вокруг X на -incl
+    // Простая орбита в плоскости XZ (все планеты на одной плоскости)
     const ringGeo=new THREE.TorusGeometry(p.orbit,0.03,8,500);
     const ring=new THREE.Mesh(ringGeo,new THREE.MeshBasicMaterial({color:0x8899bb,transparent:true,opacity:0.7}));
-    ring.rotation.x=-Math.PI/2;
-    ring.rotation.z=(p.lan||0)*Math.PI/180;
-    // Наклонение: дополнительный поворот
-    const inclRad=-(p.incl||0)*Math.PI/180;
-    ring.rotation.x+=inclRad;
-    scene.add(ring);orbitRings.push({ring,planet:mesh});
+    ring.rotation.x=-Math.PI/2;scene.add(ring);orbitRings.push({ring,planet:mesh});
     if(p.hasRing){
         const rt=texLoader.load(T.saturnRing);const rg=new THREE.RingGeometry(p.size*1.2,p.size*1.8,200);
         const pos=rg.attributes.position,uv=rg.attributes.uv;
@@ -210,35 +203,61 @@ moonDefs.forEach(md=>{
     });
 });
 
+function moonWorldPos(mdata,parentPos,tiltRad,angle){const lx=Math.cos(angle)*mdata.orbit;const lz=Math.sin(angle)*mdata.orbit;const cosT=Math.cos(tiltRad),sinT=Math.sin(tiltRad);return new THREE.Vector3(parentPos.x+lx,parentPos.y+lz*sinT,parentPos.z+lz*cosT);}
+
 // Загрузка данных
 fetch('data/objects.json?'+Date.now()).then(r=>r.json()).then(d=>{objectsData=d;}).catch(()=>{});
-let satMeshes=[],satTrajectories=[];
+
+let satMeshes=[],satTrajectories=[],satLabels=[];
 fetch('data/satellites.json?'+Date.now()).then(r=>r.json()).then(d=>{
     satellitesData=d;
     d.satellites.forEach(sat=>{
         const color=sat.color||'#ffffff';
-        const size=sat.size||0.1;
+        const size=sat.size||0.08;
         let mesh;
         if(sat.model){
-            // Загрузка 3D-модели
             const loader=new GLTFLoader();
-            loader.load('data/'+sat.model,gltf=>{mesh=gltf.scene;mesh.scale.setScalar(size);scene.add(mesh);satMeshes.push({mesh,data:sat});});
+            loader.load('data/'+sat.model,gltf=>{
+                mesh=gltf.scene;
+                const scl=sat.model_scale||size;
+                mesh.scale.setScalar(scl);
+                scene.add(mesh);
+                const lbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:sat.name}));
+                lbl.element.style.color='#aaa';lbl.element.style.fontSize='9px';mesh.add(lbl);
+                satLabels.push({mesh,lbl});
+                satMeshes.push({mesh,data:sat});
+            },undefined,()=>{
+                // fallback: точка
+                mesh=createDot(sat,color,size);
+            });
         }else{
-            const geo=new THREE.SphereGeometry(size,8,8);
-            const mat=new THREE.MeshBasicMaterial({color:new THREE.Color(color)});
-            mesh=new THREE.Mesh(geo,mat);scene.add(mesh);
-            satMeshes.push({mesh,data:sat});
-        }
-        // Если есть файл траектории
-        if(sat.trajectory_file){
-            fetch('data/'+sat.trajectory_file).then(r=>r.json()).then(traj=>{
-                satTrajectories.push({mesh,traj,data:sat});
-            }).catch(()=>{});
+            mesh=createDot(sat,color,size);
         }
     });
 }).catch(()=>{});
 
-function moonWorldPos(mdata,parentPos,tiltRad,angle){const lx=Math.cos(angle)*mdata.orbit;const lz=Math.sin(angle)*mdata.orbit;const cosT=Math.cos(tiltRad),sinT=Math.sin(tiltRad);return new THREE.Vector3(parentPos.x+lx,parentPos.y+lz*sinT,parentPos.z+lz*cosT);}
+function createDot(sat,color,size){
+    const geo=new THREE.SphereGeometry(size,6,6);
+    const mat=new THREE.MeshBasicMaterial({color:new THREE.Color(color)});
+    const mesh=new THREE.Mesh(geo,mat);scene.add(mesh);
+    const lbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:sat.name}));
+    lbl.element.style.color='#aaa';lbl.element.style.fontSize='9px';mesh.add(lbl);
+    satLabels.push({mesh,lbl});
+    satMeshes.push({mesh,data:sat});
+    return mesh;
+}
+
+// Траектории
+function loadTrajectory(sat,mesh){
+    if(!sat.trajectory_file)return;
+    fetch('data/'+sat.trajectory_file).then(r=>r.json()).then(traj=>{
+        const pts=traj.trajectory.map(p=>new THREE.Vector3(p.x,p.y,p.z));
+        const lineGeo=new THREE.BufferGeometry().setFromPoints(pts);
+        const line=new THREE.Line(lineGeo,new THREE.LineBasicMaterial({color:traj.trajectory_color||'#ff8800',transparent:true,opacity:0.6}));
+        scene.add(line);
+        satTrajectories.push({mesh,traj,data:sat,line});
+    }).catch(()=>{});
+}
 
 function getBodyByKey(key){return allBodies.find(b=>b.key===key||b.name===key);}
 function t(key){const obj=objectsData[key]||{};const names=obj.names||{};return names[currentLang]||key;}
@@ -247,7 +266,11 @@ function tr(key){const obj=objectsData[key]||{};const rel=obj.related||{};return
 
 let currentTarget=sun;
 function showInfo(key){
-    const body=getBodyByKey(key);if(!body)return;
+    const body=getBodyByKey(key);if(!body){// Может быть спутник
+        const sat=satMeshes.find(s=>s.data.id===key||s.data.name===key);
+        if(sat){showSatInfo(sat);return;}
+        return;
+    }
     selectedKey=key;currentTarget=body.obj;
     const names=objectsData[key]?.names||{};const name=names[currentLang]||body.name;
     const descText=td(key);const relatedList=tr(key);const url=body.url||'';
@@ -255,8 +278,9 @@ function showInfo(key){
     let moonsHTML='';
     const planetMoons=moonDataArr.filter(m=>m.userData.parentInfo&&m.userData.parentInfo.data.name===body.name);
     if(planetMoons.length>0){
+        const parentName=names[currentLang]||body.name;
         const moonsLabel=currentLang==='ru'?'🌙 Спутники':(currentLang==='zh'?'🌙 卫星':'🌙 Moons');
-        moonsHTML=`<button class="moons-btn" onclick="showMoonsList('${body.name}')">${moonsLabel} ${body.name} (${planetMoons.length})</button>`;
+        moonsHTML=`<button class="moons-btn" onclick="showMoonsList('${body.name}')">${moonsLabel} ${parentName} (${planetMoons.length})</button>`;
     }
     const relatedLabel=currentLang==='ru'?'🔗 Связанные миссии':(currentLang==='zh'?'🔗 相关任务':'🔗 Related missions');
     const moreLabel=currentLang==='ru'?'Подробнее на NASA →':(currentLang==='zh'?'在NASA上了解更多 →':'More on NASA →');
@@ -272,22 +296,35 @@ function showInfo(key){
 window.showMoonsList=function(parentName){
     const planetMoons=moonDataArr.filter(m=>m.userData.parentInfo&&m.userData.parentInfo.data.name===parentName);
     const content=document.getElementById('info-content');
-    const title=currentLang==='ru'?`🌙 Спутники ${parentName}`:(currentLang==='zh'?`🌙 ${parentName}的卫星`:`🌙 Moons of ${parentName}`);
+    const parentNames=objectsData[parentName]?.names||{};
+    const parentNameLocal=parentNames[currentLang]||parentName;
+    const title=currentLang==='ru'?`🌙 Спутники ${parentNameLocal}`:(currentLang==='zh'?`🌙 ${parentNameLocal}的卫星`:`🌙 Moons of ${parentNameLocal}`);
     const countText=currentLang==='ru'?`${planetMoons.length} спутников`:(currentLang==='zh'?`${planetMoons.length}颗卫星`:`${planetMoons.length} moons`);
     let html=`<h2>${title}</h2><p style="color:var(--muted)">${countText}</p><div style="margin-top:10px">`;
-    planetMoons.forEach(m=>{html+=`<div class="moon-link" onclick="showInfo('${m.userData.key||m.userData.name}')">${m.userData.name} →</div>`;});
+    planetMoons.forEach(m=>{
+        const moonNames=objectsData[m.userData.key]?.names||{};
+        const moonName=moonNames[currentLang]||m.userData.name;
+        html+=`<div class="moon-link" onclick="showInfo('${m.userData.key||m.userData.name}')">${moonName} →</div>`;
+    });
     html+='</div>';content.innerHTML=html;
 };
 window.closeInfo=function(){document.getElementById('info-panel').classList.remove('visible');};
+function showSatInfo(sat){
+    const d=sat.data;const name=d.name;const panel=document.getElementById('info-panel');const content=document.getElementById('info-content');
+    const desc=d.description?.[currentLang]||d.description?.ru||'';
+    content.innerHTML=`<h2>${name}</h2><span class="type-badge">${d.type||'Спутник'}</span><div class="desc">${desc}</div>`;
+    panel.classList.add('visible');
+}
 
 const raycaster=new THREE.Raycaster();const mouse=new THREE.Vector2();
 container.addEventListener('click',e=>{
     mouse.x=(e.clientX/container.clientWidth)*2-1;mouse.y=-(e.clientY/container.clientHeight)*2+1;
     raycaster.setFromCamera(mouse,camera);
-    const allObjs=[...allBodies.map(b=>b.obj),...satMeshes.map(s=>s.mesh)];
+    const allObjs=[sun,...allBodies.map(b=>b.obj),...satMeshes.map(s=>s.mesh)];
     const hits=raycaster.intersectObjects(allObjs);
     if(hits.length>0){
         const obj=hits[0].object;
+        if(obj===sun||obj===glow){showInfo('Sun');return;}
         const body=allBodies.find(b=>b.obj===obj);
         if(body){showInfo(body.key||body.name);return;}
         const sat=satMeshes.find(s=>s.mesh===obj);
@@ -295,21 +332,15 @@ container.addEventListener('click',e=>{
     }
 });
 
-function showSatInfo(sat){
-    const d=sat.data;const name=d.name;const panel=document.getElementById('info-panel');const content=document.getElementById('info-content');
-    const desc=d.description?.(d.description[currentLang]||d.description.ru||'')||'';
-    content.innerHTML=`<h2>${name}</h2><span class="type-badge">${d.type||'Спутник'}</span><div class="desc">${desc}</div>`;
-    panel.classList.add('visible');
-}
-
 // Меню
 window.openMenu=function(){
     const overlay=document.getElementById('menu-overlay');const box=document.getElementById('menu-box');
     const menuTitle=currentLang==='ru'?'Меню':(currentLang==='zh'?'菜单':'Menu');
-    const searchPlaceholder=currentLang==='ru'?'Поиск объектов...':(currentLang==='zh'?'搜索天体...':'Search objects...');
+    const searchPlaceholder=currentLang==='ru'?'Поиск...':(currentLang==='zh'?'搜索...':'Search...');
     const distLabel=currentLang==='ru'?'📏 Измерить расстояние':(currentLang==='zh'?'📏 测量距离':'📏 Measure distance');
     const compareLabel=currentLang==='ru'?'📐 Сравнить размеры':(currentLang==='zh'?'📐 比较大小':'📐 Compare sizes');
     const homeLabel=currentLang==='ru'?'🏠 На главную':(currentLang==='zh'?'🏠 返回主页':'🏠 Back to home');
+    const allItems=[...allBodies,...satMeshes.map(s=>({name:s.data.name,type:s.data.type||'ИСЗ',key:s.data.id||s.data.name,obj:s.mesh}))];
     let html=`
         <span class="close-menu" onclick="document.getElementById('menu-overlay').classList.remove('visible')">✕</span>
         <h3>${menuTitle}</h3>
@@ -320,7 +351,7 @@ window.openMenu=function(){
         </div>
         <input type="text" placeholder="${searchPlaceholder}" oninput="searchObjects(this.value)" id="menu-search">
         <div class="menu-list" id="menu-list">
-            ${allBodies.map(b=>`<div class="menu-item" onclick="selectFromMenu('${b.key||b.name}')"><span>${b.name}</span><span class="type">${b.type}</span></div>`).join('')}
+            ${allItems.map(b=>`<div class="menu-item" onclick="selectFromMenu('${b.key||b.name}')"><span>${b.name}</span><span class="type">${b.type}</span></div>`).join('')}
         </div>
         <button class="menu-action" onclick="startMeasureDist()">${distLabel}</button>
         <button class="menu-action" onclick="startCompareSize()">${compareLabel}</button>
@@ -329,64 +360,65 @@ window.openMenu=function(){
     `;
     box.innerHTML=html;overlay.classList.add('visible');
 };
-window.selectFromMenu=function(key){showInfo(key);document.getElementById('menu-overlay').classList.remove('visible');};
+window.selectFromMenu=function(key){
+    document.getElementById('menu-overlay').classList.remove('visible');
+    showInfo(key);
+};
 window.searchObjects=function(q){
     const list=document.getElementById('menu-list');if(!list)return;
-    const filtered=allBodies.filter(b=>b.name.toLowerCase().includes(q.toLowerCase()));
+    const allItems=[...allBodies,...satMeshes.map(s=>({name:s.data.name,type:s.data.type||'ИСЗ',key:s.data.id||s.data.name}))];
+    const filtered=allItems.filter(b=>b.name.toLowerCase().includes(q.toLowerCase()));
     list.innerHTML=filtered.map(b=>`<div class="menu-item" onclick="selectFromMenu('${b.key||b.name}')"><span>${b.name}</span><span class="type">${b.type}</span></div>`).join('');
 };
 window.setLang=function(l){
     currentLang=l;
     document.querySelectorAll('.lang-switch button').forEach(b=>b.classList.remove('active'));
     const btn=document.getElementById('lang-'+l);if(btn)btn.classList.add('active');
-    // Обновить подписи объектов
+    // Обновить подписи
     allBodies.forEach(b=>{
         const lbl=b.obj.children.find(c=>c.isCSS2DObject);
         if(lbl){const names=objectsData[b.key]?.names;lbl.element.textContent=names?.[currentLang]||b.name;}
     });
+    satMeshes.forEach(s=>{
+        const lbl=s.mesh.children.find(c=>c.isCSS2DObject);
+        if(lbl)lbl.element.textContent=s.data.name;
+    });
+    const sunLbl=sun.children.find(c=>c.isCSS2DObject);
+    if(sunLbl)sunLbl.element.textContent=t('Sun');
     if(selectedKey)showInfo(selectedKey);
 };
 
 let measureState=null;
 window.startMeasureDist=function(){
-    const promptText=currentLang==='ru'?'Нажмите на первый объект':(currentLang==='zh'?'点击第一个天体':'Click first object');
     measureState={type:'dist',first:null};
     document.getElementById('menu-result').style.display='block';
-    document.getElementById('menu-result').textContent=promptText;
+    document.getElementById('menu-result').textContent=currentLang==='ru'?'Нажмите на первый объект':(currentLang==='zh'?'点击第一个天体':'Click first object');
 };
 window.startCompareSize=function(){
-    const promptText=currentLang==='ru'?'Нажмите на первый объект':(currentLang==='zh'?'点击第一个天体':'Click first object');
     measureState={type:'compare',first:null};
     document.getElementById('menu-result').style.display='block';
-    document.getElementById('menu-result').textContent=promptText;
+    document.getElementById('menu-result').textContent=currentLang==='ru'?'Нажмите на первый объект':(currentLang==='zh'?'点击第一个天体':'Click first object');
 };
-// Перехват клика для измерения
 container.addEventListener('click',e=>{
     if(!measureState)return;
     mouse.x=(e.clientX/container.clientWidth)*2-1;mouse.y=-(e.clientY/container.clientHeight)*2+1;
     raycaster.setFromCamera(mouse,camera);
-    const hits=raycaster.intersectObjects(allBodies.map(b=>b.obj));
+    const allObjs=[sun,...allBodies.map(b=>b.obj),...satMeshes.map(s=>s.mesh)];
+    const hits=raycaster.intersectObjects(allObjs);
     if(hits.length>0){
         const obj=hits[0].object;
-        const body=allBodies.find(b=>b.obj===obj);
+        let body=allBodies.find(b=>b.obj===obj);
+        if(!body){const sat=satMeshes.find(s=>s.mesh===obj);if(sat)body={name:sat.data.name,obj:sat.mesh,size:sat.data.size||0.1};}
         if(!body)return;
-        if(!measureState.first){
-            measureState.first=body;
-            const prompt2=currentLang==='ru'?'Теперь нажмите на второй объект':(currentLang==='zh'?'现在点击第二个天体':'Now click second object');
-            document.getElementById('menu-result').textContent=`${body.name} — ${prompt2}`;
-        }else{
-            const b1=measureState.first;const b2=body;
-            const resDiv=document.getElementById('menu-result');
+        if(!measureState.first){measureState.first=body;document.getElementById('menu-result').textContent=`${body.name} — ${currentLang==='ru'?'теперь второй':(currentLang==='zh'?'现在第二个':'now second')}`;}
+        else{
+            const b1=measureState.first;const b2=body;const resDiv=document.getElementById('menu-result');
             if(measureState.type==='dist'){
-                const dist=b1.obj.position.distanceTo(b2.obj.position);
-                const distAU=(dist/145).toFixed(2);
-                const distLabel=currentLang==='ru'?'Расстояние':(currentLang==='zh'?'距离':'Distance');
-                resDiv.textContent=`${distLabel} ${b1.name} → ${b2.name}: ${dist.toFixed(0)} ед (${distAU} а.е.)`;
+                const dist=b1.obj.position.distanceTo(b2.obj.position);const distAU=(dist/145).toFixed(2);
+                resDiv.textContent=`${currentLang==='ru'?'Расстояние':(currentLang==='zh'?'距离':'Distance')} ${b1.name} → ${b2.name}: ${dist.toFixed(0)} ед (${distAU} а.е.)`;
             }else{
-                const s1=b1.size||1;const s2=b2.size||1;
-                const ratio=(s1/s2).toFixed(2);
-                const compLabel=currentLang==='ru'?'раз(а) больше':(currentLang==='zh'?'倍大':'times larger');
-                resDiv.textContent=`${b1.name} в ${ratio} ${compLabel} ${b2.name}`;
+                const s1=b1.size||1;const s2=b2.size||1;const ratio=(s1/s2).toFixed(2);
+                resDiv.textContent=`${b1.name} ${currentLang==='ru'?'в':(currentLang==='zh'?'比':'is')} ${ratio} ${currentLang==='ru'?'раз(а) больше':(currentLang==='zh'?'倍大':'times larger')} ${b2.name}`;
             }
             measureState=null;
         }
@@ -402,9 +434,6 @@ container.addEventListener('touchend',()=>isDrag=false);
 container.addEventListener('mousedown',e=>{if(e.target===container||e.target.tagName==='CANVAS'){isDrag=true;ltX=e.clientX;ltY=e.clientY;}});
 window.addEventListener('mouseup',()=>isDrag=false);
 window.addEventListener('mousemove',e=>{if(isDrag){camAngle-=(e.clientX-ltX)*0.005;camPolar=Math.max(-1.5,Math.min(1.5,camPolar+(e.clientY-ltY)*0.005));ltX=e.clientX;ltY=e.clientY;}});
-
-// Загрузка GLTFLoader для моделей
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 function animate(timestamp){
     requestAnimationFrame(animate);
@@ -445,29 +474,25 @@ function animate(timestamp){
         const parentBody=allBodies.find(b=>b.name===sat.parent||b.key===sat.parent);
         if(parentBody&&sat.orbit_km){
             const parentPos=parentBody.obj.position.clone();
-            const orb=sat.orbit_km*0.01; // масштаб
+            const orb=sat.orbit_km*0.01;
             const a=(sat.angle0_rad||0)+(days/(sat.period_days||1))*Math.PI*2;
             s.mesh.position.set(parentPos.x+Math.cos(a)*orb,parentPos.y,parentPos.z+Math.sin(a)*orb);
         }
+        // Видимость подписи
+        const lbl=s.mesh.children.find(c=>c.isCSS2DObject);
+        if(lbl){const dist=camera.position.distanceTo(s.mesh.position);lbl.element.style.display=dist<20?'block':'none';}
     });
+
     // Траектории
     satTrajectories.forEach(st=>{
-        const traj=st.traj;if(!traj.trajectory)return;
-        // Находим текущую позицию по времени
+        const traj=st.traj;if(!traj.trajectory||traj.trajectory.length<2)return;
         const tDays=days;
         let p0=traj.trajectory[0],p1=traj.trajectory[traj.trajectory.length-1];
         for(let i=0;i<traj.trajectory.length-1;i++){
-            if(tDays>=traj.trajectory[i].t_days&&tDays<=traj.trajectory[i+1].t_days){
-                p0=traj.trajectory[i];p1=traj.trajectory[i+1];break;
-            }
+            if(tDays>=traj.trajectory[i].t_days&&tDays<=traj.trajectory[i+1].t_days){p0=traj.trajectory[i];p1=traj.trajectory[i+1];break;}
         }
         const frac=(tDays-p0.t_days)/(p1.t_days-p0.t_days||1);
-        st.mesh.position.set(
-            p0.x+(p1.x-p0.x)*frac,
-            p0.y+(p1.y-p0.y)*frac,
-            p0.z+(p1.z-p0.z)*frac
-        );
-        // Поворот к объекту
+        st.mesh.position.set(p0.x+(p1.x-p0.x)*frac,p0.y+(p1.y-p0.y)*frac,p0.z+(p1.z-p0.z)*frac);
         if(traj.always_face){
             const target=allBodies.find(b=>b.name===traj.always_face||b.key===traj.always_face);
             if(target)st.mesh.lookAt(target.obj.position);
