@@ -1,176 +1,27 @@
 {
-  "Sun": {
-    "type": "star",
-    "names": { "ru": "Солнце", "en": "Sun", "zh": "太阳" },
-    "description": {
-      "ru": "Солнце — звезда в центре Солнечной системы. Это почти идеальная сфера горячей плазмы, разогретой ядерным синтезом. Температура ядра достигает 15 млн °C. Диаметр — 1,39 млн км.",
-      "en": "The Sun is the star at the center of the Solar System. Core temperature reaches 15 million °C. Diameter: 1.39 million km.",
-      "zh": "太阳是太阳系中心的恒星。核心温度达1500万°C。直径139万公里。"
-    },
-    "url": "https://science.nasa.gov/sun/",
-    "related": { "ru": ["Parker Solar Probe", "SOHO"], "en": ["Parker Solar Probe", "SOHO"], "zh": ["帕克探测器", "SOHO"] }
-  },
-  "Mercury": {
-    "type": "planet",
-    "names": { "ru": "Меркурий", "en": "Mercury", "zh": "水星" },
-    "description": {
-      "ru": "Меркурий — самая маленькая планета. Орбита — 88 дней. Температура от -180°C до +430°C.",
-      "en": "Mercury is the smallest planet. Orbit: 88 days. Temperature: -180°C to +430°C.",
-      "zh": "水星是最小的行星。轨道周期88天。温度-180°C至+430°C。"
-    },
-    "url": "https://science.nasa.gov/mercury/",
-    "related": { "ru": ["MESSENGER"], "en": ["MESSENGER"], "zh": ["信使号"] }
-  },
-  "Venus": {
-    "type": "planet",
-    "names": { "ru": "Венера", "en": "Venus", "zh": "金星" },
-    "description": {
-      "ru": "Венера — вторая планета. Самая горячая — 465°C. Вращается в обратную сторону.",
-      "en": "Venus is the second planet. Hottest at 465°C. Rotates backwards.",
-      "zh": "金星是第二行星。最热达465°C。逆向自转。"
-    },
-    "url": "https://science.nasa.gov/venus/",
-    "related": { "ru": ["Венера", "Magellan"], "en": ["Venera", "Magellan"], "zh": ["金星号", "麦哲伦号"] }
-  },
-  "Earth": {
-    "type": "planet",
-    "names": { "ru": "Земля", "en": "Earth", "zh": "地球" },
-    "description": {
-      "ru": "Земля — третья планета. Единственная известная с жизнью. 71% поверхности — вода.",
-      "en": "Earth is the third planet. Only known planet with life. 71% surface is water.",
-      "zh": "地球是第三行星。唯一已知有生命的行星。71%表面是水。"
-    },
-    "url": "https://science.nasa.gov/earth/",
-    "related": { "ru": ["МКС", "Hubble"], "en": ["ISS", "Hubble"], "zh": ["国际空间站", "哈勃"] }
-  },
-  "Mars": {
-    "type": "planet",
-    "names": { "ru": "Марс", "en": "Mars", "zh": "火星" },
-    "description": {
-      "ru": "Марс — красная планета. Есть вулкан Олимп (21,9 км). Два спутника: Фобос и Деймос.",
-      "en": "Mars is the red planet. Has Olympus Mons (21.9 km). Two moons: Phobos and Deimos.",
-      "zh": "火星是红色行星。有奥林帕斯山(21.9公里)。两颗卫星:火卫一和火卫二。"
-    },
-    "url": "https://science.nasa.gov/mars/",
-    "related": { "ru": ["Perseverance", "Curiosity"], "en": ["Perseverance", "Curiosity"], "zh": ["毅力号", "好奇号"] }
-  },
-  "Ceres": {
-    "type": "dwarf_planet",
-    "names": { "ru": "Церера", "en": "Ceres", "zh": "谷神星" },
-    "description": {
-      "ru": "Церера — карликовая планета в поясе астероидов. Диаметр 940 км.",
-      "en": "Ceres is a dwarf planet in the asteroid belt. Diameter: 940 km.",
-      "zh": "谷神星是小行星带中的矮行星。直径940公里。"
-    },
-    "url": "https://science.nasa.gov/dwarf-planets/ceres/",
-    "related": { "ru": ["Dawn"], "en": ["Dawn"], "zh": ["黎明号"] }
-  },
-  "Jupiter": {
-    "type": "planet",
-    "names": { "ru": "Юпитер", "en": "Jupiter", "zh": "木星" },
-    "description": {
-      "ru": "Юпитер — крупнейшая планета. Газовый гигант. 95 спутников. Большое Красное Пятно — шторм 350+ лет.",
-      "en": "Jupiter is the largest planet. Gas giant. 95 moons. Great Red Spot — storm 350+ years.",
-      "zh": "木星是最大的行星。气态巨行星。95颗卫星。大红斑是350多年的风暴。"
-    },
-    "url": "https://science.nasa.gov/jupiter/",
-    "related": { "ru": ["Juno", "Galileo"], "en": ["Juno", "Galileo"], "zh": ["朱诺号", "伽利略号"] }
-  },
-  "Saturn": {
-    "type": "planet",
-    "names": { "ru": "Сатурн", "en": "Saturn", "zh": "土星" },
-    "description": {
-      "ru": "Сатурн — шестая планета. Знаменит кольцами. 146 спутников. Крупнейший — Титан.",
-      "en": "Saturn is the sixth planet. Famous for rings. 146 moons. Largest: Titan.",
-      "zh": "土星是第六行星。以环闻名。146颗卫星。最大:土卫六。"
-    },
-    "url": "https://science.nasa.gov/saturn/",
-    "related": { "ru": ["Cassini"], "en": ["Cassini"], "zh": ["卡西尼号"] }
-  },
-  "Uranus": {
-    "type": "planet",
-    "names": { "ru": "Уран", "en": "Uranus", "zh": "天王星" },
-    "description": {
-      "ru": "Уран — ледяной гигант. Наклон оси 98° — лежит на боку.",
-      "en": "Uranus is an ice giant. Axial tilt 98° — rotates on its side.",
-      "zh": "天王星是冰巨行星。轴倾斜98° — 侧躺着旋转。"
-    },
-    "url": "https://science.nasa.gov/uranus/",
-    "related": { "ru": ["Voyager 2"], "en": ["Voyager 2"], "zh": ["旅行者2号"] }
-  },
-  "Neptune": {
-    "type": "planet",
-    "names": { "ru": "Нептун", "en": "Neptune", "zh": "海王星" },
-    "description": {
-      "ru": "Нептун — восьмая планета. Ледяной гигант. Ветры до 2100 км/ч.",
-      "en": "Neptune is the eighth planet. Ice giant. Winds up to 2100 km/h.",
-      "zh": "海王星是第八行星。冰巨行星。风速达2100公里/时。"
-    },
-    "url": "https://science.nasa.gov/neptune/",
-    "related": { "ru": ["Voyager 2"], "en": ["Voyager 2"], "zh": ["旅行者2号"] }
-  },
-  "Pluto": {
-    "type": "dwarf_planet",
-    "names": { "ru": "Плутон", "en": "Pluto", "zh": "冥王星" },
-    "description": {
-      "ru": "Плутон — карликовая планета в поясе Койпера. 5 спутников. Крупнейший — Харон.",
-      "en": "Pluto is a dwarf planet in the Kuiper belt. 5 moons. Largest: Charon.",
-      "zh": "冥王星是柯伊伯带的矮行星。5颗卫星。最大:冥卫一。"
-    },
-    "url": "https://science.nasa.gov/dwarf-planets/pluto/",
-    "related": { "ru": ["New Horizons"], "en": ["New Horizons"], "zh": ["新视野号"] }
-  },
-  "Moon": {
-    "type": "moon",
-    "names": { "ru": "Луна", "en": "Moon", "zh": "月球" },
-    "description": {
-      "ru": "Луна — спутник Земли. Расстояние 384 400 км. Всегда повёрнута одной стороной.",
-      "en": "Moon is Earth's satellite. Distance 384,400 km. Tidally locked.",
-      "zh": "月球是地球的卫星。距离384,400公里。潮汐锁定。"
-    },
-    "url": "https://science.nasa.gov/moon/",
-    "related": { "ru": ["Apollo 11", "Artemis"], "en": ["Apollo 11", "Artemis"], "zh": ["阿波罗11号", "阿尔忒弥斯"] }
-  },
-  "Io": {
-    "type": "moon",
-    "names": { "ru": "Ио", "en": "Io", "zh": "木卫一" },
-    "description": { "ru": "Ио — самый вулканический мир. Сотни вулканов.", "en": "Io is the most volcanic world. Hundreds of volcanoes.", "zh": "木卫一是火山最多的世界。数百座火山。" },
-    "url": "https://science.nasa.gov/jupiter/moons/io/",
-    "related": { "ru": ["Galileo", "Juno"], "en": ["Galileo", "Juno"], "zh": ["伽利略号", "朱诺号"] }
-  },
-  "Europa": {
-    "type": "moon",
-    "names": { "ru": "Европа", "en": "Europa", "zh": "木卫二" },
-    "description": { "ru": "Европа — ледяной спутник с подповерхностным океаном.", "en": "Europa is an icy moon with a subsurface ocean.", "zh": "木卫二是有地下海洋的冰卫星。" },
-    "url": "https://science.nasa.gov/jupiter/moons/europa/",
-    "related": { "ru": ["Europa Clipper"], "en": ["Europa Clipper"], "zh": ["欧罗巴快船"] }
-  },
-  "Ganymede": {
-    "type": "moon",
-    "names": { "ru": "Ганимед", "en": "Ganymede", "zh": "木卫三" },
-    "description": { "ru": "Ганимед — крупнейший спутник. Больше Меркурия. Есть магнитное поле.", "en": "Ganymede is the largest moon. Bigger than Mercury. Has magnetic field.", "zh": "木卫三是最大的卫星。比水星大。有磁场。" },
-    "url": "https://science.nasa.gov/jupiter/moons/ganymede/",
-    "related": { "ru": ["JUICE"], "en": ["JUICE"], "zh": ["JUICE"] }
-  },
-  "Callisto": {
-    "type": "moon",
-    "names": { "ru": "Каллисто", "en": "Callisto", "zh": "木卫四" },
-    "description": { "ru": "Каллисто — сильно кратерированный спутник Юпитера.", "en": "Callisto is a heavily cratered moon of Jupiter.", "zh": "木卫四是木星的一颗布满陨石坑的卫星。" },
-    "url": "https://science.nasa.gov/jupiter/moons/callisto/",
-    "related": { "ru": ["Galileo"], "en": ["Galileo"], "zh": ["伽利略号"] }
-  },
-  "Titan": {
-    "type": "moon",
-    "names": { "ru": "Титан", "en": "Titan", "zh": "土卫六" },
-    "description": { "ru": "Титан — спутник Сатурна с плотной атмосферой и озёрами метана.", "en": "Titan is Saturn's moon with dense atmosphere and methane lakes.", "zh": "土卫六是有稠密大气层和甲烷湖泊的土星卫星。" },
-    "url": "https://science.nasa.gov/saturn/moons/titan/",
-    "related": { "ru": ["Cassini", "Huygens"], "en": ["Cassini", "Huygens"], "zh": ["卡西尼号", "惠更斯号"] }
-  },
-  "Triton": {
-    "type": "moon",
-    "names": { "ru": "Тритон", "en": "Triton", "zh": "海卫一" },
-    "description": { "ru": "Тритон — спутник Нептуна с ретроградной орбитой и азотными гейзерами.", "en": "Triton is Neptune's moon with retrograde orbit and nitrogen geysers.", "zh": "海卫一是海王星有逆行轨道和氮气间歇泉的卫星。" },
-    "url": "https://science.nasa.gov/neptune/moons/triton/",
-    "related": { "ru": ["Voyager 2"], "en": ["Voyager 2"], "zh": ["旅行者2号"] }
-  }
+  "Sun": {"type":"star","names":{"ru":"Солнце","en":"Sun","zh":"太阳"},"description":{"ru":"Солнце — звезда.","en":"The Sun is a star.","zh":"太阳是恒星。"},"url":"https://science.nasa.gov/sun/","related":{"ru":[],"en":[],"zh":[]}},
+  "Mercury": {"type":"planet","names":{"ru":"Меркурий","en":"Mercury","zh":"水星"},"description":{"ru":"Меркурий.","en":"Mercury.","zh":"水星。"},"url":"https://science.nasa.gov/mercury/","related":{"ru":[],"en":[],"zh":[]}},
+  "Venus": {"type":"planet","names":{"ru":"Венера","en":"Venus","zh":"金星"},"description":{"ru":"Венера.","en":"Venus.","zh":"金星。"},"url":"https://science.nasa.gov/venus/","related":{"ru":[],"en":[],"zh":[]}},
+  "Earth": {"type":"planet","names":{"ru":"Земля","en":"Earth","zh":"地球"},"description":{"ru":"Земля.","en":"Earth.","zh":"地球。"},"url":"https://science.nasa.gov/earth/","related":{"ru":[],"en":[],"zh":[]}},
+  "Mars": {"type":"planet","names":{"ru":"Марс","en":"Mars","zh":"火星"},"description":{"ru":"Марс.","en":"Mars.","zh":"火星。"},"url":"https://science.nasa.gov/mars/","related":{"ru":[],"en":[],"zh":[]}},
+  "Ceres": {"type":"dwarf_planet","names":{"ru":"Церера","en":"Ceres","zh":"谷神星"},"description":{"ru":"Церера.","en":"Ceres.","zh":"谷神星。"},"url":"https://science.nasa.gov/dwarf-planets/ceres/","related":{"ru":[],"en":[],"zh":[]}},
+  "Jupiter": {"type":"planet","names":{"ru":"Юпитер","en":"Jupiter","zh":"木星"},"description":{"ru":"Юпитер.","en":"Jupiter.","zh":"木星。"},"url":"https://science.nasa.gov/jupiter/","related":{"ru":[],"en":[],"zh":[]}},
+  "Saturn": {"type":"planet","names":{"ru":"Сатурн","en":"Saturn","zh":"土星"},"description":{"ru":"Сатурн.","en":"Saturn.","zh":"土星。"},"url":"https://science.nasa.gov/saturn/","related":{"ru":[],"en":[],"zh":[]}},
+  "Uranus": {"type":"planet","names":{"ru":"Уран","en":"Uranus","zh":"天王星"},"description":{"ru":"Уран.","en":"Uranus.","zh":"天王星。"},"url":"https://science.nasa.gov/uranus/","related":{"ru":[],"en":[],"zh":[]}},
+  "Neptune": {"type":"planet","names":{"ru":"Нептун","en":"Neptune","zh":"海王星"},"description":{"ru":"Нептун.","en":"Neptune.","zh":"海王星。"},"url":"https://science.nasa.gov/neptune/","related":{"ru":[],"en":[],"zh":[]}},
+  "Pluto": {"type":"dwarf_planet","names":{"ru":"Плутон","en":"Pluto","zh":"冥王星"},"description":{"ru":"Плутон.","en":"Pluto.","zh":"冥王星。"},"url":"https://science.nasa.gov/dwarf-planets/pluto/","related":{"ru":[],"en":[],"zh":[]}},
+  "Moon": {"type":"moon","names":{"ru":"Луна","en":"Moon","zh":"月球"},"description":{"ru":"Луна.","en":"Moon.","zh":"月球。"},"url":"https://science.nasa.gov/moon/","related":{"ru":[],"en":[],"zh":[]}},
+  "Io": {"type":"moon","names":{"ru":"Ио","en":"Io","zh":"木卫一"},"description":{"ru":"Ио.","en":"Io.","zh":"木卫一。"},"url":"https://science.nasa.gov/jupiter/moons/io/","related":{"ru":[],"en":[],"zh":[]}},
+  "Europa": {"type":"moon","names":{"ru":"Европа","en":"Europa","zh":"木卫二"},"description":{"ru":"Европа.","en":"Europa.","zh":"木卫二。"},"url":"https://science.nasa.gov/jupiter/moons/europa/","related":{"ru":[],"en":[],"zh":[]}},
+  "Ganymede": {"type":"moon","names":{"ru":"Ганимед","en":"Ganymede","zh":"木卫三"},"description":{"ru":"Ганимед.","en":"Ganymede.","zh":"木卫三。"},"url":"https://science.nasa.gov/jupiter/moons/ganymede/","related":{"ru":[],"en":[],"zh":[]}},
+  "Callisto": {"type":"moon","names":{"ru":"Каллисто","en":"Callisto","zh":"木卫四"},"description":{"ru":"Каллисто.","en":"Callisto.","zh":"木卫四。"},"url":"https://science.nasa.gov/jupiter/moons/callisto/","related":{"ru":[],"en":[],"zh":[]}},
+  "Titan": {"type":"moon","names":{"ru":"Титан","en":"Titan","zh":"土卫六"},"description":{"ru":"Титан.","en":"Titan.","zh":"土卫六。"},"url":"https://science.nasa.gov/saturn/moons/titan/","related":{"ru":[],"en":[],"zh":[]}},
+  "Enceladus": {"type":"moon","names":{"ru":"Энцелад","en":"Enceladus","zh":"土卫二"},"description":{"ru":"Энцелад.","en":"Enceladus.","zh":"土卫二。"},"url":"","related":{"ru":[],"en":[],"zh":[]}},
+  "Mimas": {"type":"moon","names":{"ru":"Мимас","en":"Mimas","zh":"土卫一"},"description":{"ru":"Мимас.","en":"Mimas.","zh":"土卫一。"},"url":"","related":{"ru":[],"en":[],"zh":[]}},
+  "Titania": {"type":"moon","names":{"ru":"Титания","en":"Titania","zh":"天卫三"},"description":{"ru":"Титания.","en":"Titania.","zh":"天卫三。"},"url":"","related":{"ru":[],"en":[],"zh":[]}},
+  "Oberon": {"type":"moon","names":{"ru":"Оберон","en":"Oberon","zh":"天卫四"},"description":{"ru":"Оберон.","en":"Oberon.","zh":"天卫四。"},"url":"","related":{"ru":[],"en":[],"zh":[]}},
+  "Triton": {"type":"moon","names":{"ru":"Тритон","en":"Triton","zh":"海卫一"},"description":{"ru":"Тритон.","en":"Triton.","zh":"海卫一。"},"url":"https://science.nasa.gov/neptune/moons/triton/","related":{"ru":[],"en":[],"zh":[]}},
+  "Charon": {"type":"moon","names":{"ru":"Харон","en":"Charon","zh":"冥卫一"},"description":{"ru":"Харон.","en":"Charon.","zh":"冥卫一。"},"url":"","related":{"ru":[],"en":[],"zh":[]}},
+  "Phobos": {"type":"moon","names":{"ru":"Фобос","en":"Phobos","zh":"火卫一"},"description":{"ru":"Фобос.","en":"Phobos.","zh":"火卫一。"},"url":"","related":{"ru":[],"en":[],"zh":[]}},
+  "Deimos": {"type":"moon","names":{"ru":"Деймос","en":"Deimos","zh":"火卫二"},"description":{"ru":"Деймос.","en":"Deimos.","zh":"火卫二。"},"url":"","related":{"ru":[],"en":[],"zh":[]}}
 }
