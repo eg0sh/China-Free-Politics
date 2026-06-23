@@ -83,6 +83,7 @@ setTimeout(()=>document.getElementById('splash').classList.add('hidden'),3000);
 const container=document.getElementById('viewport');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x000011);
 const camera=new THREE.PerspectiveCamera(45,container.clientWidth/container.clientHeight,1,1e12);
+camera.position.set(0,1e6,2e6);
 const renderer=new THREE.WebGLRenderer({antialias:true,logarithmicDepthBuffer:true});renderer.setSize(container.clientWidth,container.clientHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));container.appendChild(renderer.domElement);
 const labelRenderer=new CSS2DRenderer();labelRenderer.setSize(container.clientWidth,container.clientHeight);labelRenderer.domElement.style.position='absolute';labelRenderer.domElement.style.top='0';labelRenderer.domElement.style.pointerEvents='none';container.appendChild(labelRenderer.domElement);
 
@@ -236,10 +237,7 @@ function showInfo(key){
     const panel=document.getElementById('info-panel');const content=document.getElementById('info-content');
     let moonsHTML='';const planetMoons=moonDataArr.filter(m=>m.userData.parentInfo&&m.userData.parentInfo.data.name===body.name);
     const satMoons=satMeshes.filter(s=>s.data.parent===body.name);
-    if(planetMoons.length>0||satMoons.length>0){
-        const pn=names[currentLang]||body.name;
-        moonsHTML=`<button class="moons-btn" onclick="event.stopPropagation();showMoonsList('${body.name}')">${l('moons')} ${pn} (${planetMoons.length+satMoons.length})</button>`;
-    }
+    if(planetMoons.length>0||satMoons.length>0){const pn=names[currentLang]||body.name;moonsHTML=`<button class="moons-btn" onclick="event.stopPropagation();showMoonsList('${body.name}')">${l('moons')} ${pn} (${planetMoons.length+satMoons.length})</button>`;}
     const typeTrans=l(body.type==='Звезда'?'star':body.type==='Планета'?'planet':body.type==='Спутник'?'moon':body.type==='Карликовая планета'?'dwarf':'star');
     content.innerHTML=`<h2>${name}</h2><span class="type-badge">${typeTrans}</span>${body.cls?`<span class="class-badge">${body.cls}</span>`:''}${moonsHTML}<div class="desc">${td(key)}</div>${tr(key).length?`<div class="related">${l('related')}: ${tr(key).join(', ')}</div>`:''}${body.url?`<div class="related"><a href="${body.url}" target="_blank">${l('more')}</a></div>`:''}`;
     panel.classList.add('visible');
@@ -333,15 +331,11 @@ function animate(timestamp){
     planetMeshes.forEach(m=>{const pd=m.userData;if(pd.orbit){const a=pd.angle0+(days/pd.period)*Math.PI*2;m.position.set(Math.cos(a)*pd.orbit,0,Math.sin(a)*pd.orbit);}if(pd.rotPeriod){m.rotation.y=(pd.rotAngle0||0)+(days*24/Math.abs(pd.rotPeriod))*Math.PI*2*(pd.rotPeriod<0?-1:1);}});
     moonDataArr.forEach(mm=>{const md=mm.userData;const pinfo=md.parentInfo;if(!pinfo)return;const pp=pinfo.mesh.position.clone();mm.position.copy(moonWorldPos(md,pp,(pinfo.data.axialTilt||0)*Math.PI/180,(md.angle0||0)+(days/md.period)*Math.PI*2));});
     moonOrbitLines.forEach(ol=>{const md=ol.data;const pinfo=md.parentInfo;if(!pinfo)return;const pp=pinfo.mesh.position.clone();const tr=(pinfo.data.axialTilt||0)*Math.PI/180;const pts=[];for(let i=0;i<=256;i++)pts.push(moonWorldPos(md,pp,tr,(i/256)*Math.PI*2));ol.line.geometry.dispose();ol.line.geometry=new THREE.BufferGeometry().setFromPoints(pts);});
-    satMeshes.forEach(s=>{const sat=s.data;if(sat.parent&&sat.orbit_km){const pb=allBodies.find(b=>b.name===sat.parent||b.key===sat.parent);if(pb){const pp=pb.obj.position.clone();const a=(sat.angle0_rad||0)+(days/(sat.period_days||1))*Math.PI*2;s.mesh.position.set(pp.x+Math.cos(a)*sat.orbit_km*10,pp.y,pp.z+Math.sin(a)*sat.orbit_km*10);}}const lbl=s.mesh.children.find(c=>c.isCSS2DObject);if(lbl)lbl.element.style.display=camera.position.distanceTo(s.mesh.position)<s.mesh.scale.x*500?'block':'none';});
+    satMeshes.forEach(s=>{const sat=s.data;if(sat.parent&&sat.orbit_km){const pb=allBodies.find(b=>b.name===sat.parent||b.key===sat.parent);if(pb){const pp=pb.obj.position.clone();const a=(sat.angle0_rad||0)+(days/(sat.period_days||1))*Math.PI*2;s.mesh.position.set(pp.x+Math.cos(a)*sat.orbit_km*10,pp.y,pp.z+Math.sin(a)*sat.orbit_km*10);}}});
+    satLabels.forEach(sl=>{if(sl.mesh){const dist=camera.position.distanceTo(sl.mesh.position);sl.lbl.element.style.display=dist<sl.mesh.scale.x*500?'block':'none';}});
     orbitRings.forEach(o=>{o.ring.visible=camera.position.distanceTo(o.planet.position)>o.planet.userData.size*20;});
     moonOrbitLines.forEach(ol=>{const pp=ol.data.parentInfo.mesh.position;ol.line.visible=camera.position.distanceTo(pp)>ol.data.parentInfo.data.size*15;});
-    if(currentTarget){
-        const tp=currentTarget.position.clone();const dist=Math.pow(10,camLogDist);
-        const camPos=new THREE.Vector3(tp.x+Math.cos(camAngle)*Math.cos(camPolar)*dist,tp.y+Math.sin(camPolar)*dist,tp.z+Math.sin(camAngle)*Math.cos(camPolar)*dist);
-        if(camPos.length()>STAR_SPHERE_R*0.85){camPos.normalize().multiplyScalar(STAR_SPHERE_R*0.85);}
-        camera.position.lerp(camPos,0.05);camera.lookAt(tp);
-    }
+    if(currentTarget){const tp=currentTarget.position.clone();const dist=Math.pow(10,camLogDist);const camPos=new THREE.Vector3(tp.x+Math.cos(camAngle)*Math.cos(camPolar)*dist,tp.y+Math.sin(camPolar)*dist,tp.z+Math.sin(camAngle)*Math.cos(camPolar)*dist);if(camPos.length()>STAR_SPHERE_R*0.85){camPos.normalize().multiplyScalar(STAR_SPHERE_R*0.85);}camera.position.lerp(camPos,0.05);camera.lookAt(tp);}
     earthShader.uniforms.sunPos.value.copy(sun.position);renderer.render(scene,camera);labelRenderer.render(scene,camera);
 }
 requestAnimationFrame(animate);
