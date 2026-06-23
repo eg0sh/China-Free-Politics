@@ -9,13 +9,12 @@
       "period_days": 0.064,
       "angle0_rad": 0,
       "color": "#ff4444",
-      "size": 0.12,
+      "size": 2.5,
       "model": null,
-      "trajectory_file": null,
       "description": {
-        "ru": "Китайская орбитальная станция «Тяньгун».",
-        "en": "Chinese space station Tiangong.",
-        "zh": "中国天宫空间站。"
+        "ru": "Китайская орбитальная станция «Тяньгун». Запущена в 2021 году.",
+        "en": "Chinese space station Tiangong. Launched in 2021.",
+        "zh": "中国天宫空间站。2021年发射。"
       }
     },
     {
@@ -27,14 +26,30 @@
       "period_days": 0.065,
       "angle0_rad": 2.5,
       "color": "#ffffff",
-      "size": 0.1,
+      "size": 2.0,
       "model": "https://63338rf6wo.ucarecd.net/a9f43b41-9f1c-447f-bb45-f37d3a24f067/iss.glb",
-      "model_scale": 0.015,
-      "trajectory_file": null,
+      "model_scale": 3.0,
       "description": {
-        "ru": "Международная космическая станция.",
-        "en": "International Space Station.",
-        "zh": "国际空间站。"
+        "ru": "Международная космическая станция. Совместный проект 15 стран.",
+        "en": "International Space Station. Joint project of 15 nations.",
+        "zh": "国际空间站。15国合作项目。"
+      }
+    },
+    {
+      "id": "hubble",
+      "name": "Хаббл",
+      "type": "telescope",
+      "parent": "Earth",
+      "orbit_km": 540,
+      "period_days": 0.067,
+      "angle0_rad": 4.0,
+      "color": "#ffcc00",
+      "size": 1.2,
+      "model": null,
+      "description": {
+        "ru": "Космический телескоп «Хаббл». На орбите с 1990 года.",
+        "en": "Hubble Space Telescope. In orbit since 1990.",
+        "zh": "哈勃太空望远镜。1990年入轨。"
       }
     }
   ]
