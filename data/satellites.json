@@ -11,7 +11,7 @@
       "period_days": 0.064,
       "angle0_rad": 0,
       "color": "#ff4444",
-      "size": 0.3,
+      "size": 0.001,
       "model": null,
       "description": {
         "ru": "Китайская орбитальная станция «Тяньгун». Запущена в 2021 году.",
@@ -30,9 +30,9 @@
       "period_days": 0.065,
       "angle0_rad": 2.5,
       "color": "#ffffff",
-      "size": 0.3,
+      "size": 0.001,
       "model": "https://63338rf6wo.ucarecd.net/a9f43b41-9f1c-447f-bb45-f37d3a24f067/iss.glb",
-      "model_scale": 0.4,
+      "model_scale": 0.0005,
       "description": {
         "ru": "Международная космическая станция. Совместный проект 15 стран.",
         "en": "International Space Station. Joint project of 15 nations.",
@@ -50,7 +50,7 @@
       "period_days": 0.067,
       "angle0_rad": 4.0,
       "color": "#ffcc00",
-      "size": 0.25,
+      "size": 0.001,
       "model": null,
       "description": {
         "ru": "Космический телескоп «Хаббл». На орбите с 1990 года.",
