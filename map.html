@@ -156,11 +156,8 @@ const planetInfo={};
 planetDefs.forEach(p=>{
     let mat;if(p.isEarth)mat=earthShader;else if(p.tex)mat=new THREE.MeshPhongMaterial({map:texLoader.load(p.tex),specular:0x111111,shininess:5});else mat=new THREE.MeshPhongMaterial({color:0x888888});
     const mesh=new THREE.Mesh(new THREE.SphereGeometry(p.size,48,48),mat);mesh.userData=p;
-    // Группа для вращения вокруг оси
     const spinGroup=new THREE.Group();spinGroup.add(mesh);scene.add(spinGroup);
-    const tiltRad=(p.axialTilt||0)*Math.PI/180;
-    spinGroup.rotation.z=tiltRad;
-    // Группа для орбит спутников
+    const tiltRad=(p.axialTilt||0)*Math.PI/180;spinGroup.rotation.z=tiltRad;
     const moonGroup=new THREE.Group();moonGroup.rotation.z=tiltRad;spinGroup.add(moonGroup);
     const lbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:p.name}));lbl.element.style.color='#ccc';lbl.element.style.fontSize='12px';mesh.add(lbl);
     allBodies.push({name:p.name,obj:spinGroup,type:'Планета',cls:p.cls,url:p.url,key:p.key,size:p.size});planetMeshes.push(spinGroup);planetSpinGroups.push({group:spinGroup,mesh,data:p});
@@ -198,15 +195,21 @@ function moonWorldPos(mdata,parentPos,tiltRad,angle){const lx=Math.cos(angle)*md
 
 fetch('data/objects.json?'+Date.now()).then(r=>r.json()).then(d=>{objectsData=d;}).catch(()=>{});
 
-let satMarkers=[],satModels=[];
+let satMarkers=[],satOrbitLines=[];
 const diamondCanvas=document.createElement('canvas');diamondCanvas.width=64;diamondCanvas.height=64;
-const dctx=diamondCanvas.getContext('2d');dctx.fillStyle='#fff';dctx.beginPath();dctx.moveTo(32,0);dctx.lineTo(64,32);dctx.lineTo(32,64);dctx.lineTo(0,32);dctx.closePath();dctx.fill();
+const dctx=diamondCanvas.getContext('2d');dctx.fillStyle='#ffffff';dctx.beginPath();dctx.moveTo(32,0);dctx.lineTo(64,32);dctx.lineTo(32,64);dctx.lineTo(0,32);dctx.closePath();dctx.fill();
 const diamondTex=new THREE.CanvasTexture(diamondCanvas);
 function loadSats(){
     fetch('data/satellites.json?'+Date.now()).then(r=>r.json()).then(d=>{
         d.satellites.forEach(sat=>{
-            const spriteMat=new THREE.SpriteMaterial({map:diamondTex,color:new THREE.Color(sat.color||'#fff'),transparent:true,opacity:0.9,depthTest:false});
-            const sprite=new THREE.Sprite(spriteMat);sprite.scale.set(2,2,1);sprite.userData={data:sat,loaded:false,mesh:null};scene.add(sprite);satMarkers.push(sprite);
+            const spriteMat=new THREE.SpriteMaterial({map:diamondTex,color:0xffffff,transparent:true,opacity:0.9,depthTest:false});
+            const sprite=new THREE.Sprite(spriteMat);sprite.scale.set(2,2,1);sprite.userData={data:sat,loaded:false,mesh:null};scene.add(sprite);
+            const lbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:sat.name}));lbl.element.style.color='#aaa';lbl.element.style.fontSize='9px';sprite.add(lbl);
+            satMarkers.push(sprite);
+            // Орбита
+            const orbPts=[];for(let i=0;i<=256;i++)orbPts.push(new THREE.Vector3());
+            const orbLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints(orbPts),new THREE.LineBasicMaterial({color:0x667788,transparent:true,opacity:0.6}));
+            scene.add(orbLine);satOrbitLines.push({line:orbLine,sprite});
         });
     }).catch(()=>{});
 }
@@ -215,9 +218,10 @@ function loadSatModel(sprite){
     if(!sat.model){sprite.userData.loaded=true;return;}
     sprite.userData.loading=true;
     document.getElementById('loading-overlay').style.display='block';
+    document.getElementById('loading-overlay').textContent=l('loading');
     const loader=new GLTFLoader();const url=sat.model.startsWith('http')?sat.model:'data/'+sat.model;
     loader.load(url,gltf=>{
-        const mesh=gltf.scene;const scl=sat.model_scale||0.5;mesh.scale.setScalar(scl);scene.add(mesh);
+        const mesh=gltf.scene;const scl=(sat.model_scale||0.5)*0.01;mesh.scale.setScalar(scl);scene.add(mesh);
         sprite.userData.mesh=mesh;sprite.userData.loaded=true;sprite.userData.loading=false;
         document.getElementById('loading-overlay').style.display='none';
         currentTarget=mesh;selectedKey=sat.id||sat.name;
@@ -261,7 +265,15 @@ window.showMoonsList=function(pn){
     if(sms.length>0){html+=`<p style="color:var(--muted);font-size:12px;margin:8px 0">${l('artificial')}</p>`;sms.forEach(s=>{const d=s.userData.data;html+=`<div class="moon-link" onclick="event.stopPropagation();loadSatModel(s)">${satName(d)} →</div>`;});}
     html+='</div>';content.innerHTML=html;
 };
-window.closeInfo=function(){document.getElementById('info-panel').classList.remove('visible');};
+window.closeInfo=function(){
+    document.getElementById('info-panel').classList.remove('visible');
+    // Выгружаем модели, которые не являются текущей целью
+    satMarkers.forEach(s=>{
+        if(s.userData.mesh && s.userData.mesh !== currentTarget){
+            scene.remove(s.userData.mesh);s.userData.mesh=null;s.userData.loaded=false;
+        }
+    });
+};
 
 const raycaster=new THREE.Raycaster();const mouse=new THREE.Vector2();
 container.addEventListener('click',e=>{
@@ -290,26 +302,11 @@ window.openMenu=function(){
 };
 window.searchMenu=function(q){const items=getMenuItems();const list=document.getElementById('menu-list');list.innerHTML=items.filter(b=>b.name.toLowerCase().includes(q.toLowerCase())).map(b=>`<div class="menu-item" onclick="selectFromMenu('${b.key}',${b.marker?true:false})"><span>${b.name}</span><span class="type">${b.type}${b.cls?' · '+b.cls:''}</span></div>`).join('');};
 window.selectFromMenu=function(key,isMarker){document.getElementById('menu-overlay').classList.remove('visible');if(isMarker){const m=satMarkers.find(s=>s.userData.data.id===key||s.userData.data.name===key);if(m)loadSatModel(m);}else showInfo(key);};
-window.setLang=function(lng){currentLang=lng;document.querySelectorAll('.lang-switch button').forEach(b=>b.classList.remove('active'));document.getElementById('lang-'+lng).classList.add('active');document.getElementById('btn-menu').textContent='☰ '+l('menu');allBodies.forEach(b=>{const lbl=b.obj.children.find(c=>c.isCSS2DObject)||b.obj.children[0]?.children?.find(c=>c.isCSS2DObject);if(lbl)lbl.element.textContent=t(b.key);});satMarkers.forEach(s=>{s.userData.label=s.userData.label||satName(s.userData.data);});if(selectedKey&&!satMarkers.find(s=>s.userData.mesh===currentTarget))showInfo(selectedKey);};
+window.setLang=function(lng){currentLang=lng;document.querySelectorAll('.lang-switch button').forEach(b=>b.classList.remove('active'));document.getElementById('lang-'+lng).classList.add('active');document.getElementById('btn-menu').textContent='☰ '+l('menu');allBodies.forEach(b=>{const lbl=b.obj.children.find(c=>c.isCSS2DObject)||b.obj.children[0]?.children?.find(c=>c.isCSS2DObject);if(lbl)lbl.element.textContent=t(b.key);});satMarkers.forEach(s=>{const lbl=s.children.find(c=>c.isCSS2DObject);if(lbl)lbl.element.textContent=satName(s.userData.data);});if(selectedKey)showInfo(selectedKey);};
 window.startMeasureDist=function(){const box=document.getElementById('menu-box');const items=getMenuItems();box.innerHTML=`<span class="close-menu" onclick="document.getElementById('menu-overlay').classList.remove('visible')">✕</span><h3>${l('dist')}</h3><select id="sel-dist-1">${items.map(b=>`<option value="${b.key}">${b.name}</option>`).join('')}</select><select id="sel-dist-2">${items.map(b=>`<option value="${b.key}">${b.name}</option>`).join('')}</select><button class="menu-action" onclick="calcDist()">${l('calc')}</button><div id="menu-result" class="result" style="display:none"></div>`;};
-window.calcDist=function(){
-    const k1=document.getElementById('sel-dist-1').value;const k2=document.getElementById('sel-dist-2').value;
-    const b1=allBodies.find(b=>b.key===k1||b.name===k1)||satMarkers.find(s=>s.userData.data.id===k1||s.userData.data.name===k1);
-    const b2=allBodies.find(b=>b.key===k2||b.name===k2)||satMarkers.find(s=>s.userData.data.id===k2||s.userData.data.name===k2);
-    if(!b1||!b2)return;const o1=b1.obj||b1;const o2=b2.obj||b2;const d=o1.position.distanceTo(o2.position);
-    const n1=b1.userData?.data?satName(b1.userData.data):t(b1.key||b1.name);const n2=b2.userData?.data?satName(b2.userData.data):t(b2.key||b2.name);
-    document.getElementById('menu-result').style.display='block';document.getElementById('menu-result').textContent=`${n1} ${l('vs')} ${n2}: ${(d*100).toLocaleString()} ${l('km')}`;
-};
+window.calcDist=function(){const k1=document.getElementById('sel-dist-1').value;const k2=document.getElementById('sel-dist-2').value;const b1=allBodies.find(b=>b.key===k1||b.name===k1)||satMarkers.find(s=>s.userData.data.id===k1||s.userData.data.name===k1);const b2=allBodies.find(b=>b.key===k2||b.name===k2)||satMarkers.find(s=>s.userData.data.id===k2||s.userData.data.name===k2);if(!b1||!b2)return;const o1=b1.obj||b1;const o2=b2.obj||b2;const d=o1.position.distanceTo(o2.position);const n1=b1.userData?.data?satName(b1.userData.data):t(b1.key||b1.name);const n2=b2.userData?.data?satName(b2.userData.data):t(b2.key||b2.name);document.getElementById('menu-result').style.display='block';document.getElementById('menu-result').textContent=`${n1} ${l('vs')} ${n2}: ${(d*100).toLocaleString()} ${l('km')}`;};
 window.startCompareSize=function(){const box=document.getElementById('menu-box');const items=getMenuItems();box.innerHTML=`<span class="close-menu" onclick="document.getElementById('menu-overlay').classList.remove('visible')">✕</span><h3>${l('compare')}</h3><select id="sel-comp-1">${items.map(b=>`<option value="${b.key}">${b.name}</option>`).join('')}</select><select id="sel-comp-2">${items.map(b=>`<option value="${b.key}">${b.name}</option>`).join('')}</select><button class="menu-action" onclick="calcCompare()">${l('compareAct')}</button><div id="menu-result" class="result" style="display:none"></div>`;};
-window.calcCompare=function(){
-    const k1=document.getElementById('sel-comp-1').value;const k2=document.getElementById('sel-comp-2').value;
-    const b1=allBodies.find(b=>b.key===k1||b.name===k1)||satMarkers.find(s=>s.userData.data.id===k1||s.userData.data.name===k1);
-    const b2=allBodies.find(b=>b.key===k2||b.name===k2)||satMarkers.find(s=>s.userData.data.id===k2||s.userData.data.name===k2);
-    if(!b1||!b2)return;const s1=b1.size||b1.userData?.data?.size||1;const s2=b2.size||b2.userData?.data?.size||1;
-    const n1=b1.userData?.data?satName(b1.userData.data):t(b1.key||b1.name);const n2=b2.userData?.data?satName(b2.userData.data):t(b2.key||b2.name);
-    const diaR=(s1/s2).toFixed(2);const volR=(s1*s1*s1/(s2*s2*s2)).toFixed(2);
-    document.getElementById('menu-result').style.display='block';document.getElementById('menu-result').textContent=`${n1} ${l('vs')} ${n2}: ${l('dia')} ×${diaR}, ${l('vol')} ×${volR}`;
-};
+window.calcCompare=function(){const k1=document.getElementById('sel-comp-1').value;const k2=document.getElementById('sel-comp-2').value;const b1=allBodies.find(b=>b.key===k1||b.name===k1)||satMarkers.find(s=>s.userData.data.id===k1||s.userData.data.name===k1);const b2=allBodies.find(b=>b.key===k2||b.name===k2)||satMarkers.find(s=>s.userData.data.id===k2||s.userData.data.name===k2);if(!b1||!b2)return;const s1=b1.size||b1.userData?.data?.size||1;const s2=b2.size||b2.userData?.data?.size||1;const n1=b1.userData?.data?satName(b1.userData.data):t(b1.key||b1.name);const n2=b2.userData?.data?satName(b2.userData.data):t(b2.key||b2.name);const diaR=(s1/s2).toFixed(2);const volR=(s1*s1*s1/(s2*s2*s2)).toFixed(2);document.getElementById('menu-result').style.display='block';document.getElementById('menu-result').textContent=`${n1} ${l('vs')} ${n2}: ${l('dia')} ×${diaR}, ${l('vol')} ×${volR}`;};
 
 let camLogDist=3.5;
 container.addEventListener('wheel',e=>{camLogDist=Math.max(-1,Math.min(7.9,camLogDist+e.deltaY*0.0005));},{passive:true});
@@ -329,10 +326,8 @@ function animate(timestamp){
     hudDate.textContent=new Date(simTime).toLocaleDateString(currentLang==='zh'?'zh-CN':currentLang,{year:'numeric',month:'long',day:'numeric'});
     hudTime.textContent=new Date(simTime).toLocaleTimeString(currentLang==='zh'?'zh-CN':currentLang,{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     updateSpeedUI();
-    // Планеты: spinGroup двигается по орбите, mesh внутри вращается вокруг своей оси
     planetSpinGroups.forEach(sg=>{
-        const pd=sg.data;
-        if(pd.orbit){const a=pd.angle0+(days/pd.period)*Math.PI*2;sg.group.position.set(Math.cos(a)*pd.orbit,0,Math.sin(a)*pd.orbit);}
+        const pd=sg.data;if(pd.orbit){const a=pd.angle0+(days/pd.period)*Math.PI*2;sg.group.position.set(Math.cos(a)*pd.orbit,0,Math.sin(a)*pd.orbit);}
         if(pd.rotPeriod){sg.mesh.rotation.y=(pd.rotAngle0||0)+(days*24/Math.abs(pd.rotPeriod))*Math.PI*2*(pd.rotPeriod<0?-1:1);}
     });
     moonDataArr.forEach(mm=>{const md=mm.userData;const pinfo=md.parentInfo;if(!pinfo)return;const pp=pinfo.spinGroup.position.clone();const tr=(pinfo.data.axialTilt||0)*Math.PI/180;mm.position.copy(moonWorldPos(md,pp,tr,(md.angle0||0)+(days/md.period)*Math.PI*2));});
@@ -342,7 +337,13 @@ function animate(timestamp){
         if(pb&&sat.orbit_km){const pp=pb.obj.position.clone();const orb=(6371+sat.orbit_km)/100;const a=(sat.angle0_rad||0)+(days/(sat.period_days||1))*Math.PI*2;s.position.set(pp.x+Math.cos(a)*orb,pp.y,pp.z+Math.sin(a)*orb);}
         if(s.userData.mesh){s.userData.mesh.position.copy(s.position);}
     });
-    orbitRings.forEach(o=>{o.ring.visible=camera.position.distanceTo(o.planet.position)>o.planet.userData?.size*20||o.planet.userData?.children?.[0]?.userData?.size*20||1000;});
+    // Орбиты искусственных спутников
+    satOrbitLines.forEach(ol=>{
+        const sat=ol.sprite.userData.data;if(!sat.parent)return;
+        const pb=allBodies.find(b=>b.name===sat.parent||b.key===sat.parent);
+        if(pb&&sat.orbit_km){const pp=pb.obj.position.clone();const orb=(6371+sat.orbit_km)/100;const pts=[];for(let i=0;i<=256;i++){const a=(i/256)*Math.PI*2;pts.push(new THREE.Vector3(pp.x+Math.cos(a)*orb,pp.y,pp.z+Math.sin(a)*orb));}ol.line.geometry.dispose();ol.line.geometry=new THREE.BufferGeometry().setFromPoints(pts);}
+    });
+    orbitRings.forEach(o=>{o.ring.visible=camera.position.distanceTo(o.planet.position)>o.planet.userData?.size*20||1000;});
     if(currentTarget){const tp=currentTarget.position.clone();const dist=Math.pow(10,camLogDist);const cp=new THREE.Vector3(tp.x+Math.cos(camAngle)*Math.cos(camPolar)*dist,tp.y+Math.sin(camPolar)*dist,tp.z+Math.sin(camAngle)*Math.cos(camPolar)*dist);if(cp.length()>STAR_SPHERE_R*0.85)cp.normalize().multiplyScalar(STAR_SPHERE_R*0.85);camera.position.lerp(cp,0.05);camera.lookAt(tp);}
     earthShader.uniforms.sunPos.value.copy(sun.position);renderer.render(scene,camera);labelRenderer.render(scene,camera);
 }
