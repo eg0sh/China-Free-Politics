@@ -104,7 +104,15 @@ const speedSlider=document.getElementById('speed-slider');const btnLive=document
 const speedText=document.getElementById('speed-text');const hudDate=document.getElementById('hud-date');const hudTime=document.getElementById('hud-time');
 
 function speedFromSlider(v){return (v/100)*secPerYear;}
-function formatSpeed(s){if(s===0)return'LIVE';const a=Math.abs(s);if(a>=86400)return'1 дн/с';if(a>=3600)return(s/3600).toFixed(1)+' ч/с';return s.toFixed(0)+' сек/с';}
+function formatSpeed(s){
+    if(s===0)return'LIVE';
+    const a=Math.abs(s);
+    if(a<60)return s.toFixed(0)+' сек/с';
+    if(a<3600)return (s/60).toFixed(1)+' мин/с';
+    if(a<86400)return (s/3600).toFixed(1)+' ч/с';
+    if(a<secPerYear)return (s/86400).toFixed(1)+' дн/с';
+    return (s/secPerYear).toFixed(1)+' лет/с';
+}
 function getSimDays(){return (simTime-refDate)/msDay;}
 
 speedSlider.addEventListener('input',()=>{const v=parseFloat(speedSlider.value);if(v===0){isLive=true;timeSpeed=0;btnLive.classList.add('active');simTime=Date.now();isPaused=false;btnPause.textContent='⏸';}else{isLive=false;timeSpeed=speedFromSlider(v);btnLive.classList.remove('active');isPaused=false;btnPause.textContent='⏸';}lastFrameTime=performance.now();updateSpeedUI();});
@@ -133,7 +141,7 @@ const earthShader=new THREE.ShaderMaterial({
     fragmentShader:`varying vec2 vUv;varying vec3 vWorldPos;varying vec3 vWorldNormal;uniform sampler2D dayTex;uniform sampler2D nightTex;uniform vec3 sunPos;void main(){vec3 toSun=normalize(sunPos-vWorldPos);float l=dot(normalize(vWorldNormal),toSun);float m=smoothstep(-0.15,0.25,l);vec4 d=texture2D(dayTex,vUv);vec4 n=texture2D(nightTex,vUv);vec4 c=mix(n,d,m);c.rgb+=n.rgb*0.06;gl_FragColor=c;}`
 });
 
-const planetSpinGroups=[],moonDataArr=[],allBodies=[],orbitRings=[];
+const planetSpinGroups=[],moonDataArr=[],allBodies=[],orbitRings=[],moonOrbitLines=[];
 allBodies.push({name:'Солнце',obj:sun,type:'Звезда',cls:'G2V',url:'https://science.nasa.gov/sun/',key:'Sun',size:6963.5});
 
 const planetDefs=[
@@ -154,15 +162,14 @@ planetDefs.forEach(p=>{
     let mat;if(p.isEarth)mat=earthShader;else if(p.tex)mat=new THREE.MeshPhongMaterial({map:texLoader.load(p.tex),specular:0x111111,shininess:5});else mat=new THREE.MeshPhongMaterial({color:0x888888});
     const mesh=new THREE.Mesh(new THREE.SphereGeometry(p.size,48,48),mat);mesh.userData=p;
     const spinGroup=new THREE.Group();spinGroup.add(mesh);scene.add(spinGroup);
-    const tiltRad=(p.axialTilt||0)*Math.PI/180;spinGroup.rotation.z=tiltRad;
-    const moonGroup=new THREE.Group();moonGroup.rotation.z=tiltRad;spinGroup.add(moonGroup);
+    spinGroup.rotation.z=(p.axialTilt||0)*Math.PI/180;
     const lbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:p.name}));lbl.element.style.color='#ccc';lbl.element.style.fontSize='12px';mesh.add(lbl);
     allBodies.push({name:p.name,obj:spinGroup,type:'Планета',cls:p.cls,url:p.url,key:p.key,size:p.size});planetSpinGroups.push({group:spinGroup,mesh,data:p});
     const orbPts=[];for(let i=0;i<=512;i++){const a=(i/512)*Math.PI*2;orbPts.push(new THREE.Vector3(Math.cos(a)*p.orbit,0,Math.sin(a)*p.orbit));}
     const orbLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints(orbPts),new THREE.LineBasicMaterial({color:0x8899bb,transparent:true,opacity:0.9}));
     scene.add(orbLine);orbitRings.push({ring:orbLine,planet:spinGroup});
     if(p.hasRing){const rt=texLoader.load(T.saturnRing);const ir=p.size*1.3,oR=p.size*2.5;const rg=new THREE.RingGeometry(ir,oR,256);const pos=rg.attributes.position,uv=rg.attributes.uv;for(let i=0;i<pos.count;i++){const x=pos.getX(i),y=pos.getY(i),r=Math.sqrt(x*x+y*y);uv.setXY(i,(r-ir)/(oR-ir),0.5);}const rm=new THREE.Mesh(rg,new THREE.MeshBasicMaterial({map:rt,side:THREE.DoubleSide,transparent:true,opacity:0.8}));rm.rotation.x=-Math.PI/2;mesh.add(rm);}
-    planetInfo[p.name]={spinGroup,mesh,data:p,moonGroup};
+    planetInfo[p.name]={spinGroup,mesh,data:p};
 });
 
 const moonDefs=[
@@ -182,9 +189,10 @@ moonDefs.forEach(md=>{
         const mm=new THREE.Mesh(new THREE.SphereGeometry(m.size,24,24),mMat);mm.userData={...m,parentInfo:pinfo};scene.add(mm);
         const mlbl=new CSS2DObject(Object.assign(document.createElement('div'),{textContent:m.name}));mlbl.element.style.color='#999';mlbl.element.style.fontSize='10px';mm.add(mlbl);
         allBodies.push({name:m.name,obj:mm,type:'Спутник',cls:m.cls||'',url:m.url||'',key:m.key,size:m.size});moonDataArr.push(mm);
-        const orbPts=[];for(let i=0;i<=256;i++){const a=(i/256)*Math.PI*2;orbPts.push(new THREE.Vector3(Math.cos(a)*m.orbit,0,Math.sin(a)*m.orbit));}
+        // Орбита в мировых координатах — будет обновляться
+        const orbPts=[];for(let i=0;i<=256;i++)orbPts.push(new THREE.Vector3());
         const orbLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints(orbPts),new THREE.LineBasicMaterial({color:0x667788,transparent:true,opacity:0.8}));
-        pinfo.moonGroup.add(orbLine);
+        scene.add(orbLine);moonOrbitLines.push({line:orbLine,data:{...m,parentInfo:pinfo}});
     });
 });
 
@@ -192,8 +200,8 @@ function moonWorldPos(mdata,parentPos,tiltRad,angle){const lx=Math.cos(angle)*md
 
 fetch('data/objects.json?'+Date.now()).then(r=>r.json()).then(d=>{objectsData=d;}).catch(()=>{});
 
-// Искусственные спутники — белые ромбы с хвостами
-let satMarkers=[],satTrails=[];
+// Искусственные спутники
+let satMarkers=[],satTrails=[],satOrbitLines=[];
 const diamondCanvas=document.createElement('canvas');diamondCanvas.width=64;diamondCanvas.height=64;
 const dctx=diamondCanvas.getContext('2d');dctx.fillStyle='#fff';dctx.beginPath();dctx.moveTo(32,0);dctx.lineTo(64,32);dctx.lineTo(32,64);dctx.lineTo(0,32);dctx.closePath();dctx.fill();
 const diamondTex=new THREE.CanvasTexture(diamondCanvas);
@@ -209,6 +217,12 @@ function loadSats(){
             trailGeo.setFromPoints(trailPts);
             const trailLine=new THREE.Line(trailGeo,new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:0.3}));
             scene.add(trailLine);satTrails.push({line:trailLine,sprite});
+            // Круговая орбита (если есть)
+            if(!sat.trajectory_file&&sat.orbit_km){
+                const orbPts=[];for(let i=0;i<=256;i++)orbPts.push(new THREE.Vector3());
+                const orbLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints(orbPts),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:0.4}));
+                scene.add(orbLine);satOrbitLines.push({line:orbLine,sprite});
+            }
         });
     }).catch(()=>{});
 }
@@ -235,8 +249,7 @@ function showInfo(key){
     let moonsHTML='';const pms=moonDataArr.filter(m=>m.userData.parentInfo&&m.userData.parentInfo.data.name===body.name);
     const sms=satMarkers.filter(s=>s.userData.data.parent===body.name);
     if(pms.length>0||sms.length>0){const pn=names[currentLang]||body.name;moonsHTML=`<button class="moons-btn" onclick="event.stopPropagation();showMoonsList('${body.name}')">${l('moons')} ${pn} (${pms.length+sms.length})</button>`;}
-    const typeTrans=l(body.type==='Звезда'?'star':body.type==='Планета'?'planet':body.type==='Спутник'?'moon':body.type==='Карликовая планета'?'dwarf':'star');
-    content.innerHTML=`<h2>${name}</h2><span class="type-badge">${typeTrans}</span>${body.cls?`<span class="class-badge">${trCls(body.cls)}</span>`:''}${moonsHTML}<div class="desc">${td(key)}</div>${tr(key).length?`<div class="related">${l('related')}: ${tr(key).join(', ')}</div>`:''}${body.url?`<div class="related"><a href="${body.url}" target="_blank">${l('more')}</a></div>`:''}`;
+    content.innerHTML=`<h2>${name}</h2><span class="type-badge">${l(body.type==='Звезда'?'star':body.type==='Планета'?'planet':body.type==='Спутник'?'moon':body.type==='Карликовая планета'?'dwarf':'star')}</span>${body.cls?`<span class="class-badge">${trCls(body.cls)}</span>`:''}${moonsHTML}<div class="desc">${td(key)}</div>${tr(key).length?`<div class="related">${l('related')}: ${tr(key).join(', ')}</div>`:''}${body.url?`<div class="related"><a href="${body.url}" target="_blank">${l('more')}</a></div>`:''}`;
     panel.classList.add('visible');
 }
 window.showMoonsList=function(pn){
@@ -322,7 +335,18 @@ function animate(timestamp){
         if(pd.orbit){const a=pd.angle0+(days/pd.period)*Math.PI*2;sg.group.position.set(Math.cos(a)*pd.orbit,0,Math.sin(a)*pd.orbit);}
         if(pd.rotPeriod){sg.mesh.rotation.y=(pd.rotAngle0||0)+(days*24/Math.abs(pd.rotPeriod))*Math.PI*2*(pd.rotPeriod<0?-1:1);}
     });
-    moonDataArr.forEach(mm=>{const md=mm.userData;const pinfo=md.parentInfo;if(!pinfo)return;const pp=pinfo.spinGroup.position.clone();const tr=(pinfo.data.axialTilt||0)*Math.PI/180;mm.position.copy(moonWorldPos(md,pp,tr,(md.angle0||0)+(days/md.period)*Math.PI*2));});
+    // Луны + их орбиты
+    moonDataArr.forEach(mm=>{
+        const md=mm.userData;const pinfo=md.parentInfo;if(!pinfo)return;
+        const pp=pinfo.spinGroup.position.clone();const tr=(pinfo.data.axialTilt||0)*Math.PI/180;
+        mm.position.copy(moonWorldPos(md,pp,tr,(md.angle0||0)+(days/md.period)*Math.PI*2));
+    });
+    moonOrbitLines.forEach(ol=>{
+        const md=ol.data;const pinfo=md.parentInfo;if(!pinfo)return;
+        const pp=pinfo.spinGroup.position.clone();const tr=(pinfo.data.axialTilt||0)*Math.PI/180;
+        const pts=[];for(let i=0;i<=256;i++)pts.push(moonWorldPos(md,pp,tr,(i/256)*Math.PI*2));
+        ol.line.geometry.dispose();ol.line.geometry=new THREE.BufferGeometry().setFromPoints(pts);
+    });
     // Искусственные спутники
     satMarkers.forEach(s=>{
         const sat=s.userData.data;if(!sat.parent)return;
@@ -334,8 +358,15 @@ function animate(timestamp){
     satTrails.forEach(st=>{
         const hist=st.sprite.userData.history;
         if(hist.length<2)return;
-        const pts=hist.slice();
-        st.line.geometry.dispose();st.line.geometry=new THREE.BufferGeometry().setFromPoints(pts);
+        st.line.geometry.dispose();st.line.geometry=new THREE.BufferGeometry().setFromPoints(hist);
+    });
+    // Круговые орбиты ИСЗ
+    satOrbitLines.forEach(ol=>{
+        const sat=ol.sprite.userData.data;if(!sat.parent||!sat.orbit_km)return;
+        const pb=allBodies.find(b=>b.name===sat.parent||b.key===sat.parent);
+        if(!pb)return;const pp=pb.obj.position.clone();const orb=(6371+sat.orbit_km)/100;
+        const pts=[];for(let i=0;i<=256;i++){const a=(i/256)*Math.PI*2;pts.push(new THREE.Vector3(pp.x+Math.cos(a)*orb,pp.y,pp.z+Math.sin(a)*orb));}
+        ol.line.geometry.dispose();ol.line.geometry=new THREE.BufferGeometry().setFromPoints(pts);
     });
     orbitRings.forEach(o=>{o.ring.visible=camera.position.distanceTo(o.planet.position)>1000;});
     if(currentTarget){const tp=currentTarget.position.clone();const dist=Math.pow(10,camLogDist);const cp=new THREE.Vector3(tp.x+Math.cos(camAngle)*Math.cos(camPolar)*dist,tp.y+Math.sin(camPolar)*dist,tp.z+Math.sin(camAngle)*Math.cos(camPolar)*dist);if(cp.length()>STAR_SPHERE_R*0.85)cp.normalize().multiplyScalar(STAR_SPHERE_R*0.85);camera.position.lerp(cp,0.05);camera.lookAt(tp);}
